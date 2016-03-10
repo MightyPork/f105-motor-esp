@@ -6,7 +6,7 @@ CONFIG -= qt
 DEFINES =
 
 INCLUDEPATH = . \
-	/home/ondra/devel/esp/sdk/esp-open-sdk/sdk/include \
+	esp_iot_sdk_v1.5.2/include \
 	include \
 	libesphttpd/include \
 	libesphttpd/espfs
@@ -40,7 +40,7 @@ SOURCES += \
 	user/io.c \
 	user/stdout.c \
 	user/user_main.c \
-    user/uart.c
+	user/uart.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -72,8 +72,8 @@ HEADERS += \
 	user/cgi.h \
 	user/io.h \
 	user/stdout.h \
-    user/uart.h \
-    user/uart_register.h
+	user/uart.h \
+	user/uart_register.h
 
 DISTFILES += \
 	style.astylerc
