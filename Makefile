@@ -31,7 +31,7 @@ FW_BASE		= firmware
 XTENSA_TOOLS_ROOT ?= 
 
 # base directory of the ESP8266 SDK package, absolute
-SDK_BASE	?= /opt/Espressif/ESP8266_SDK
+SDK_BASE	?= esp_iot_sdk_v1.5.2
 
 # Opensdk patches stdint.h when compiled with an internal SDK. If you run into compile problems pertaining to
 # redefinition of int types, try setting this to 'yes'.
@@ -42,7 +42,7 @@ ESPTOOL		?= esptool.py
 ESPPORT		?= /dev/ttyUSB0
 #ESPDELAY indicates seconds to wait between flashing the two binary images
 ESPDELAY	?= 3
-ESPBAUD		?= 460800
+ESPBAUD		?= 115200
 
 #Appgen path and name
 APPGEN		?= $(SDK_BASE)/tools/gen_appbin.py
