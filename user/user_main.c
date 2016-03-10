@@ -1,0 +1,153 @@
+/*
+ * ----------------------------------------------------------------------------
+ * "THE BEER-WARE LICENSE" (Revision 42):
+ * Jeroen Domburg <jeroen@spritesmods.com> wrote this file. As long as you retain
+ * this notice you can do whatever you want with this stuff. If we meet some day,
+ * and you think this stuff is worth it, you can buy me a beer in return.
+ * ----------------------------------------------------------------------------
+ */
+
+// library headers
+#include <esp8266.h>
+#include "httpd.h"
+#include "httpdespfs.h"
+#include "cgiwifi.h"
+#include "cgiflash.h"
+#include "auth.h"
+#include "espfs.h"
+#include "captdns.h"
+#include "webpages-espfs.h"
+#include "cgiwebsocket.h"
+
+// user files
+#include "cgi.h"
+#include "stdout.h"
+#include "io.h"
+
+
+/**
+ * @brief BasicAuth name/password checking function.
+ *
+ * It's invoked by the authBasic() built-in route handler
+ * until it returns 0. Each time it populates the provided
+ * name and password buffer.
+ *
+ * @param connData : connection context
+ * @param no       : user number (incremented each time it's called)
+ * @param user     : user buffer
+ * @param userLen  : user buffer size
+ * @param pass     : password buffer
+ * @param passLen  : password buffer size
+ * @return 0 to end, 1 if more users are available.
+ */
+int myPassFn(HttpdConnData *connData, int no, char *user, int userLen, char *pass, int passLen)
+{
+	(void)connData;
+	(void)userLen;
+	(void)passLen;
+
+	if (no == 0) {
+		os_strcpy(user, "admin");
+		os_strcpy(pass, "s3cr3t");
+		return 1;
+//Add more users this way. Check against incrementing no for each user added.
+//  } else if (no==1) {
+//      os_strcpy(user, "user1");
+//      os_strcpy(pass, "something");
+//      return 1;
+	}
+	return 0;
+}
+
+
+// Some stuff for alternative ESPFS storage methods
+#ifdef ESPFS_POS
+CgiUploadFlashDef uploadParams = {
+	.type = CGIFLASH_TYPE_ESPFS,
+	.fw1Pos = ESPFS_POS,
+	.fw2Pos = 0,
+	.fwSize = ESPFS_SIZE,
+};
+#define INCLUDE_FLASH_FNS
+#endif
+#ifdef OTA_FLASH_SIZE_K
+CgiUploadFlashDef uploadParams = {
+	.type = CGIFLASH_TYPE_FW,
+	.fw1Pos = 0x1000,
+	.fw2Pos = ((OTA_FLASH_SIZE_K * 1024) / 2) + 0x1000,
+	.fwSize = ((OTA_FLASH_SIZE_K * 1024) / 2) - 0x1000,
+	.tagName = OTA_TAGNAME
+};
+#define INCLUDE_FLASH_FNS
+#endif
+
+
+/**
+ * This is the main url->function dispatching data struct.
+ *
+ * In short, it's a struct with various URLs plus their handlers. The handlers can
+ * be 'standard' CGI functions you wrote, or 'special' CGIs requiring an argument.
+ * They can also be auth-functions. An asterisk will match any url starting with
+ * everything before the asterisks; "*" matches everything. The list will be
+ * handled top-down, so make sure to put more specific rules above the more
+ * general ones. Authorization things (like authBasic) act as a 'barrier' and
+ * should be placed above the URLs they protect.
+ */
+static HttpdBuiltInUrl builtInUrls[] = {
+	{"*", cgiRedirectApClientToHostname, "esp8266.nonet"},
+	{"/", cgiEspFsTemplate, (void *)tplCounter},
+
+//Enable the line below to protect the WiFi configuration with an username/password combo.
+//  {"/wifi/*", authBasic, (void *)myPassFn},
+
+	{"/wifi", cgiRedirect, "/wifi/"},
+	{"/wifi/", cgiEspFsTemplate, (void *)tplWlan},
+	//{"/wifi/", cgiRedirect, "/wifi/wifi.tpl"},
+	{"/wifi/wifiscan.cgi", cgiWiFiScan, NULL},
+	{"/wifi/connect.cgi", cgiWiFiConnect, NULL},
+	{"/wifi/connstatus.cgi", cgiWiFiConnStatus, NULL},
+	{"/wifi/setmode.cgi", cgiWiFiSetMode, NULL},
+
+	{"*", cgiEspFsHook, NULL}, //Catch-all cgi function for the filesystem
+	{NULL, NULL, NULL}
+};
+
+
+
+/**
+ * Main routine. Initialize stdout, the I/O, filesystem and the webserver and we're done.
+ */
+void user_init(void)
+{
+	// set up the debuging output
+	stdoutInit();
+
+	// reset button etc
+	ioInit();
+
+	// Start the captive portal
+	captdnsInit();
+
+	/* --- Initialize ESPFS --- */
+
+	// 0x40200000 is the base address for spi flash memory mapping, ESPFS_POS is the position
+	// where image is written in flash that is defined in Makefile.
+#ifdef ESPFS_POS
+	espFsInit((void*)(0x40200000 + ESPFS_POS));
+#else
+	espFsInit((void*)(webpages_espfs_start));
+#endif
+
+	/* --- Initialize the webserver --- */
+
+	httpdInit(builtInUrls, 80);
+
+
+	os_printf("\nReady\n");
+}
+
+
+void user_rf_pre_init()
+{
+	//Not needed, but some SDK versions want this defined.
+}
