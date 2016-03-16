@@ -9,7 +9,8 @@ INCLUDEPATH = . \
 	esp_iot_sdk_v1.5.2/include \
 	include \
 	libesphttpd/include \
-	libesphttpd/espfs
+	libesphttpd/espfs \
+	libesphttpd/core
 
 SOURCES += \
 	libesphttpd/core/auth.c \
@@ -38,9 +39,9 @@ SOURCES += \
 	user/cgi-test.c \
 	user/cgi.c \
 	user/io.c \
-	user/stdout.c \
 	user/user_main.c \
-	user/uart.c
+	user/cfg_serial.c \
+    user/uart_driver.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -71,9 +72,38 @@ HEADERS += \
 	user/cgi-test.h \
 	user/cgi.h \
 	user/io.h \
-	user/stdout.h \
-	user/uart.h \
-	user/uart_register.h
+	user/uart_register.h \
+	user/cfg_serial.h \
+	esp_iot_sdk_v1.5.2/include/json/json.h \
+	esp_iot_sdk_v1.5.2/include/json/jsonparse.h \
+	esp_iot_sdk_v1.5.2/include/json/jsontree.h \
+	esp_iot_sdk_v1.5.2/include/airkiss.h \
+	esp_iot_sdk_v1.5.2/include/at_custom.h \
+	esp_iot_sdk_v1.5.2/include/c_types.h \
+	esp_iot_sdk_v1.5.2/include/eagle_soc.h \
+	esp_iot_sdk_v1.5.2/include/esp_sdk_ver.h \
+	esp_iot_sdk_v1.5.2/include/espconn.h \
+	esp_iot_sdk_v1.5.2/include/espnow.h \
+	esp_iot_sdk_v1.5.2/include/ets_sys.h \
+	esp_iot_sdk_v1.5.2/include/gpio.h \
+	esp_iot_sdk_v1.5.2/include/ip_addr.h \
+	esp_iot_sdk_v1.5.2/include/mem.h \
+	esp_iot_sdk_v1.5.2/include/mesh.h \
+	esp_iot_sdk_v1.5.2/include/os_type.h \
+	esp_iot_sdk_v1.5.2/include/osapi.h \
+	esp_iot_sdk_v1.5.2/include/ping.h \
+	esp_iot_sdk_v1.5.2/include/pwm.h \
+	esp_iot_sdk_v1.5.2/include/queue.h \
+	esp_iot_sdk_v1.5.2/include/slc_register.h \
+	esp_iot_sdk_v1.5.2/include/smartconfig.h \
+	esp_iot_sdk_v1.5.2/include/sntp.h \
+	esp_iot_sdk_v1.5.2/include/spi_flash.h \
+	esp_iot_sdk_v1.5.2/include/spi_register.h \
+	esp_iot_sdk_v1.5.2/include/uart_register.h \
+	esp_iot_sdk_v1.5.2/include/upgrade.h \
+	esp_iot_sdk_v1.5.2/include/user_interface.h \
+    user/uart_driver.h
 
 DISTFILES += \
-	style.astylerc
+	style.astylerc \
+	Makefile

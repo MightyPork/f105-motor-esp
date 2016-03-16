@@ -2,7 +2,7 @@
 * Driver file for ESP8266 UART, works with the SDK.
 */
 
-#include "uart.h"
+#include "uart_driver.h"
 
 #include <esp8266.h>
 

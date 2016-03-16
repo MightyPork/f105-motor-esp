@@ -16,7 +16,7 @@ ESP_FLASH_FREQ_DIV=0
 
 
 ifeq ("$(OUTPUT_TYPE)","separate")
-#In case of separate ESPFS and binaries, set the pos and length of the ESPFS here. 
+#In case of separate ESPFS and binaries, set the pos and length of the ESPFS here.
 ESPFS_POS = 0x18000
 ESPFS_SIZE = 0x28000
 endif
@@ -28,10 +28,10 @@ FW_BASE		= firmware
 
 # Base directory for the compiler. Needs a / at the end; if not set it'll use the tools that are in
 # the PATH.
-XTENSA_TOOLS_ROOT ?= 
+XTENSA_TOOLS_ROOT ?=
 
 # base directory of the ESP8266 SDK package, absolute
-SDK_BASE	?= esp_iot_sdk_v1.5.2
+SDK_BASE	?= ./esp_iot_sdk_v1.5.2
 
 # Opensdk patches stdint.h when compiled with an internal SDK. If you run into compile problems pertaining to
 # redefinition of int types, try setting this to 'yes'.
@@ -207,6 +207,6 @@ clean:
 	$(Q) rm -f $(TARGET_OUT)
 	$(Q) find $(BUILD_BASE) -type f | xargs rm -f
 	$(Q) rm -rf $(FW_BASE)
-	
+
 
 $(foreach bdir,$(BUILD_DIR),$(eval $(call compile-objects,$(bdir))))

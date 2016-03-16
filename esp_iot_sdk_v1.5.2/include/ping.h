@@ -1,6 +1,8 @@
 #ifndef __PING_H__
 #define __PING_H__
 
+#include <c_types.h>
+
 
 typedef void (* ping_recv_function)(void* arg, void *pdata);
 typedef void (* ping_sent_function)(void* arg, void *pdata);

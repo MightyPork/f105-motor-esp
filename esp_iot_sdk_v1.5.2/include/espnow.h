@@ -6,6 +6,8 @@
 #ifndef __ESPNOW_H__
 #define __ESPNOW_H__
 
+#include <c_types.h>
+
 enum esp_now_role {
 	ESP_NOW_ROLE_IDLE = 0,
 	ESP_NOW_ROLE_CONTROLLER,

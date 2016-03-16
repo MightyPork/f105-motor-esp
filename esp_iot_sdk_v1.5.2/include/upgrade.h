@@ -1,6 +1,8 @@
 #ifndef __UPGRADE_H__
 #define __UPGRADE_H__
 
+#include <c_types.h>
+
 #define SPI_FLASH_SEC_SIZE      4096
 #define LIMIT_ERASE_SIZE		0x10000
 
@@ -19,19 +21,19 @@ typedef void (*upgrade_states_check_callback)(void * arg);
 //#define UPGRADE_SSL_ENABLE
 
 struct upgrade_server_info {
-    uint8 ip[4];
-    uint16 port;
+	uint8 ip[4];
+	uint16 port;
 
-    uint8 upgrade_flag;
+	uint8 upgrade_flag;
 
-    uint8 pre_version[16];
-    uint8 upgrade_version[16];
+	uint8 pre_version[16];
+	uint8 upgrade_version[16];
 
-    uint32 check_times;
-    uint8 *url;
+	uint32 check_times;
+	uint8 *url;
 
-    upgrade_states_check_callback check_cb;
-    struct espconn *pespconn;
+	upgrade_states_check_callback check_cb;
+	struct espconn *pespconn;
 };
 
 #define UPGRADE_FLAG_IDLE       0x00

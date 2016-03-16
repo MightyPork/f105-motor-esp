@@ -1,16 +1,16 @@
 /*
  * ----------------------------------------------------------------------------
  * "THE BEER-WARE LICENSE" (Revision 42):
- * Jeroen Domburg <jeroen@spritesmods.com> wrote this file. As long as you retain 
- * this notice you can do whatever you want with this stuff. If we meet some day, 
- * and you think this stuff is worth it, you can buy me a beer in return. 
+ * Jeroen Domburg <jeroen@spritesmods.com> wrote this file. As long as you retain
+ * this notice you can do whatever you want with this stuff. If we meet some day,
+ * and you think this stuff is worth it, you can buy me a beer in return.
  * ----------------------------------------------------------------------------
  */
 
 
 /*
 This is a 'captive portal' DNS server: it basically replies with a fixed IP (in this case:
-the one of the SoftAP interface of this ESP module) for any and all DNS queries. This can 
+the one of the SoftAP interface of this ESP module) for any and all DNS queries. This can
 be used to send mobile phones, tablets etc which connect to the ESP in AP mode directly to
 the internal webserver.
 */
@@ -95,17 +95,17 @@ typedef struct __attribute__ ((packed)) {
 //Function to put unaligned 16-bit network values
 static void ICACHE_FLASH_ATTR setn16(void *pp, int16_t n) {
 	char *p=pp;
-	*p++=(n>>8);
-	*p++=(n&0xff);
+	*p++=(char)(n>>8);
+	*p++=(char)(n&0xff);
 }
 
 //Function to put unaligned 32-bit network values
 static void ICACHE_FLASH_ATTR setn32(void *pp, int32_t n) {
 	char *p=pp;
-	*p++=(n>>24)&0xff;
-	*p++=(n>>16)&0xff;
-	*p++=(n>>8)&0xff;
-	*p++=(n&0xff);
+	*p++=(char)((n>>24)&0xff);
+	*p++=(char)((n>>16)&0xff);
+	*p++=(char)((n>>8)&0xff);
+	*p++=(char)(n&0xff);
 }
 
 static uint16_t ICACHE_FLASH_ATTR my_ntohs(uint16_t *in) {
@@ -114,7 +114,7 @@ static uint16_t ICACHE_FLASH_ATTR my_ntohs(uint16_t *in) {
 }
 
 
-//Parses a label into a C-string containing a dotted 
+//Parses a label into a C-string containing a dotted
 //Returns pointer to start of next fields in packet
 static char* ICACHE_FLASH_ATTR labelToStr(char *packet, char *labelPtr, int packetSz, char *res, int resMaxLen) {
 	int i, j, k;
@@ -153,7 +153,7 @@ static char ICACHE_FLASH_ATTR *strToLabel(char *str, char *label, int maxLen) {
 	char *p=label+1; //ptr to next label byte to be written
 	while (1) {
 		if (*str=='.' || *str==0) {
-			*len=((p-len)-1);	//write len of label bit
+			*len=(char)((p-len)-1);	//write len of label bit
 			len=p;				//pos of len for next part
 			p++;				//data ptr is one past len
 			if (*str==0) break;	//done
@@ -183,7 +183,7 @@ static void ICACHE_FLASH_ATTR captdnsRecv(struct sockaddr_in *premote_addr, char
 	DnsHeader *hdr=(DnsHeader*)p;
 	DnsHeader *rhdr=(DnsHeader*)&reply[0];
 	p+=sizeof(DnsHeader);
-//	httpd_printf("DNS packet: id 0x%X flags 0x%X rcode 0x%X qcnt %d ancnt %d nscount %d arcount %d len %d\n", 
+//	httpd_printf("DNS packet: id 0x%X flags 0x%X rcode 0x%X qcnt %d ancnt %d nscount %d arcount %d len %d\n",
 //		my_ntohs(&hdr->id), hdr->flags, hdr->rcode, my_ntohs(&hdr->qdcount), my_ntohs(&hdr->ancount), my_ntohs(&hdr->nscount), my_ntohs(&hdr->arcount), length);
 	//Some sanity checks:
 	if (length>DNS_LEN) return; 								//Packet is longer than DNS implementation allows
@@ -276,14 +276,14 @@ static void captdnsTask(void *pvParameters) {
 	socklen_t fromlen;
 	struct ip_info ipconfig;
 	char udp_msg[DNS_LEN];
-	
+
 	memset(&ipconfig, 0, sizeof(ipconfig));
 	memset(&server_addr, 0, sizeof(server_addr));
-	server_addr.sin_family = AF_INET;	   
+	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = INADDR_ANY;
 	server_addr.sin_port = htons(53);
 	server_addr.sin_len = sizeof(server_addr);
-	
+
 	do {
 		sockFd=socket(AF_INET, SOCK_DGRAM, 0);
 		if (sockFd==-1) {
@@ -291,7 +291,7 @@ static void captdnsTask(void *pvParameters) {
 			vTaskDelay(1000/portTICK_RATE_MS);
 		}
 	} while (sockFd==-1);
-	
+
 	do {
 		ret=bind(sockFd, (struct sockaddr *)&server_addr, sizeof(server_addr));
 		if (ret!=0) {
@@ -307,7 +307,7 @@ static void captdnsTask(void *pvParameters) {
 		ret=recvfrom(sockFd, (u8 *)udp_msg, DNS_LEN, 0,(struct sockaddr *)&from,(socklen_t *)&fromlen);
 		if (ret>0) captdnsRecv(&from,udp_msg,ret);
 	}
-	
+
 	close(sockFd);
 	vTaskDelete(NULL);
 }

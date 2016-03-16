@@ -21,8 +21,9 @@
 
 // user files
 #include "cgi.h"
-#include "stdout.h"
+#include "cfg_serial.h"
 #include "io.h"
+#include "uart_driver.h"
 
 
 /**
@@ -113,6 +114,13 @@ static HttpdBuiltInUrl builtInUrls[] = {
 };
 
 
+static ETSTimer prTestTimer;
+
+static void ICACHE_FLASH_ATTR test_timer_task(void *arg) {
+	const char * t = "Test\r\n";
+	UART_WriteBuffer(0, (uint8_t*)t, strlen(t), 1000);
+}
+
 
 /**
  * Main routine. Initialize stdout, the I/O, filesystem and the webserver and we're done.
@@ -120,7 +128,7 @@ static HttpdBuiltInUrl builtInUrls[] = {
 void user_init(void)
 {
 	// set up the debuging output
-	stdoutInit();
+	serialInit();
 
 	// reset button etc
 	ioInit();
@@ -142,8 +150,12 @@ void user_init(void)
 
 	httpdInit(builtInUrls, 80);
 
-
 	os_printf("\nReady\n");
+
+	// print TEST on the command interface every 500 ms
+	os_timer_disarm(&prTestTimer);
+	os_timer_setfn(&prTestTimer, test_timer_task, NULL);
+	os_timer_arm(&prTestTimer, 500, 1);
 }
 
 

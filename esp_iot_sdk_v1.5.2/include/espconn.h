@@ -1,6 +1,9 @@
 #ifndef __ESPCONN_H__
 #define __ESPCONN_H__
 
+#include <c_types.h>
+#include <ip_addr.h>
+
 typedef sint8 err_t;
 
 typedef void *espconn_handle;
@@ -30,39 +33,39 @@ typedef void (* espconn_reconnect_callback)(void *arg, sint8 err);
 
 /** Protocol family and type of the espconn */
 enum espconn_type {
-    ESPCONN_INVALID    = 0,
-    /* ESPCONN_TCP Group */
-    ESPCONN_TCP        = 0x10,
-    /* ESPCONN_UDP Group */
-    ESPCONN_UDP        = 0x20,
+	ESPCONN_INVALID    = 0,
+	/* ESPCONN_TCP Group */
+	ESPCONN_TCP        = 0x10,
+	/* ESPCONN_UDP Group */
+	ESPCONN_UDP        = 0x20,
 };
 
 /** Current state of the espconn. Non-TCP espconn are always in state ESPCONN_NONE! */
 enum espconn_state {
-    ESPCONN_NONE,
-    ESPCONN_WAIT,
-    ESPCONN_LISTEN,
-    ESPCONN_CONNECT,
-    ESPCONN_WRITE,
-    ESPCONN_READ,
-    ESPCONN_CLOSE
+	ESPCONN_NONE,
+	ESPCONN_WAIT,
+	ESPCONN_LISTEN,
+	ESPCONN_CONNECT,
+	ESPCONN_WRITE,
+	ESPCONN_READ,
+	ESPCONN_CLOSE
 };
 
 typedef struct _esp_tcp {
-    int remote_port;
-    int local_port;
-    uint8 local_ip[4];
-    uint8 remote_ip[4];
-    espconn_connect_callback connect_callback;
-    espconn_reconnect_callback reconnect_callback;
-    espconn_connect_callback disconnect_callback;
+	int remote_port;
+	int local_port;
+	uint8 local_ip[4];
+	uint8 remote_ip[4];
+	espconn_connect_callback connect_callback;
+	espconn_reconnect_callback reconnect_callback;
+	espconn_connect_callback disconnect_callback;
 	espconn_connect_callback write_finish_fn;
 } esp_tcp;
 
 typedef struct _esp_udp {
-    int remote_port;
-    int local_port;
-    uint8 local_ip[4];
+	int remote_port;
+	int local_port;
+	uint8 local_ip[4];
 	uint8 remote_ip[4];
 } esp_udp;
 
@@ -78,19 +81,19 @@ typedef void (* espconn_sent_callback)(void *arg);
 
 /** A espconn descriptor */
 struct espconn {
-    /** type of the espconn (TCP, UDP) */
-    enum espconn_type type;
-    /** current state of the espconn */
-    enum espconn_state state;
-    union {
-        esp_tcp *tcp;
-        esp_udp *udp;
-    } proto;
-    /** A callback function that is informed about events for this espconn */
-    espconn_recv_callback recv_callback;
-    espconn_sent_callback sent_callback;
-    uint8 link_cnt;
-    void *reverse;
+	/** type of the espconn (TCP, UDP) */
+	enum espconn_type type;
+	/** current state of the espconn */
+	enum espconn_state state;
+	union {
+		esp_tcp *tcp;
+		esp_udp *udp;
+	} proto;
+	/** A callback function that is informed about events for this espconn */
+	espconn_recv_callback recv_callback;
+	espconn_sent_callback sent_callback;
+	uint8 link_cnt;
+	void *reverse;
 };
 
 enum espconn_option{
@@ -417,7 +420,7 @@ typedef void (*dns_found_callback)(const char *name, ip_addr_t *ipaddr, void *ca
  * Description  : Resolve a hostname (string) into an IP address.
  * Parameters   : pespconn -- espconn to resolve a hostname
  *                hostname -- the hostname that is to be queried
- *                addr -- pointer to a ip_addr_t where to store the address if 
+ *                addr -- pointer to a ip_addr_t where to store the address if
  *                it is already cached in the dns_table (only valid if ESPCONN_OK
  *                is returned!)
  *                found -- a callback function to be called on success, failure

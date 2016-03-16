@@ -3,6 +3,6 @@
 
 #include <esp8266.h>
 
-void stdoutInit();
+void serialInit();
 
 #endif

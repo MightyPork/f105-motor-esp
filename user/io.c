@@ -38,7 +38,7 @@ static void ICACHE_FLASH_ATTR resetBtnTimerCb(void *arg) {
 	} else {
 		if (resetCnt>=6) { //3 sec pressed
 			wifi_station_disconnect();
-			wifi_set_opmode(0x3); //reset to AP+STA mode
+			wifi_set_opmode(STATIONAP_MODE); //reset to AP+STA mode
 			os_printf("Reset to AP mode. Restarting system...\n");
 			system_restart();
 		}
