@@ -14,12 +14,12 @@
 
 
 
-LOCAL void uart0_rx_intr_handler(void *para);
-LOCAL void uart_recvTask(os_event_t *events);
+static void uart0_rx_intr_handler(void *para);
+static void uart_recvTask(os_event_t *events);
 
 #define uart_recvTaskPrio        0
 #define uart_recvTaskQueueLen    10
-LOCAL os_event_t uart_recvTaskQueue[uart_recvTaskQueueLen];
+static os_event_t uart_recvTaskQueue[uart_recvTaskQueueLen];
 
 
 
@@ -37,7 +37,7 @@ clear_rxtx(int uart_no)
  * @brief Configure UART 115200-8-N-1
  * @param uart_no
  */
-void ICACHE_FLASH_ATTR
+static void ICACHE_FLASH_ATTR
 my_uart_init(UARTn uart_no)
 {
 	UART_SetParity(uart_no, PARITY_NONE);
@@ -48,8 +48,8 @@ my_uart_init(UARTn uart_no)
 }
 
 
-void ICACHE_FLASH_ATTR
-serialInit()
+/** Configure basic UART func and pins */
+static void conf_uart_pins(void)
 {
 	// U0TXD
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0TXD_U, FUNC_U0TXD);
@@ -67,47 +67,46 @@ serialInit()
 
 	// Select debug port
 	UART_SetPrintPort(UART1);
+}
 
-
-	// Configure Rx on UART0
-
-
+/** Configure Rx on UART0 */
+static void conf_uart_receiver(void)
+{
+	//
 	// Start the Rx reading task
 	system_os_task(uart_recvTask, uart_recvTaskPrio, uart_recvTaskQueue, uart_recvTaskQueueLen);
-
-
 	// set handler
 	ETS_UART_INTR_ATTACH((void *)uart0_rx_intr_handler, &(UartDev.rcv_buff)); // the buf will be used as an arg
-
 
 	// fifo threshold config
 	uint32_t conf = ((100 & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S);
 	conf |= ((0x10 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S);
-
 	// timeout config
 	conf |= ((0x02 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S); // timeout threshold
 	conf |= UART_RX_TOUT_EN; // enable timeout
-
 	WRITE_PERI_REG(UART_CONF1(UART0), conf);
-
 
 	// enable TOUT and ERR irqs
 	SET_PERI_REG_MASK(UART_INT_ENA(UART0), UART_RXFIFO_TOUT_INT_ENA | UART_FRM_ERR_INT_ENA);
-
 	/* clear interrupt flags */
 	WRITE_PERI_REG(UART_INT_CLR(UART0), 0xffff);
-
 	/* enable RX interrupts */
 	SET_PERI_REG_MASK(UART_INT_ENA(UART0), UART_RXFIFO_FULL_INT_ENA | UART_RXFIFO_OVF_INT_ENA);
-
 
 	// Enable IRQ in Extensa
 	ETS_UART_INTR_ENABLE();
 }
 
 
-// ---- receive business ----
+void ICACHE_FLASH_ATTR
+serialInit()
+{
+	conf_uart_pins();
+	conf_uart_receiver();
+}
 
+
+// ---- async receive stuff ----
 
 
 void uart_rx_intr_disable(uint8 uart_no)
@@ -129,7 +128,7 @@ void uart_rx_intr_enable(uint8 uart_no)
 #define UART_GetRxFifoCount(uart_no) ((READ_PERI_REG(UART_STATUS((uart_no))) >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT)
 
 
-LOCAL void ICACHE_FLASH_ATTR
+static void ICACHE_FLASH_ATTR
 uart_recvTask(os_event_t *events)
 {
 	if (events->sig == 0) {
@@ -158,7 +157,7 @@ uart_recvTask(os_event_t *events)
  * Parameters   : void *para - point to ETS_UART_INTR_ATTACH's arg
  * Returns      : NONE
 *******************************************************************************/
-LOCAL void
+static void
 uart0_rx_intr_handler(void *para)
 {
 	uint32_t status_reg = READ_PERI_REG(UART_INT_ST(UART0));

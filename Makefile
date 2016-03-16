@@ -51,8 +51,8 @@ APPGEN		?= $(SDK_BASE)/tools/gen_appbin.py
 TARGET		= httpd
 
 # which modules (subdirectories) of the project to include in compiling
-MODULES		= user
-EXTRA_INCDIR	= include libesphttpd/include
+MODULES		= user sbmp
+EXTRA_INCDIR	= include libesphttpd/include sbmp
 
 # libraries used in this project, mainly provided by the SDK
 LIBS		= c gcc hal phy pp net80211 wpa main lwip crypto
@@ -184,10 +184,10 @@ endef
 all: checkdirs $(TARGET_OUT) $(FW_BASE)
 	$(Q) echo -e "\nBuild OK.\n"
 
-libesphttpd/Makefile:
-	$(Q) echo "No libesphttpd submodule found. Using git to fetch it..."
-	$(Q) git submodule init
-	$(Q) git submodule update
+# libesphttpd/Makefile:
+# 	$(Q) echo "No libesphttpd submodule found. Using git to fetch it..."
+# 	$(Q) git submodule init
+# 	$(Q) git submodule update
 
 libesphttpd: libesphttpd/Makefile
 	$(Q) make -C libesphttpd USE_OPENSDK=$(USE_OPENSDK)

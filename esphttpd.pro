@@ -10,7 +10,8 @@ INCLUDEPATH = . \
 	include \
 	libesphttpd/include \
 	libesphttpd/espfs \
-	libesphttpd/core
+	libesphttpd/core \
+	sbmp
 
 SOURCES += \
 	libesphttpd/core/auth.c \
@@ -40,8 +41,15 @@ SOURCES += \
 	user/cgi.c \
 	user/io.c \
 	user/user_main.c \
-	user/cfg_serial.c \
-    user/uart_driver.c
+	user/uart_driver.c \
+	sbmp/crc32.c \
+	sbmp/sbmp_checksum.c \
+	sbmp/sbmp_datagram.c \
+	sbmp/sbmp_frame.c \
+	sbmp/sbmp_logging.c \
+	sbmp/sbmp_session.c \
+	user/datalink.c \
+    user/serial.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -73,7 +81,6 @@ HEADERS += \
 	user/cgi.h \
 	user/io.h \
 	user/uart_register.h \
-	user/cfg_serial.h \
 	esp_iot_sdk_v1.5.2/include/json/json.h \
 	esp_iot_sdk_v1.5.2/include/json/jsonparse.h \
 	esp_iot_sdk_v1.5.2/include/json/jsontree.h \
@@ -102,7 +109,17 @@ HEADERS += \
 	esp_iot_sdk_v1.5.2/include/uart_register.h \
 	esp_iot_sdk_v1.5.2/include/upgrade.h \
 	esp_iot_sdk_v1.5.2/include/user_interface.h \
-    user/uart_driver.h
+	user/uart_driver.h \
+	sbmp/crc32.h \
+	sbmp/sbmp.h \
+	sbmp/sbmp_checksum.h \
+	sbmp/sbmp_config.h \
+	sbmp/sbmp_datagram.h \
+	sbmp/sbmp_frame.h \
+	sbmp/sbmp_logging.h \
+	sbmp/sbmp_session.h \
+	user/datalink.h \
+    user/serial.h
 
 DISTFILES += \
 	style.astylerc \

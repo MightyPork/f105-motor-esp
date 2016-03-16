@@ -21,8 +21,9 @@
 
 // user files
 #include "cgi.h"
-#include "cfg_serial.h"
+#include "serial.h"
 #include "io.h"
+#include "datalink.h"
 #include "uart_driver.h"
 
 
@@ -114,12 +115,12 @@ static HttpdBuiltInUrl builtInUrls[] = {
 };
 
 
-static ETSTimer prTestTimer;
+//static ETSTimer prTestTimer;
 
-static void ICACHE_FLASH_ATTR test_timer_task(void *arg) {
-	const char * t = "Test\r\n";
-	UART_WriteBuffer(0, (uint8_t*)t, strlen(t), 1000);
-}
+//static void ICACHE_FLASH_ATTR test_timer_task(void *arg) {
+//	const char * t = "Test\r\n";
+//	UART_WriteBuffer(0, (uint8_t*)t, strlen(t), 1000);
+//}
 
 
 /**
@@ -133,10 +134,11 @@ void user_init(void)
 	// reset button etc
 	ioInit();
 
+	// set up SBMP
+	datalinkInit();
+
 	// Start the captive portal
 	captdnsInit();
-
-	/* --- Initialize ESPFS --- */
 
 	// 0x40200000 is the base address for spi flash memory mapping, ESPFS_POS is the position
 	// where image is written in flash that is defined in Makefile.
@@ -152,10 +154,10 @@ void user_init(void)
 
 	os_printf("\nReady\n");
 
-	// print TEST on the command interface every 500 ms
-	os_timer_disarm(&prTestTimer);
-	os_timer_setfn(&prTestTimer, test_timer_task, NULL);
-	os_timer_arm(&prTestTimer, 500, 1);
+//	// print TEST on the command interface every 500 ms
+//	os_timer_disarm(&prTestTimer);
+//	os_timer_setfn(&prTestTimer, test_timer_task, NULL);
+//	os_timer_arm(&prTestTimer, 500, 1);
 }
 
 

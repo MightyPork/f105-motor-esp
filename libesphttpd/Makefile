@@ -139,10 +139,10 @@ endef
 all: checkdirs $(LIB) webpages.espfs libwebpages-espfs.a
 
 submodules: lib/heatshrink/Makefile
-lib/heatshrink/Makefile:
-	$(Q) echo "Heatshrink isn't found. Checking out submodules to fetch it."
-	$(Q) git submodule init
-	$(Q) git submodule update
+# lib/heatshrink/Makefile:
+# 	$(Q) echo "Heatshrink isn't found. Checking out submodules to fetch it."
+# 	$(Q) git submodule init
+# 	$(Q) git submodule update
 
 
 $(LIB): $(BUILD_DIR) submodules $(OBJ)
