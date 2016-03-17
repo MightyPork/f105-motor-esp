@@ -8,3 +8,5 @@ for file in $(find html_preview/ -name "*.tpl")
 do 
   mv $file `echo $file | sed s/.tpl$/.html/`
 done
+
+echo "Html preview updated."

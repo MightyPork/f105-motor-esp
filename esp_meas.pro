@@ -3,7 +3,7 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-DEFINES =
+DEFINES = ESPFS_HEATSHRINK
 
 INCLUDEPATH = . \
 	esp_iot_sdk_v1.5.2/include \
@@ -48,7 +48,7 @@ SOURCES += \
 	sbmp/sbmp_frame.c \
 	sbmp/sbmp_session.c \
 	user/datalink.c \
-    user/serial.c
+	user/serial.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -118,7 +118,7 @@ HEADERS += \
 	sbmp/sbmp_logging.h \
 	sbmp/sbmp_session.h \
 	user/datalink.h \
-    user/serial.h
+	user/serial.h
 
 DISTFILES += \
 	style.astylerc \

@@ -98,8 +98,10 @@ CgiUploadFlashDef uploadParams = {
  * should be placed above the URLs they protect.
  */
 static HttpdBuiltInUrl builtInUrls[] = {
-	{"*", cgiRedirectApClientToHostname, "esp8266.nonet"},
+	{"*", cgiRedirectApClientToHostname, "esp8266.nonet"}, // redirect func for the captive portal
 	{"/", cgiEspFsTemplate, (void *)tplCounter},
+
+	{"/random.tpl", cgiRandomNumbers, NULL},
 
 //Enable the line below to protect the WiFi configuration with an username/password combo.
 //  {"/wifi/*", authBasic, (void *)myPassFn},

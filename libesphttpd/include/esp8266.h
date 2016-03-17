@@ -24,6 +24,9 @@
 
 #define FLASH_FN ICACHE_FLASH_ATTR
 
+// this ideally would allow flash arrays, but alas works only for uint32_t
+#define FLASH_DATA ICACHE_RODATA_ATTR STORE_ATTR
+
 #include "platform.h"
 #include "espmissingincludes.h"
 #include "esp_sdk_ver.h"

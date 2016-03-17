@@ -10,6 +10,7 @@
 <nav>
 <ul>
 <li><a href="/wifi">WiFi setup</a>
+<li><a href="/random.tpl">Random numbers</a>
 </ul>
 
 <hr>

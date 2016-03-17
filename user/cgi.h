@@ -6,4 +6,6 @@
 
 int tplCounter(HttpdConnData *connData, char *token, void **arg);
 
+int cgiRandomNumbers(HttpdConnData *connData);
+
 #endif
