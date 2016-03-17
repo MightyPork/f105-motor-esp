@@ -8,4 +8,6 @@ int tplCounter(HttpdConnData *connData, char *token, void **arg);
 
 int cgiRandomNumbers(HttpdConnData *connData);
 
+int tplMultipart(HttpdConnData *connData, char *token, void **arg);
+
 #endif

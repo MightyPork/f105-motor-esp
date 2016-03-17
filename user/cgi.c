@@ -29,13 +29,66 @@ int ICACHE_FLASH_ATTR tplCounter(HttpdConnData *connData, char *token, void **ar
 		os_sprintf(buff, "%ld", hitCounter);
 	}
 	httpdSend(connData, buff, -1);
+
 	return HTTPD_CGI_DONE;
 }
+
 
 
 typedef struct {
 	uint32_t count_remain;
 } RandomNumberState;
+
+
+//Template code for the counter on the index page.
+int ICACHE_FLASH_ATTR tplMultipart(HttpdConnData *connData, char *token, void **arg)
+{
+	if (token == NULL) {
+		if (*arg != NULL) free(*arg);
+		return HTTPD_CGI_DONE; // cleanup
+	}
+
+	if (os_strcmp(token, "numbers") == 0) {
+		RandomNumberState *rns = *arg;
+		char buff[20];
+
+		if (rns == NULL) {
+			//First call to this cgi. Open the file so we can read it.
+			rns=(RandomNumberState *)malloc(sizeof(RandomNumberState));
+			*arg=rns;
+
+			// parse count
+			uint32_t count = 1;
+			int len = httpdFindArg(connData->getArgs, "count", buff, sizeof(buff));
+			if (len==-1) {
+				// no such get arg
+			} else {
+				count = (uint32_t)atoi(buff);
+			}
+			rns->count_remain = count;
+
+			printf("User wants %d numbers.", count);
+		}
+
+		for (int i = 0; i < 100; i++) {
+			os_sprintf(buff, "<li>%lu\n", os_random());
+			httpdSend(connData, buff, -1);
+
+			if (--rns->count_remain == 0) {
+				break;
+			}
+		}
+
+		if (rns->count_remain == 0) {
+			free(rns);
+			return HTTPD_CGI_DONE;
+		}
+
+		return HTTPD_CGI_MORE;
+	}
+
+	return HTTPD_CGI_DONE;
+}
 
 
 // better to put it in the fs...

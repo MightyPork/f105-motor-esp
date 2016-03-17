@@ -28,6 +28,16 @@
 
 #include "sbmp.h"
 
+#define SHOW_HEAP_USE
+
+#ifdef SHOW_HEAP_USE
+static ETSTimer prHeapTimer;
+
+static void ICACHE_FLASH_ATTR prHeapTimerCb(void *arg) {
+	os_printf("Heap: %ld\n", (unsigned long)system_get_free_heap_size());
+}
+#endif
+
 
 /**
  * @brief BasicAuth name/password checking function.
@@ -101,6 +111,8 @@ static HttpdBuiltInUrl builtInUrls[] = {
 	{"*", cgiRedirectApClientToHostname, "esp8266.nonet"}, // redirect func for the captive portal
 	{"/", cgiEspFsTemplate, (void *)tplCounter},
 
+	{"/multipart.tpl", cgiEspFsTemplate, (void *)tplMultipart},
+
 	{"/random.tpl", cgiRandomNumbers, NULL},
 
 //Enable the line below to protect the WiFi configuration with an username/password combo.
@@ -165,6 +177,12 @@ void user_init(void)
 	httpdInit(builtInUrls, 80);
 
 	os_printf("\nReady\n");
+
+#ifdef SHOW_HEAP_USE
+	os_timer_disarm(&prHeapTimer);
+	os_timer_setfn(&prHeapTimer, prHeapTimerCb, NULL);
+	os_timer_arm(&prHeapTimer, 3000, 1);
+#endif
 
 //	// print TEST on the command interface every 500 ms
 //	os_timer_disarm(&prTestTimer);
