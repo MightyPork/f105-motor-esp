@@ -197,13 +197,11 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 	// resume the parser state from the last token,
 	// if subst. func wants more data to be sent.
 	if (tpd->chunk_resume) {
-		printf("\nResuming chunk...\n");
-
+		// resume
 		len = tpd->buff_len;
 		e = tpd->buff_e;
 		sp = tpd->buff_sp;
 		x = tpd->buff_x;
-
 	} else {
 		len = espFsRead(tpd->file, buff, TEMPLATE_CHUNK);
 		tpd->buff_len = len;
@@ -214,9 +212,7 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 	}
 
 	if (len > 0) {
-		printf("*a");
 		for (; x < len; x++) {
-			printf("*b");
 			if (tpd->tokenPos == -1) {
 				//Inside ordinary text.
 				if (buff[x] == '%') {
@@ -229,21 +225,16 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 					sp++;
 				}
 			} else {
-				printf("*c");
 				if (buff[x] == '%') {
-					printf("*d");
 					if (tpd->tokenPos == 0) {
 						//This is the second % of a %% escape string.
 						//Send a single % and resume with the normal program flow.
 						httpdSend(connData, "%", 1);
 					} else {
-						printf("*e");
 
 						if (!tpd->chunk_resume) {
 							//This is an actual token.
 							tpd->token[tpd->tokenPos++] = 0; //zero-terminate token
-						} else {
-							printf("*f");
 						}
 
 						tpd->chunk_resume = false;
@@ -251,8 +242,6 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 						int status = ((TplCallback)(connData->cgiArg))(connData, tpd->token, &tpd->tplArg);
 
 						if (status == HTTPD_CGI_MORE) {
-							printf("\nSaving template pos & continuing in next run..\n");
-
 							// wants to send more in this token's place.....
 							tpd->chunk_resume = true;
 
