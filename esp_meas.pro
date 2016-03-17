@@ -46,7 +46,6 @@ SOURCES += \
 	sbmp/sbmp_checksum.c \
 	sbmp/sbmp_datagram.c \
 	sbmp/sbmp_frame.c \
-	sbmp/sbmp_logging.c \
 	sbmp/sbmp_session.c \
 	user/datalink.c \
     user/serial.c

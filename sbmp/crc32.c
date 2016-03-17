@@ -115,22 +115,22 @@ static uint32_t ICACHE_RODATA_ATTR STORE_ATTR crc_32_tab[] = { /* CRC polynomial
 
 #define UPDC32(octet, crc) (crc_32_tab[((crc) ^ ((uint8_t)octet)) & 0xff] ^ ((crc) >> 8))
 
-uint32_t crc32_begin(void)
+uint32_t FLASH_FN crc32_begin(void)
 {
 	return 0xFFFFFFFF;
 }
 
-uint32_t crc32_update(uint32_t crc_scratch, uint8_t ch)
+uint32_t FLASH_FN crc32_update(uint32_t crc_scratch, uint8_t ch)
 {
 	return UPDC32(ch, crc_scratch);
 }
 
-uint32_t crc32_end(uint32_t crc_scratch)
+uint32_t FLASH_FN crc32_end(uint32_t crc_scratch)
 {
 	return ~crc_scratch;
 }
 
-uint32_t crc32buf(uint8_t *buf, size_t len)
+uint32_t FLASH_FN crc32buf(uint8_t *buf, size_t len)
 {
 	uint32_t scratch = crc32_begin();
 

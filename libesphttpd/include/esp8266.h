@@ -22,6 +22,9 @@
 #include <upgrade.h>
 #endif
 
+#define FLASH_FN ICACHE_FLASH_ATTR
+
 #include "platform.h"
 #include "espmissingincludes.h"
+#include "esp_sdk_ver.h"
 

@@ -4,24 +4,34 @@
 
 #include "datalink.h"
 
+
+static SBMP_Endpoint *ep;
+
+
 /** func used for sending bytes by SBMP */
-static void u0_putc(uint8_t c)
+static void FLASH_FN u0_putc(uint8_t c)
 {
-	UART_WriteCharCRLF(UART0, c, 0);
+	UART_WriteChar(UART0, c, 0);
 }
 
 
-static void dg_handler(SBMP_Datagram *dg)
+static void FLASH_FN dg_handler(SBMP_Datagram *dg)
 {
 	sbmp_info("Datagram received.");
 }
 
 
-
-static SBMP_Endpoint *ep;
+void datalink_receive(uint8_t byte)
+{
+	sbmp_ep_receive(ep, byte);
+}
 
 /** Datalink */
-void datalinkInit(void)
+void FLASH_FN datalinkInit(void)
 {
 	ep = sbmp_ep_init(NULL, NULL, 256, dg_handler, u0_putc);
+
+	sbmp_ep_enable(ep, true);
+
+	os_printf("SBMP started on UART0\n");
 }

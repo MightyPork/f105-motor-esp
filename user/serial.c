@@ -11,7 +11,7 @@
 
 #include <esp8266.h>
 #include "uart_driver.h"
-
+#include "datalink.h"
 
 
 static void uart0_rx_intr_handler(void *para);
@@ -22,11 +22,8 @@ static void uart_recvTask(os_event_t *events);
 static os_event_t uart_recvTaskQueue[uart_recvTaskQueueLen];
 
 
-
-
 /** Clear the fifos */
-void ICACHE_FLASH_ATTR
-clear_rxtx(int uart_no)
+void FLASH_FN clear_rxtx(int uart_no)
 {
 	SET_PERI_REG_MASK(UART_CONF0(uart_no), UART_RXFIFO_RST | UART_TXFIFO_RST);
 	CLEAR_PERI_REG_MASK(UART_CONF0(uart_no), UART_RXFIFO_RST | UART_TXFIFO_RST);
@@ -37,8 +34,7 @@ clear_rxtx(int uart_no)
  * @brief Configure UART 115200-8-N-1
  * @param uart_no
  */
-static void ICACHE_FLASH_ATTR
-my_uart_init(UARTn uart_no)
+static void FLASH_FN my_uart_init(UARTn uart_no)
 {
 	UART_SetParity(uart_no, PARITY_NONE);
 	UART_SetStopBits(uart_no, ONE_STOP_BIT);
@@ -49,7 +45,7 @@ my_uart_init(UARTn uart_no)
 
 
 /** Configure basic UART func and pins */
-static void conf_uart_pins(void)
+static void FLASH_FN conf_uart_pins(void)
 {
 	// U0TXD
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0TXD_U, FUNC_U0TXD);
@@ -70,7 +66,7 @@ static void conf_uart_pins(void)
 }
 
 /** Configure Rx on UART0 */
-static void conf_uart_receiver(void)
+static void FLASH_FN conf_uart_receiver(void)
 {
 	//
 	// Start the Rx reading task
@@ -98,8 +94,7 @@ static void conf_uart_receiver(void)
 }
 
 
-void ICACHE_FLASH_ATTR
-serialInit()
+void FLASH_FN serialInit()
 {
 	conf_uart_pins();
 	conf_uart_receiver();
@@ -128,8 +123,7 @@ void uart_rx_intr_enable(uint8 uart_no)
 #define UART_GetRxFifoCount(uart_no) ((READ_PERI_REG(UART_STATUS((uart_no))) >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT)
 
 
-static void ICACHE_FLASH_ATTR
-uart_recvTask(os_event_t *events)
+static void FLASH_FN uart_recvTask(os_event_t *events)
 {
 	if (events->sig == 0) {
 		uint8 fifo_len = UART_GetRxFifoCount(UART0);
@@ -137,7 +131,9 @@ uart_recvTask(os_event_t *events)
 		// read from the FIFO & print back
 		for (uint8 idx = 0; idx < fifo_len; idx++) {
 			uint8 d_tmp = READ_PERI_REG(UART_FIFO(UART0)) & 0xFF;
-			UART_WriteChar(UART0, d_tmp, 0);
+			//UART_WriteChar(UART0, d_tmp, 0);
+
+			datalink_receive(d_tmp);
 		}
 
 		// clear irq flags
@@ -160,6 +156,8 @@ uart_recvTask(os_event_t *events)
 static void
 uart0_rx_intr_handler(void *para)
 {
+	(void)para;
+
 	uint32_t status_reg = READ_PERI_REG(UART_INT_ST(UART0));
 
 	if (status_reg & UART_FRM_ERR_INT_ST) {

@@ -31,7 +31,7 @@ static ETSTimer resetBtntimer;
 //	}
 //}
 
-static void ICACHE_FLASH_ATTR resetBtnTimerCb(void *arg) {
+static void FLASH_FN resetBtnTimerCb(void *arg) {
 	static int resetCnt=0;
 	if (!GPIO_INPUT_GET(BTNGPIO)) {
 		resetCnt++;
@@ -46,12 +46,20 @@ static void ICACHE_FLASH_ATTR resetBtnTimerCb(void *arg) {
 	}
 }
 
-void ioInit() {
+void FLASH_FN ioInit() {
 //	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO0_U, FUNC_GPIO0);
 	gpio_output_set(0, 0, 0/*(1<<LEDGPIO)*/, (1<<BTNGPIO));
-	os_timer_disarm(&resetBtntimer);
-	os_timer_setfn(&resetBtntimer, resetBtnTimerCb, NULL);
-	os_timer_arm(&resetBtntimer, 500, 1);
+
+	if (GPIO_INPUT_GET(BTNGPIO) == 0) {
+		// starting "in BOOT mode" - do not install the AP reset timer
+		os_printf("GPIO0 stuck low - AP reset button disabled.\n");
+	} else {
+		os_timer_disarm(&resetBtntimer);
+		os_timer_setfn(&resetBtntimer, resetBtnTimerCb, NULL);
+		os_timer_arm(&resetBtntimer, 500, 1);
+
+		os_printf("Note: Hold GPIO0 low for reset to AP mode.\n");
+	}
 }
 

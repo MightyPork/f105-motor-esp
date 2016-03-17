@@ -44,7 +44,7 @@
  * If handshake is used, the peer will detect that CRC32 is not
  * supported here, and should start using XOR.
  */
-#define SBMP_HAS_CRC32 0
+#define SBMP_HAS_CRC32 1
 #endif
 
 /* ------------------------------------- */

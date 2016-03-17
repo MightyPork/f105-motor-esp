@@ -26,6 +26,8 @@
 #include "datalink.h"
 #include "uart_driver.h"
 
+#include "sbmp.h"
+
 
 /**
  * @brief BasicAuth name/password checking function.
@@ -42,7 +44,7 @@
  * @param passLen  : password buffer size
  * @return 0 to end, 1 if more users are available.
  */
-int myPassFn(HttpdConnData *connData, int no, char *user, int userLen, char *pass, int passLen)
+int FLASH_FN myPassFn(HttpdConnData *connData, int no, char *user, int userLen, char *pass, int passLen)
 {
 	(void)connData;
 	(void)userLen;
@@ -122,6 +124,8 @@ static HttpdBuiltInUrl builtInUrls[] = {
 //	UART_WriteBuffer(0, (uint8_t*)t, strlen(t), 1000);
 //}
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
 
 /**
  * Main routine. Initialize stdout, the I/O, filesystem and the webserver and we're done.
@@ -130,6 +134,12 @@ void user_init(void)
 {
 	// set up the debuging output
 	serialInit();
+
+	os_printf("\n\x1b[32;1mESP8266 starting, "
+			  "HTTPD v."HTTPDVER", "
+			  "SBMP v."SBMP_VER", "
+			  "IoT SDK v." STR(ESP_SDK_VERSION)
+			  "\x1b[0m\n");
 
 	// reset button etc
 	ioInit();

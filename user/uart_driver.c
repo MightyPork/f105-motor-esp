@@ -154,9 +154,9 @@ void ICACHE_FLASH_ATTR
 UART_SetPrintPort(UARTn uart_no)
 {
 	if (uart_no == UART0) {
-		os_install_putc1(u0_putc_crlf);
+		os_install_putc1((void *)u0_putc_crlf);
 	} else {
-		os_install_putc1(u1_putc_crlf);
+		os_install_putc1((void *)u1_putc_crlf);
 	}
 }
 
