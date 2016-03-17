@@ -44,7 +44,10 @@ typedef struct {
 int ICACHE_FLASH_ATTR tplMultipart(HttpdConnData *connData, char *token, void **arg)
 {
 	if (token == NULL) {
-		if (*arg != NULL) free(*arg);
+		if (*arg != NULL) {
+			free(*arg);
+			*arg = NULL; // mark as already freed
+		}
 		return HTTPD_CGI_DONE; // cleanup
 	}
 
@@ -81,6 +84,7 @@ int ICACHE_FLASH_ATTR tplMultipart(HttpdConnData *connData, char *token, void **
 
 		if (rns->count_remain == 0) {
 			free(rns);
+			*arg = NULL; // mark as already freed
 			return HTTPD_CGI_DONE;
 		}
 
@@ -90,7 +94,7 @@ int ICACHE_FLASH_ATTR tplMultipart(HttpdConnData *connData, char *token, void **
 	return HTTPD_CGI_DONE;
 }
 
-
+/*
 // better to put it in the fs...
 
 int FLASH_FN cgiRandomNumbers(HttpdConnData *connData) {
@@ -161,3 +165,4 @@ int FLASH_FN cgiRandomNumbers(HttpdConnData *connData) {
 
 	return HTTPD_CGI_MORE;
 }
+*/

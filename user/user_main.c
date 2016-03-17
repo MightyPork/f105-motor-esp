@@ -113,7 +113,7 @@ static HttpdBuiltInUrl builtInUrls[] = {
 
 	{"/multipart.tpl", cgiEspFsTemplate, (void *)tplMultipart},
 
-	{"/random.tpl", cgiRandomNumbers, NULL},
+//	{"/random.tpl", cgiRandomNumbers, NULL},
 
 //Enable the line below to protect the WiFi configuration with an username/password combo.
 //  {"/wifi/*", authBasic, (void *)myPassFn},
