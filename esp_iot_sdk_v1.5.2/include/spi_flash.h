@@ -1,15 +1,17 @@
-/* 
+/*
  * copyright (c) Espressif System 2010
- * 
+ *
  */
 
 #ifndef SPI_FLASH_H
 #define SPI_FLASH_H
 
+#include <c_types.h>
+
 typedef enum {
-    SPI_FLASH_RESULT_OK,
-    SPI_FLASH_RESULT_ERR,
-    SPI_FLASH_RESULT_TIMEOUT
+	SPI_FLASH_RESULT_OK,
+	SPI_FLASH_RESULT_ERR,
+	SPI_FLASH_RESULT_TIMEOUT
 } SpiFlashOpResult;
 
 typedef struct{
@@ -32,7 +34,7 @@ typedef SpiFlashOpResult (* user_spi_flash_read)(
 		SpiFlashChip *spi,
 		uint32 src_addr,
 		uint32 *des_addr,
-        uint32 size);
+		uint32 size);
 
 void spi_flash_set_read_func(user_spi_flash_read read);
 

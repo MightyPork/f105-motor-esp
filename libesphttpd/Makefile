@@ -7,8 +7,8 @@ THISDIR:=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 
 #Default options. If you want to change them, please create ../esphttpdconfig.mk with the options you want in it.
-GZIP_COMPRESSION ?= no
-COMPRESS_W_YUI ?= no
+GZIP_COMPRESSION ?= yes
+COMPRESS_W_YUI ?= yes
 YUI-COMPRESSOR ?= /usr/bin/yui-compressor
 USE_HEATSHRINK ?= yes
 HTTPD_WEBSOCKETS ?= yes
@@ -17,6 +17,11 @@ FREERTOS ?= no
 HTTPD_MAX_CONNECTIONS ?= 4
 #For FreeRTOS
 HTTPD_STACKSIZE ?= 2048
+
+# this works only if you also enable YUI-COMPRESSOR
+HTML-MINIFIER ?= html-minifier -c html-minifier-conf.json
+COMPRESS_W_HTMLMINIFIER ?= yes
+
 
 # Output directors to store intermediate compiled files
 # relative to the project directory
@@ -162,6 +167,9 @@ ifeq ("$(COMPRESS_W_YUI)","yes")
 	$(Q) echo "Compression assets with yui-compressor. This may take a while..."
 	$(Q) for file in `find html_compressed -type f -name "*.js"`; do $(YUI-COMPRESSOR) --type js $$file -o $$file; done
 	$(Q) for file in `find html_compressed -type f -name "*.css"`; do $(YUI-COMPRESSOR) --type css $$file -o $$file; done
+ifeq ("$(COMPRESS_W_HTMLMINIFIER)","yes")
+	$(Q) for file in `find html_compressed -type f -name "*.html" -o -name "*.htm" -o -name "*.tpl"`; do $(HTML-MINIFIER) $$file -o $$file; done
+endif
 	$(Q) awk "BEGIN {printf \"YUI compression ratio was: %.2f%%\\n\", (`du -b -s html_compressed/ | sed 's/\([0-9]*\).*/\1/'`/`du -b -s ../html/ | sed 's/\([0-9]*\).*/\1/'`)*100}"
 # mkespfsimage will compress html, css, svg and js files with gzip by default if enabled
 # override with -g cmdline parameter

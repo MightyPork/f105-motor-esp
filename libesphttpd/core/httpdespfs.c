@@ -27,7 +27,8 @@ static const char *gzipNonSupportedMessage = "HTTP/1.0 501 Not implemented\r\n"
 											 "Your browser does not accept gzip-compressed data.\r\n";
 
 
-EspFsFile *tryOpenIndex(const char *path)
+
+static EspFsFile *tryOpenIndex_do(const char *path, const char *indexname)
 {
 	// Try appending index.tpl
 	char fname[100];
@@ -41,17 +42,38 @@ EspFsFile *tryOpenIndex(const char *path)
 	}
 
 	// add index
-	strcpy(fname + url_len, "index.tpl");
+	strcpy(fname + url_len, indexname);
 
 	return espFsOpen(fname);
 }
 
 
+EspFsFile *tryOpenIndex(const char *path)
+{
+	EspFsFile * file;
 
-//This is a catch-all cgi function. It takes the url passed to it, looks up the corresponding
-//path in the filesystem and if it exists, passes the file through. This simulates what a normal
-//webserver would do with static files.
-int ICACHE_FLASH_ATTR cgiEspFsHook(HttpdConnData *connData)
+	// if there is a dot in the file, assume it's an extension
+	// no point in trying to find index in this case, abort.
+	if (strchr(path, '.') != NULL) return NULL;
+
+
+	// try index.html
+	file = tryOpenIndex_do(path, "index.html");
+	if (file != NULL) return file;
+
+	// try index.htm
+	file = tryOpenIndex_do(path, "index.htm");
+	if (file != NULL) return file;
+
+	// try index.tpl
+	file = tryOpenIndex_do(path, "index.tpl");
+	if (file != NULL) return file;
+
+	return NULL; // failed to guess the right name
+}
+
+
+int ICACHE_FLASH_ATTR serveStaticFile(HttpdConnData *connData, const char* filepath)
 {
 	EspFsFile *file = connData->cgiData;
 	int len;
@@ -65,18 +87,21 @@ int ICACHE_FLASH_ATTR cgiEspFsHook(HttpdConnData *connData)
 		return HTTPD_CGI_DONE;
 	}
 
+	// invalid call.
+	if (filepath == NULL) {
+		printf("serveStaticFile called with NULL path!\n");
+		return HTTPD_CGI_NOTFOUND;
+	}
+
 	if (file == NULL) {
 		//First call to this cgi. Open the file so we can read it.
-		file = espFsOpen(connData->url);
+		file = espFsOpen(filepath);
 		if (file == NULL) {
-
 			// file not found
-			file = tryOpenIndex(connData->url);
 
-			if (file == NULL) {
-				return HTTPD_CGI_NOTFOUND;
-			}
-
+			// If this is a folder, look for index file
+			file = tryOpenIndex(filepath);
+			if (file == NULL) return HTTPD_CGI_NOTFOUND;
 		}
 
 		// The gzip checking code is intentionally without #ifdefs because checking
@@ -100,7 +125,7 @@ int ICACHE_FLASH_ATTR cgiEspFsHook(HttpdConnData *connData)
 
 		connData->cgiData = file;
 		httpdStartResponse(connData, 200);
-		httpdHeader(connData, "Content-Type", httpdGetMimetype(connData->url));
+		httpdHeader(connData, "Content-Type", httpdGetMimetype(filepath));
 		if (isGzip) {
 			httpdHeader(connData, "Content-Encoding", "gzip");
 		}
@@ -121,6 +146,21 @@ int ICACHE_FLASH_ATTR cgiEspFsHook(HttpdConnData *connData)
 	}
 }
 
+
+
+//This is a catch-all cgi function. It takes the url passed to it, looks up the corresponding
+//path in the filesystem and if it exists, passes the file through. This simulates what a normal
+//webserver would do with static files.
+int ICACHE_FLASH_ATTR cgiEspFsHook(HttpdConnData *connData)
+{
+	return serveStaticFile(connData, connData->url);
+}
+
+
+int ICACHE_FLASH_ATTR cgiEspFsFile(HttpdConnData *connData)
+{
+	return serveStaticFile(connData, connData->cgiArg);
+}
 
 //cgiEspFsTemplate can be used as a template.
 
@@ -164,18 +204,25 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 
 		tpd->chunk_resume = false;
 
-		tpd->file = espFsOpen(connData->url);
+
+		const char *filepath = connData->url;
+
+		// check for custom template URL
+		if (connData->cgiArg2 != NULL) {
+			filepath = connData->cgiArg2;
+			printf("Using filepath %s\n", filepath);
+		}
+
+		tpd->file = espFsOpen(filepath);
 		if (tpd->file == NULL) {
-
-			// file not found
-			tpd->file = tryOpenIndex(connData->url);
-
+			// If this is a folder, look for index file
+			tpd->file = tryOpenIndex(filepath);
 			if (tpd->file == NULL) {
-				espFsClose(tpd->file);
 				free(tpd);
 				return HTTPD_CGI_NOTFOUND;
 			}
 		}
+
 		tpd->tplArg = NULL;
 		tpd->tokenPos = -1;
 		if (espFsFlags(tpd->file) & FLAG_GZIP) {
@@ -186,7 +233,7 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 		}
 		connData->cgiData = tpd;
 		httpdStartResponse(connData, 200);
-		httpdHeader(connData, "Content-Type", httpdGetMimetype(connData->url));
+		httpdHeader(connData, "Content-Type", httpdGetMimetype(filepath));
 		httpdEndHeaders(connData);
 		return HTTPD_CGI_MORE;
 	}

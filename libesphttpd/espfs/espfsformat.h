@@ -1,10 +1,12 @@
 #ifndef ESPROFSFORMAT_H
 #define ESPROFSFORMAT_H
 
+#include <stdint.h>
+
 /*
 Stupid cpio-like tool to make read-only 'filesystems' that live on the flash SPI chip of the module.
 Can (will) use lzf compression (when I come around to it) to make shit quicker. Aligns names, files,
-headers on 4-byte boundaries so the SPI abstraction hardware in the ESP8266 doesn't crap on itself 
+headers on 4-byte boundaries so the SPI abstraction hardware in the ESP8266 doesn't crap on itself
 when trying to do a <4byte or unaligned read.
 */
 

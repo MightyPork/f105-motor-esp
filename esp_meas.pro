@@ -3,7 +3,7 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-DEFINES = ESPFS_HEATSHRINK
+DEFINES = ESPFS_HEATSHRINK HTTPD_MAX_CONNECTIONS=4 __ets__
 
 INCLUDEPATH = . \
 	esp_iot_sdk_v1.5.2/include \
@@ -11,6 +11,7 @@ INCLUDEPATH = . \
 	libesphttpd/include \
 	libesphttpd/espfs \
 	libesphttpd/core \
+	libesphttpd/lib/heatshrink \
 	sbmp
 
 SOURCES += \

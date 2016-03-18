@@ -15,6 +15,10 @@ ESP_FLASH_MODE=0
 ESP_FLASH_FREQ_DIV=0
 
 
+GZIP_COMPRESSION=yes
+USE_HEATSHRINK=yes
+
+
 ifeq ("$(OUTPUT_TYPE)","separate")
 #In case of separate ESPFS and binaries, set the pos and length of the ESPFS here.
 ESPFS_POS = 0x18000

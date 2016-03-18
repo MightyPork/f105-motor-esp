@@ -39,15 +39,15 @@ It's written for use with httpd, but doesn't need to be used as such.
 #include "heatshrink_decoder.h"
 #endif
 
-static char* espFsData = NULL;
+static const char* espFsData = NULL;
 
 
 struct EspFsFile {
-	EspFsHeader *header;
+	const EspFsHeader *header;
 	char decompressor;
 	int32_t posDecomp;
-	char *posStart;
-	char *posComp;
+	const char *posStart;
+	const char *posComp;
 	void *decompData;
 };
 
@@ -67,9 +67,10 @@ Accessing the flash through the mem emulation at 0x40200000 is a bit hairy: All 
 a memory exception, crashing the program.
 */
 
-EspFsInitResult ICACHE_FLASH_ATTR espFsInit(void *flashAddress) {
-	if((uint32_t)flashAddress > 0x40200000) {
-		flashAddress = (void*)((uint32_t)flashAddress-0x40200000);
+EspFsInitResult ICACHE_FLASH_ATTR espFsInit(const void *flashAddress)
+{
+	if ((uint32_t)flashAddress > 0x40200000) {
+		flashAddress = (void*)((uint32_t)flashAddress - 0x40200000);
 	}
 
 	// base address must be aligned to 4 bytes
@@ -84,7 +85,7 @@ EspFsInitResult ICACHE_FLASH_ATTR espFsInit(void *flashAddress) {
 		return ESPFS_INIT_RESULT_NO_IMAGE;
 	}
 
-	espFsData = (char *)flashAddress;
+	espFsData = (const char *)flashAddress;
 	return ESPFS_INIT_RESULT_OK;
 }
 
@@ -93,20 +94,22 @@ EspFsInitResult ICACHE_FLASH_ATTR espFsInit(void *flashAddress) {
 
 //ToDo: perhaps memcpy also does unaligned accesses?
 #ifdef __ets__
-void ICACHE_FLASH_ATTR readFlashUnaligned(char *dst, char *src, int len) {
+void ICACHE_FLASH_ATTR readFlashUnaligned(char *dst, char *src, int len)
+{
 	uint8_t src_offset = ((uint32_t)src) & 3;
 	uint32_t src_address = ((uint32_t)src) - src_offset;
 
-	uint32_t tmp_buf[len/4 + 2];
-	spi_flash_read((uint32)src_address, (uint32*)tmp_buf, len+src_offset);
-	memcpy(dst, ((uint8_t*)tmp_buf)+src_offset, len);
+	uint32_t tmp_buf[len / 4 + 2];
+	spi_flash_read((uint32)src_address, (uint32*)tmp_buf, len + src_offset);
+	memcpy(dst, ((uint8_t*)tmp_buf) + src_offset, len);
 }
 #else
 #define readFlashUnaligned memcpy
 #endif
 
 // Returns flags of opened file.
-int ICACHE_FLASH_ATTR espFsFlags(EspFsFile *fh) {
+int ICACHE_FLASH_ATTR espFsFlags(EspFsFile *fh)
+{
 	if (fh == NULL) {
 		httpd_printf("File handle not ready\n");
 		return -1;
@@ -118,61 +121,64 @@ int ICACHE_FLASH_ATTR espFsFlags(EspFsFile *fh) {
 }
 
 //Open a file and return a pointer to the file desc struct.
-EspFsFile ICACHE_FLASH_ATTR *espFsOpen(char *fileName) {
+EspFsFile ICACHE_FLASH_ATTR *espFsOpen(const char *fileName)
+{
+	printf("Open file %s\n", fileName);
+
 	if (espFsData == NULL) {
 		httpd_printf("Call espFsInit first!\n");
 		return NULL;
 	}
-	char *p=espFsData;
-	char *hpos;
+	const char *p = espFsData;
+	const char *hpos;
 	char namebuf[256];
 	EspFsHeader h;
 	EspFsFile *r;
 	//Strip initial slashes
-	while(fileName[0]=='/') fileName++;
+	while (fileName[0] == '/') fileName++;
 	//Go find that file!
-	while(1) {
-		hpos=p;
+	while (1) {
+		hpos = p;
 		//Grab the next file header.
 		spi_flash_read((uint32)p, (uint32*)&h, sizeof(EspFsHeader));
 
-		if (h.magic!=ESPFS_MAGIC) {
+		if (h.magic != ESPFS_MAGIC) {
 			httpd_printf("Magic mismatch. EspFS image broken.\n");
 			return NULL;
 		}
-		if (h.flags&FLAG_LASTFILE) {
-			httpd_printf("End of image.\n");
+		if (h.flags & FLAG_LASTFILE) {
+			httpd_printf("File %s not found in EspFS.\n", fileName);
 			return NULL;
 		}
 		//Grab the name of the file.
-		p+=sizeof(EspFsHeader);
+		p += sizeof(EspFsHeader);
 		spi_flash_read((uint32)p, (uint32*)&namebuf, sizeof(namebuf));
-//		httpd_printf("Found file '%s'. Namelen=%x fileLenComp=%x, compr=%d flags=%d\n",
-//				namebuf, (unsigned int)h.nameLen, (unsigned int)h.fileLenComp, h.compression, h.flags);
-		if (strcmp(namebuf, fileName)==0) {
+//      httpd_printf("Found file '%s'. Namelen=%x fileLenComp=%x, compr=%d flags=%d\n",
+//              namebuf, (unsigned int)h.nameLen, (unsigned int)h.fileLenComp, h.compression, h.flags);
+		if (strcmp(namebuf, fileName) == 0) {
 			//Yay, this is the file we need!
-			p+=h.nameLen; //Skip to content.
-			r=(EspFsFile *)malloc(sizeof(EspFsFile)); //Alloc file desc mem
-//			httpd_printf("Alloc %p\n", r);
-			if (r==NULL) return NULL;
-			r->header=(EspFsHeader *)hpos;
-			r->decompressor=h.compression;
-			r->posComp=p;
-			r->posStart=p;
-			r->posDecomp=0;
-			if (h.compression==COMPRESS_NONE) {
-				r->decompData=NULL;
+			p += h.nameLen; //Skip to content.
+			r = (EspFsFile *)malloc(sizeof(EspFsFile)); //Alloc file desc mem
+//          httpd_printf("Alloc %p\n", r);
+			if (r == NULL) return NULL;
+			r->header = (const EspFsHeader *)hpos;
+			r->decompressor = h.compression;
+			r->posComp = p;
+			r->posStart = p;
+			r->posDecomp = 0;
+			if (h.compression == COMPRESS_NONE) {
+				r->decompData = NULL;
 #ifdef ESPFS_HEATSHRINK
-			} else if (h.compression==COMPRESS_HEATSHRINK) {
+			} else if (h.compression == COMPRESS_HEATSHRINK) {
 				//File is compressed with Heatshrink.
 				char parm;
 				heatshrink_decoder *dec;
 				//Decoder params are stored in 1st byte.
-				readFlashUnaligned(&parm, r->posComp, 1);
+				readFlashUnaligned(&parm, (char*)r->posComp, 1);
 				r->posComp++;
 				httpd_printf("Heatshrink compressed file; decode parms = %x\n", parm);
-				dec=heatshrink_decoder_alloc(16, (parm>>4)&0xf, parm&0xf);
-				r->decompData=dec;
+				dec = heatshrink_decoder_alloc(16, (parm >> 4) & 0xf, parm & 0xf);
+				r->decompData = dec;
 #endif
 			} else {
 				httpd_printf("Invalid compression: %d\n", h.compression);
@@ -181,37 +187,38 @@ EspFsFile ICACHE_FLASH_ATTR *espFsOpen(char *fileName) {
 			return r;
 		}
 		//We don't need this file. Skip name and file
-		p+=h.nameLen+h.fileLenComp;
-		if ((int)p&3) p+=4-((int)p&3); //align to next 32bit val
+		p += h.nameLen + h.fileLenComp;
+		if ((int)p & 3) p += 4 - ((int)p & 3); //align to next 32bit val
 	}
 }
 
 //Read len bytes from the given file into buff. Returns the actual amount of bytes read.
-int ICACHE_FLASH_ATTR espFsRead(EspFsFile *fh, char *buff, int len) {
+int ICACHE_FLASH_ATTR espFsRead(EspFsFile *fh, char *buff, int len)
+{
 	int flen, fdlen;
-	if (fh==NULL) return 0;
+	if (fh == NULL) return 0;
 
 	readFlashUnaligned((char*)&flen, (char*)&fh->header->fileLenComp, 4);
 	//Cache file length.
 	//Do stuff depending on the way the file is compressed.
-	if (fh->decompressor==COMPRESS_NONE) {
+	if (fh->decompressor == COMPRESS_NONE) {
 		int toRead;
-		toRead=flen-(fh->posComp-fh->posStart);
-		if (len>toRead) len=toRead;
-//		httpd_printf("Reading %d bytes from %x\n", len, (unsigned int)fh->posComp);
-		readFlashUnaligned(buff, fh->posComp, len);
-		fh->posDecomp+=len;
-		fh->posComp+=len;
-//		httpd_printf("Done reading %d bytes, pos=%x\n", len, fh->posComp);
+		toRead = flen - (fh->posComp - fh->posStart);
+		if (len > toRead) len = toRead;
+//      httpd_printf("Reading %d bytes from %x\n", len, (unsigned int)fh->posComp);
+		readFlashUnaligned(buff, (char*)fh->posComp, len);
+		fh->posDecomp += len;
+		fh->posComp += len;
+//      httpd_printf("Done reading %d bytes, pos=%x\n", len, fh->posComp);
 		return len;
 #ifdef ESPFS_HEATSHRINK
-	} else if (fh->decompressor==COMPRESS_HEATSHRINK) {
+	} else if (fh->decompressor == COMPRESS_HEATSHRINK) {
 		readFlashUnaligned((char*)&fdlen, (char*)&fh->header->fileLenDecomp, 4);
-		int decoded=0;
+		int decoded = 0;
 		size_t elen, rlen;
 		char ebuff[16];
-		heatshrink_decoder *dec=(heatshrink_decoder *)fh->decompData;
-//		httpd_printf("Alloc %p\n", dec);
+		heatshrink_decoder *dec = (heatshrink_decoder *)fh->decompData;
+//      httpd_printf("Alloc %p\n", dec);
 		if (fh->posDecomp == fdlen) {
 			return 0;
 		}
@@ -220,26 +227,26 @@ int ICACHE_FLASH_ATTR espFsRead(EspFsFile *fh, char *buff, int len) {
 		// This means even when there is no input data (elen==0) try to poll decoder until
 		// posDecomp equals decompressed file length
 
-		while(decoded<len) {
+		while (decoded < len) {
 			//Feed data into the decompressor
 			//ToDo: Check ret val of heatshrink fns for errors
-			elen=flen-(fh->posComp - fh->posStart);
-			if (elen>0) {
-				readFlashUnaligned(ebuff, fh->posComp, 16);
-				heatshrink_decoder_sink(dec, (uint8_t *)ebuff, (elen>16)?16:elen, &rlen);
-				fh->posComp+=rlen;
+			elen = flen - (fh->posComp - fh->posStart);
+			if (elen > 0) {
+				readFlashUnaligned(ebuff, (char*)fh->posComp, 16);
+				heatshrink_decoder_sink(dec, (uint8_t *)ebuff, (elen > 16) ? 16 : elen, &rlen);
+				fh->posComp += rlen;
 			}
 			//Grab decompressed data and put into buff
-			heatshrink_decoder_poll(dec, (uint8_t *)buff, len-decoded, &rlen);
-			fh->posDecomp+=rlen;
-			buff+=rlen;
-			decoded+=rlen;
+			heatshrink_decoder_poll(dec, (uint8_t *)buff, len - decoded, &rlen);
+			fh->posDecomp += rlen;
+			buff += rlen;
+			decoded += rlen;
 
-//			httpd_printf("Elen %d rlen %d d %d pd %ld fdl %d\n",elen,rlen,decoded, fh->posDecomp, fdlen);
+//          httpd_printf("Elen %d rlen %d d %d pd %ld fdl %d\n",elen,rlen,decoded, fh->posDecomp, fdlen);
 
 			if (elen == 0) {
 				if (fh->posDecomp == fdlen) {
-//					httpd_printf("Decoder finish\n");
+//                  httpd_printf("Decoder finish\n");
 					heatshrink_decoder_finish(dec);
 				}
 				return decoded;
@@ -252,16 +259,17 @@ int ICACHE_FLASH_ATTR espFsRead(EspFsFile *fh, char *buff, int len) {
 }
 
 //Close the file.
-void ICACHE_FLASH_ATTR espFsClose(EspFsFile *fh) {
-	if (fh==NULL) return;
+void ICACHE_FLASH_ATTR espFsClose(EspFsFile *fh)
+{
+	if (fh == NULL) return;
 #ifdef ESPFS_HEATSHRINK
-	if (fh->decompressor==COMPRESS_HEATSHRINK) {
-		heatshrink_decoder *dec=(heatshrink_decoder *)fh->decompData;
+	if (fh->decompressor == COMPRESS_HEATSHRINK) {
+		heatshrink_decoder *dec = (heatshrink_decoder *)fh->decompData;
 		heatshrink_decoder_free(dec);
-//		httpd_printf("Freed %p\n", dec);
+//      httpd_printf("Freed %p\n", dec);
 	}
 #endif
-//	httpd_printf("Freed %p\n", fh);
+//  httpd_printf("Freed %p\n", fh);
 	free(fh);
 }
 

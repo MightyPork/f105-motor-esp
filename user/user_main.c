@@ -107,27 +107,28 @@ CgiUploadFlashDef uploadParams = {
  * general ones. Authorization things (like authBasic) act as a 'barrier' and
  * should be placed above the URLs they protect.
  */
+
+
 static HttpdBuiltInUrl builtInUrls[] = {
-	{"*", cgiRedirectApClientToHostname, "esp8266.nonet"}, // redirect func for the captive portal
-	{"/", cgiEspFsTemplate, (void *)tplCounter},
+	ROUTE_CGI_ARG("*", cgiRedirectApClientToHostname, "esp8266.nonet"), // redirect func for the captive portal
 
-	{"/multipart.tpl", cgiEspFsTemplate, (void *)tplMultipart},
-
-//	{"/random.tpl", cgiRandomNumbers, NULL},
+	ROUTE_TPL("/", tplCounter),
+	ROUTE_TPL_FILE("/multipart", tplMultipart, "/multipart.tpl"),
 
 //Enable the line below to protect the WiFi configuration with an username/password combo.
-//  {"/wifi/*", authBasic, (void *)myPassFn},
+//  ROUTE_AUTH("/wifi/*", myPassFn),
 
-	{"/wifi", cgiRedirect, "/wifi/"},
-	{"/wifi/", cgiEspFsTemplate, (void *)tplWlan},
-	//{"/wifi/", cgiRedirect, "/wifi/wifi.tpl"},
-	{"/wifi/wifiscan.cgi", cgiWiFiScan, NULL},
-	{"/wifi/connect.cgi", cgiWiFiConnect, NULL},
-	{"/wifi/connstatus.cgi", cgiWiFiConnStatus, NULL},
-	{"/wifi/setmode.cgi", cgiWiFiSetMode, NULL},
+	ROUTE_REDIRECT("/wifi",  "/wifi/"),
+	ROUTE_TPL_FILE("/wifi/", tplWlan, "/wifi/index.tpl"),
 
-	{"*", cgiEspFsHook, NULL}, //Catch-all cgi function for the filesystem
-	{NULL, NULL, NULL}
+	ROUTE_CGI("/wifi/wifiscan.cgi", cgiWiFiScan),
+	ROUTE_CGI("/wifi/connect.cgi", cgiWiFiConnect),
+	ROUTE_CGI("/wifi/connstatus.cgi", cgiWiFiConnStatus),
+	ROUTE_CGI("/wifi/setmode.cgi", cgiWiFiSetMode),
+
+	ROUTE_FS("*"), //Catch-all cgi function for the filesystem
+
+	ROUTE_END()
 };
 
 

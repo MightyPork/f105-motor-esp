@@ -86,10 +86,10 @@ static const ICACHE_RODATA_ATTR MimeMap mimeTypes[]={
 };
 
 //Returns a static char* to a mime type for a given url to a file.
-const char ICACHE_FLASH_ATTR *httpdGetMimetype(char *url) {
+const char ICACHE_FLASH_ATTR *httpdGetMimetype(const char *url) {
 	int i=0;
 	//Go find the extension
-	char *ext=url+(strlen(url)-1);
+	const char *ext=url+(strlen(url)-1);
 	while (ext!=url && *ext!='.') ext--;
 	if (*ext=='.') ext++;
 
@@ -99,7 +99,7 @@ const char ICACHE_FLASH_ATTR *httpdGetMimetype(char *url) {
 }
 
 //Looks up the connData info for a specific connection
-static HttpdConnData ICACHE_FLASH_ATTR *httpdFindConnData(ConnTypePtr conn, char *remIp, int remPort) {
+static HttpdConnData ICACHE_FLASH_ATTR *httpdFindConnData(ConnTypePtr conn, const char *remIp, int remPort) {
 	for (int i=0; i<HTTPD_MAX_CONNECTIONS; i++) {
 		if (connData[i] && connData[i]->remote_port == remPort &&
 						memcmp(connData[i]->remote_ip, remIp, 4) == 0) {
@@ -154,7 +154,7 @@ int ICACHE_FLASH_ATTR httpdUrlDecode(char *val, int valLen, char *ret, int retLe
 			esced=2;
 		} else if (esced==2) {
 			escVal+=httpdHexVal(val[s]);
-			ret[d++]=escVal;
+			ret[d++]=(char)escVal;
 			esced=0;
 		} else if (val[s]=='%') {
 			esced=1;
@@ -481,7 +481,7 @@ void ICACHE_FLASH_ATTR httpdSentCb(ConnTypePtr rconn, char *remIp, int remPort) 
 		httpdCgiIsDone(conn);
 	}
 	if (r==HTTPD_CGI_NOTFOUND || r==HTTPD_CGI_AUTHENTICATED) {
-		httpd_printf("ERROR! CGI fn returns code %d after sending data! Bad CGI!\n", r);
+		error("ERROR! CGI fn returns code %d after sending data! Bad CGI!", r);
 		httpdCgiIsDone(conn);
 	}
 	httpdFlushSendBuffer(conn);
@@ -514,6 +514,7 @@ static void ICACHE_FLASH_ATTR httpdProcessRequest(HttpdConnData *conn) {
 				conn->cgiData=NULL;
 				conn->cgi=builtInUrls[i].cgiCb;
 				conn->cgiArg=builtInUrls[i].cgiArg;
+				conn->cgiArg2=builtInUrls[i].cgiArg2;
 				break;
 			}
 			i++;

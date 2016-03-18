@@ -12,13 +12,13 @@
 # Adding JPG or PNG files (and any other compressed formats) is not recommended, because GZIP compression does not works effectively on compressed files.
 
 #Static gzipping is disabled by default.
-GZIP_COMPRESSION ?= no
+GZIP_COMPRESSION ?= yes
 
 # If COMPRESS_W_YUI is set to "yes" then the static css and js files will be compressed with yui-compressor
 # This option works only when GZIP_COMPRESSION is set to "yes"
 # http://yui.github.io/yuicompressor/
 #Disabled by default.
-COMPRESS_W_YUI ?= no
+COMPRESS_W_YUI ?= yes
 YUI-COMPRESSOR ?= /usr/bin/yui-compressor
 
 #If USE_HEATSHRINK is set to "yes" then the espfs files will be compressed with Heatshrink and decompressed
