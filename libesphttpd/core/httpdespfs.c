@@ -246,7 +246,7 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 	// resume the parser state from the last token,
 	// if subst. func wants more data to be sent.
 	if (tpd->chunk_resume) {
-		dbg("Resuming tpl parser for multi-part subst");
+//		dbg("Resuming tpl parser for multi-part subst");
 		// resume
 		len = tpd->buff_len;
 		e = tpd->buff_e;
@@ -292,7 +292,7 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 						int status = ((TplCallback)(connData->cgiArg))(connData, tpd->token, &tpd->tplArg);
 
 						if (status == HTTPD_CGI_MORE) {
-							dbg("Multi-part tpl subst, saving parser state");
+//							dbg("Multi-part tpl subst, saving parser state");
 							// wants to send more in this token's place.....
 							tpd->chunk_resume = true;
 
