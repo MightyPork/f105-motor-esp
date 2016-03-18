@@ -199,7 +199,7 @@ static void ICACHE_FLASH_ATTR captdnsRecv(struct sockaddr_in *premote_addr, char
 		if (p==NULL) return;
 		DnsQuestionFooter *qf=(DnsQuestionFooter*)p;
 		p+=sizeof(DnsQuestionFooter);
-		httpd_printf("DNS: Q (type 0x%X class 0x%X) for %s\n", my_ntohs(&qf->type), my_ntohs(&qf->class), buff);
+		info("DNS: Q (type 0x%X class 0x%X) for %s", my_ntohs(&qf->type), my_ntohs(&qf->class), buff);
 		if (my_ntohs(&qf->type)==QTYPE_A) {
 			//They want to know the IPv4 address of something.
 			//Build the response.
@@ -319,6 +319,7 @@ void captdnsInit(void) {
 #else
 
 void ICACHE_FLASH_ATTR captdnsInit(void) {
+	info("Starting captive portal");
 	static struct espconn conn;
 	static esp_udp udpconn;
 	conn.type=ESPCONN_UDP;

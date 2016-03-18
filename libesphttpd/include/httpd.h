@@ -110,12 +110,4 @@ void httpdRecvCb(ConnTypePtr conn, char *remIp, int remPort, char *data, unsigne
 void httpdDisconCb(ConnTypePtr conn, char *remIp, int remPort);
 int httpdConnectCb(ConnTypePtr conn, char *remIp, int remPort);
 
-
-// debugging
-
-#define LOG_EOL "\n"
-#define dbg(fmt, ...)   httpd_printf(fmt LOG_EOL, ##__VA_ARGS__);
-#define error(fmt, ...) httpd_printf("\x1b[31;1m"fmt"\x1b[0m"LOG_EOL, ##__VA_ARGS__);
-#define info(fmt, ...)  httpd_printf("\x1b[32;1m"fmt"\x1b[0m"LOG_EOL, ##__VA_ARGS__);
-
 #endif

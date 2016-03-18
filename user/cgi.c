@@ -70,7 +70,7 @@ int ICACHE_FLASH_ATTR tplMultipart(HttpdConnData *connData, char *token, void **
 			}
 			rns->count_remain = count;
 
-			printf("User wants %d numbers.", count);
+			info("User wants %d numbers.", count);
 		}
 
 		for (int i = 0; i < 100; i++) {

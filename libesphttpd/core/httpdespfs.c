@@ -89,7 +89,7 @@ int ICACHE_FLASH_ATTR serveStaticFile(HttpdConnData *connData, const char* filep
 
 	// invalid call.
 	if (filepath == NULL) {
-		printf("serveStaticFile called with NULL path!\n");
+		error("serveStaticFile called with NULL path!");
 		return HTTPD_CGI_NOTFOUND;
 	}
 
@@ -139,6 +139,8 @@ int ICACHE_FLASH_ATTR serveStaticFile(HttpdConnData *connData, const char* filep
 	if (len != 1024) {
 		//We're done.
 		espFsClose(file);
+		info("Static file done");
+
 		return HTTPD_CGI_DONE;
 	} else {
 		//Ok, till next time.
@@ -210,7 +212,7 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 		// check for custom template URL
 		if (connData->cgiArg2 != NULL) {
 			filepath = connData->cgiArg2;
-			printf("Using filepath %s\n", filepath);
+			dbg("Using filepath %s", filepath);
 		}
 
 		tpd->file = espFsOpen(filepath);
@@ -226,7 +228,7 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 		tpd->tplArg = NULL;
 		tpd->tokenPos = -1;
 		if (espFsFlags(tpd->file) & FLAG_GZIP) {
-			httpd_printf("cgiEspFsTemplate: Trying to use gzip-compressed file %s as template!\n", connData->url);
+			error("cgiEspFsTemplate: Trying to use gzip-compressed file %s as template!", connData->url);
 			espFsClose(tpd->file);
 			free(tpd);
 			return HTTPD_CGI_NOTFOUND;
@@ -244,6 +246,7 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 	// resume the parser state from the last token,
 	// if subst. func wants more data to be sent.
 	if (tpd->chunk_resume) {
+		dbg("Resuming tpl parser for multi-part subst");
 		// resume
 		len = tpd->buff_len;
 		e = tpd->buff_e;
@@ -289,6 +292,7 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 						int status = ((TplCallback)(connData->cgiArg))(connData, tpd->token, &tpd->tplArg);
 
 						if (status == HTTPD_CGI_MORE) {
+							dbg("Multi-part tpl subst, saving parser state");
 							// wants to send more in this token's place.....
 							tpd->chunk_resume = true;
 
@@ -322,6 +326,8 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 
 		// let the cgi func clean it's stuff
 		((TplCallback)(connData->cgiArg))(connData, NULL, &tpd->tplArg);
+
+		info("Template sent.");
 
 		espFsClose(tpd->file);
 		free(tpd);

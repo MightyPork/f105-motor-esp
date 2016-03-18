@@ -5,9 +5,9 @@ Some flash handling cgi routines. Used for reading the existing flash and updati
 /*
  * ----------------------------------------------------------------------------
  * "THE BEER-WARE LICENSE" (Revision 42):
- * Jeroen Domburg <jeroen@spritesmods.com> wrote this file. As long as you retain 
- * this notice you can do whatever you want with this stuff. If we meet some day, 
- * and you think this stuff is worth it, you can buy me a beer in return. 
+ * Jeroen Domburg <jeroen@spritesmods.com> wrote this file. As long as you retain
+ * this notice you can do whatever you want with this stuff. If we meet some day,
+ * and you think this stuff is worth it, you can buy me a beer in return.
  * ----------------------------------------------------------------------------
  */
 
@@ -88,8 +88,8 @@ int ICACHE_FLASH_ATTR cgiReadFlash(HttpdConnData *connData) {
 //a direct POST from e.g. Curl or a Javascript AJAX call with either the
 //firmware given by cgiGetFirmwareNext or an OTA upgrade image.
 
-//Because we don't have the buffer to allocate an entire sector but will 
-//have to buffer some data because the post buffer may be misaligned, we 
+//Because we don't have the buffer to allocate an entire sector but will
+//have to buffer some data because the post buffer may be misaligned, we
 //write SPI data in pages. The page size is a software thing, not
 //a hardware one.
 #define PAGELEN 64
@@ -137,10 +137,10 @@ int ICACHE_FLASH_ATTR cgiUploadFirmware(HttpdConnData *connData) {
 
 	if (state==NULL) {
 		//First call. Allocate and initialize state variable.
-		httpd_printf("Firmware upload cgi start.\n");
+		info("Firmware upload cgi start.");
 		state=malloc(sizeof(UploadState));
 		if (state==NULL) {
-			httpd_printf("Can't allocate firmware upload struct!\n");
+			error("Can't allocate firmware upload struct!");
 			return HTTPD_CGI_DONE;
 		}
 		memset(state, 0, sizeof(UploadState));
@@ -148,10 +148,10 @@ int ICACHE_FLASH_ATTR cgiUploadFirmware(HttpdConnData *connData) {
 		connData->cgiData=state;
 		state->err="Premature end";
 	}
-	
+
 	char *data=connData->post->buff;
 	int dataLen=connData->post->buffLen;
-	
+
 	while (dataLen!=0) {
 		if (state->state==FLST_START) {
 			//First call. Assume the header of whatever we're uploading already is in the POST buffer.
@@ -161,11 +161,11 @@ int ICACHE_FLASH_ATTR cgiUploadFirmware(HttpdConnData *connData) {
 				strncpy(buff, h->tag, 27);
 				buff[27]=0;
 				if (strcmp(buff, def->tagName)!=0) {
-					httpd_printf("OTA tag mismatch! Current=`%s` uploaded=`%s`.\n",
-										def->tagName, buff);
+					warn("OTA tag mismatch! Current=`%s` uploaded=`%s`.", def->tagName, buff);
+
 					len=httpdFindArg(connData->getArgs, "force", buff, sizeof(buff));
 					if (len!=-1 && atoi(buff)) {
-						httpd_printf("Forcing firmware flash.\n");
+						info("Forcing firmware flash.");
 					} else {
 						state->err="Firmware not intended for this device!\n";
 						state->state=FLST_ERROR;
@@ -180,13 +180,13 @@ int ICACHE_FLASH_ATTR cgiUploadFirmware(HttpdConnData *connData) {
 					dataLen-=sizeof(OtaHeader); //skip header when parsing data
 					data+=sizeof(OtaHeader);
 					if (system_upgrade_userbin_check()==1) {
-						httpd_printf("Flashing user1.bin from ota image\n");
+						info("Flashing user1.bin from ota image");
 						state->len=h->len1;
 						state->skip=h->len2;
 						state->state=FLST_WRITE;
 						state->address=def->fw1Pos;
 					} else {
-						httpd_printf("Flashing user2.bin from ota image\n");
+						info("Flashing user2.bin from ota image");
 						state->len=h->len2;
 						state->skip=h->len1;
 						state->state=FLST_SKIP;
@@ -214,7 +214,7 @@ int ICACHE_FLASH_ATTR cgiUploadFirmware(HttpdConnData *connData) {
 			} else {
 				state->err="Invalid flash image type!";
 				state->state=FLST_ERROR;
-				httpd_printf("Did not recognize flash image type!\n");
+				error("Did not recognize flash image type!");
 			}
 		} else if (state->state==FLST_SKIP) {
 			//Skip bytes without doing anything with them
@@ -263,7 +263,7 @@ int ICACHE_FLASH_ATTR cgiUploadFirmware(HttpdConnData *connData) {
 				}
 			}
 		} else if (state->state==FLST_DONE) {
-			httpd_printf("Huh? %d bogus bytes received after data received.\n", dataLen);
+			warn("Huh? %d bogus bytes received after data received.", dataLen);
 			//Ignore those bytes.
 			dataLen=0;
 		} else if (state->state==FLST_ERROR) {
@@ -271,14 +271,16 @@ int ICACHE_FLASH_ATTR cgiUploadFirmware(HttpdConnData *connData) {
 			dataLen=0;
 		}
 	}
-	
+
 	if (connData->post->len==connData->post->received) {
 		//We're done! Format a response.
-		httpd_printf("Upload done. Sending response.\n");
+		info("Upload done. Sending response.");
 		httpdStartResponse(connData, state->state==FLST_ERROR?400:200);
 		httpdHeader(connData, "Content-Type", "text/plain");
 		httpdEndHeaders(connData);
 		if (state->state!=FLST_DONE) {
+			error("Error msg: %s", state->err);
+
 			httpdSend(connData, "Firmware image error:", -1);
 			httpdSend(connData, state->err, -1);
 			httpdSend(connData, "\n", -1);

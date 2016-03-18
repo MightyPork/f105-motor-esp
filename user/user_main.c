@@ -150,11 +150,10 @@ void user_init(void)
 	// set up the debuging output
 	serialInit();
 
-	os_printf("\n\x1b[32;1mESP8266 starting, "
+	banner("\n*** ESP8266 starting, "
 			  "HTTPD v."HTTPDVER", "
 			  "SBMP v."SBMP_VER", "
-			  "IoT SDK v." STR(ESP_SDK_VERSION)
-			  "\x1b[0m\n");
+			  "IoT SDK v." STR(ESP_SDK_VERSION)" ***\n");
 
 	// reset button etc
 	ioInit();
@@ -177,7 +176,7 @@ void user_init(void)
 
 	httpdInit(builtInUrls, 80);
 
-	os_printf("\nReady\n");
+	info("\nReady\n");
 
 #ifdef SHOW_HEAP_USE
 	os_timer_disarm(&prHeapTimer);

@@ -17,7 +17,7 @@ static void FLASH_FN u0_putc(uint8_t c)
 
 static void FLASH_FN dg_handler(SBMP_Datagram *dg)
 {
-	sbmp_info("Datagram received.");
+	dbg("[SBMP] Datagram received.");
 }
 
 
@@ -33,5 +33,5 @@ void FLASH_FN datalinkInit(void)
 
 	sbmp_ep_enable(ep, true);
 
-	os_printf("SBMP started on UART0\n");
+	info("SBMP started on UART0");
 }

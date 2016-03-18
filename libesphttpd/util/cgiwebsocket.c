@@ -5,9 +5,9 @@ Websocket support for esphttpd. Inspired by https://github.com/dangrie158/ESP-82
 /*
  * ----------------------------------------------------------------------------
  * "THE BEER-WARE LICENSE" (Revision 42):
- * Jeroen Domburg <jeroen@spritesmods.com> wrote this file. As long as you retain 
- * this notice you can do whatever you want with this stuff. If we meet some day, 
- * and you think this stuff is worth it, you can buy me a beer in return. 
+ * Jeroen Domburg <jeroen@spritesmods.com> wrote this file. As long as you retain
+ * this notice you can do whatever you want with this stuff. If we meet some day,
+ * and you think this stuff is worth it, you can buy me a beer in return.
  * ----------------------------------------------------------------------------
  */
 
@@ -22,24 +22,24 @@ Websocket support for esphttpd. Inspired by https://github.com/dangrie158/ESP-82
 #define WS_GUID "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
 /* from IEEE RFC6455 sec 5.2
-      0                   1                   2                   3
-      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-     +-+-+-+-+-------+-+-------------+-------------------------------+
-     |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
-     |I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
-     |N|V|V|V|       |S|             |   (if payload len==126/127)   |
-     | |1|2|3|       |K|             |                               |
-     +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
-     |     Extended payload length continued, if payload len == 127  |
-     + - - - - - - - - - - - - - - - +-------------------------------+
-     |                               |Masking-key, if MASK set to 1  |
-     +-------------------------------+-------------------------------+
-     | Masking-key (continued)       |          Payload Data         |
-     +-------------------------------- - - - - - - - - - - - - - - - +
-     :                     Payload Data continued ...                :
-     + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
-     |                     Payload Data continued ...                |
-     +---------------------------------------------------------------+
+	  0                   1                   2                   3
+	  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+	 +-+-+-+-+-------+-+-------------+-------------------------------+
+	 |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
+	 |I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
+	 |N|V|V|V|       |S|             |   (if payload len==126/127)   |
+	 | |1|2|3|       |K|             |                               |
+	 +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+	 |     Extended payload length continued, if payload len == 127  |
+	 + - - - - - - - - - - - - - - - +-------------------------------+
+	 |                               |Masking-key, if MASK set to 1  |
+	 +-------------------------------+-------------------------------+
+	 | Masking-key (continued)       |          Payload Data         |
+	 +-------------------------------- - - - - - - - - - - - - - - - +
+	 :                     Payload Data continued ...                :
+	 + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+	 |                     Payload Data continued ...                |
+	 +---------------------------------------------------------------+
 */
 
 #define FLAG_FIN (1 << 7)
@@ -92,7 +92,7 @@ static int ICACHE_FLASH_ATTR sendFrameHead(Websock *ws, int opcode, int len) {
 	buf[i++]=opcode;
 	if (len>65535) {
 		buf[i++]=127;
-		buf[i++]=0; buf[i++]=0; buf[i++]=0; buf[i++]=0; 
+		buf[i++]=0; buf[i++]=0; buf[i++]=0; buf[i++]=0;
 		buf[i++]=len>>24;
 		buf[i++]=len>>16;
 		buf[i++]=len>>8;
@@ -104,7 +104,7 @@ static int ICACHE_FLASH_ATTR sendFrameHead(Websock *ws, int opcode, int len) {
 	} else {
 		buf[i++]=len;
 	}
-	httpd_printf("WS: Sent frame head for payload of %d bytes.\n", len);
+	info("[WS] Sent frame head for payload of %d bytes.", len);
 	return httpdSend(ws->conn, buf, i);
 }
 
@@ -122,7 +122,7 @@ int ICACHE_FLASH_ATTR cgiWebsocketSend(Websock *ws, char *data, int len, int fla
 //Broadcast data to all websockets at a specific url. Returns the amount of connections sent to.
 int ICACHE_FLASH_ATTR cgiWebsockBroadcast(char *resource, char *data, int len, int flags) {
 //This is majorly broken (and actually, always, it just tended to work because the circumstances
-//were juuuust right). Because the socket is used outside of the httpd send/receive context, it 
+//were juuuust right). Because the socket is used outside of the httpd send/receive context, it
 //will not have an associated send buffer. This means httpdSend will write to a dangling pointer!
 //Disabled for now. If you really need this, open an issue on github or otherwise poke me and I'll
 //see what I can do.
@@ -148,11 +148,13 @@ void ICACHE_FLASH_ATTR cgiWebsocketClose(Websock *ws, int reason) {
 	httpdSend(ws->conn, rs, 2);
 	ws->priv->closedHere=1;
 	httpdFlushSendBuffer(ws->conn);
+
+	info("[WS] WebSocket closed.");
 }
 
 
 static void ICACHE_FLASH_ATTR websockFree(Websock *ws) {
-	httpd_printf("Ws: Free\n");
+	dbg("[WS] Free WebSocket struct");
 	if (ws->closeCb) ws->closeCb(ws);
 	//Clean up linked list
 	if (llStart==ws) {
@@ -202,7 +204,7 @@ int ICACHE_FLASH_ATTR cgiWebSocketRecv(HttpdConnData *connData, char *data, int 
 			//Was a payload byte.
 			wasHeaderByte=0;
 		}
-		
+
 		if (ws->priv->wsStatus==ST_PAYLOAD && wasHeaderByte) {
 			//We finished parsing the header, but i still is on the last header byte. Move one forward so
 			//the payload code works as usual.
@@ -211,11 +213,11 @@ int ICACHE_FLASH_ATTR cgiWebSocketRecv(HttpdConnData *connData, char *data, int 
 		//Also finish parsing frame if we haven't received any payload bytes yet, but the length of the frame
 		//is zero.
 		if (ws->priv->wsStatus==ST_PAYLOAD) {
-			//Okay, header is in; this is a data byte. We're going to process all the data bytes we have 
+			//Okay, header is in; this is a data byte. We're going to process all the data bytes we have
 			//received here at the same time; no more byte iterations till the end of this frame.
 			//First, unmask the data
 			sl=len-i;
-			httpd_printf("Ws: Frame payload. wasHeaderByte %d fr.len %d sl %d cmd 0x%x\n", wasHeaderByte, (int)ws->priv->fr.len, (int)sl, ws->priv->fr.flags);
+			dbg("[WS] Frame payload. wasHeaderByte %d fr.len %d sl %d cmd 0x%x\n", wasHeaderByte, (int)ws->priv->fr.len, (int)sl, ws->priv->fr.flags);
 			if (sl > ws->priv->fr.len) sl=ws->priv->fr.len;
 			for (j=0; j<sl; j++) data[i+j]^=(ws->priv->fr.mask[(ws->priv->maskCtr++)&3]);
 
@@ -233,7 +235,7 @@ int ICACHE_FLASH_ATTR cgiWebSocketRecv(HttpdConnData *connData, char *data, int 
 					if (!ws->priv->frameCont) sendFrameHead(ws, OPCODE_PONG|FLAG_FIN, ws->priv->fr.len);
 					if (sl>0) httpdSend(ws->conn, data+i, sl);
 				}
-			} else if ((ws->priv->fr.flags&OPCODE_MASK)==OPCODE_TEXT || 
+			} else if ((ws->priv->fr.flags&OPCODE_MASK)==OPCODE_TEXT ||
 						(ws->priv->fr.flags&OPCODE_MASK)==OPCODE_BINARY ||
 						(ws->priv->fr.flags&OPCODE_MASK)==OPCODE_CONTINUE) {
 				if (sl>ws->priv->fr.len) sl=ws->priv->fr.len;
@@ -249,15 +251,15 @@ int ICACHE_FLASH_ATTR cgiWebSocketRecv(HttpdConnData *connData, char *data, int 
 					if (ws->recvCb) ws->recvCb(ws, data+i, sl, flags);
 				}
 			} else if ((ws->priv->fr.flags&OPCODE_MASK)==OPCODE_CLOSE) {
-				httpd_printf("WS: Got close frame\n");
+				dbg("[WS] Got close frame");
 				if (!ws->priv->closedHere) {
-					httpd_printf("WS: Sending response close frame\n");
+					dbg("[WS] Sending response close frame");
 					cgiWebsocketClose(ws, ((data[i]<<8)&0xff00)+(data[i+1]&0xff));
 				}
 				r=HTTPD_CGI_DONE;
 				break;
 			} else {
-				if (!ws->priv->frameCont) httpd_printf("WS: Unknown opcode 0x%X\n", ws->priv->fr.flags&OPCODE_MASK);
+				if (!ws->priv->frameCont) error("[WS] Unknown opcode 0x%X", ws->priv->fr.flags&OPCODE_MASK);
 			}
 			i+=sl-1;
 			ws->priv->fr.len-=sl;
@@ -285,7 +287,7 @@ int ICACHE_FLASH_ATTR cgiWebsocket(HttpdConnData *connData) {
 	sha1nfo s;
 	if (connData->conn==NULL) {
 		//Connection aborted. Clean up.
-		httpd_printf("WS: Cleanup\n");
+		dbg("[WS] Cleanup");
 		if (connData->cgiData) {
 			Websock *ws=(Websock*)connData->cgiData;
 			websockFree(ws);
@@ -294,12 +296,13 @@ int ICACHE_FLASH_ATTR cgiWebsocket(HttpdConnData *connData) {
 		}
 		return HTTPD_CGI_DONE;
 	}
-	
+
 	if (connData->cgiData==NULL) {
 //		httpd_printf("WS: First call\n");
 		//First call here. Check if client headers are OK, send server header.
 		i=httpdGetHeader(connData, "Upgrade", buff, sizeof(buff)-1);
-		httpd_printf("WS: Upgrade: %s\n", buff);
+		info("[WS] Opening websocket, Upgrade: %s\n", buff);
+
 		if (i && strcasecmp(buff, "websocket")==0) {
 			i=httpdGetHeader(connData, "Sec-WebSocket-Key", buff, sizeof(buff)-1);
 			if (i) {
@@ -344,7 +347,7 @@ int ICACHE_FLASH_ATTR cgiWebsocket(HttpdConnData *connData) {
 		httpdEndHeaders(connData);
 		return HTTPD_CGI_DONE;
 	}
-	
+
 	//Sending is done. Call the sent callback if we have one.
 	Websock *ws=(Websock*)connData->cgiData;
 	if (ws && ws->sentCb) ws->sentCb(ws);

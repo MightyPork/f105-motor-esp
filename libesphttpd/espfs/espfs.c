@@ -111,7 +111,7 @@ void ICACHE_FLASH_ATTR readFlashUnaligned(char *dst, char *src, int len)
 int ICACHE_FLASH_ATTR espFsFlags(EspFsFile *fh)
 {
 	if (fh == NULL) {
-		httpd_printf("File handle not ready\n");
+		error("[EspFS] File handle not ready");
 		return -1;
 	}
 
@@ -123,10 +123,10 @@ int ICACHE_FLASH_ATTR espFsFlags(EspFsFile *fh)
 //Open a file and return a pointer to the file desc struct.
 EspFsFile ICACHE_FLASH_ATTR *espFsOpen(const char *fileName)
 {
-	printf("Open file %s\n", fileName);
+	dbg("[EspFS] Open file %s", fileName);
 
 	if (espFsData == NULL) {
-		httpd_printf("Call espFsInit first!\n");
+		error("[EspFS] Call espFsInit first!");
 		return NULL;
 	}
 	const char *p = espFsData;
@@ -143,11 +143,11 @@ EspFsFile ICACHE_FLASH_ATTR *espFsOpen(const char *fileName)
 		spi_flash_read((uint32)p, (uint32*)&h, sizeof(EspFsHeader));
 
 		if (h.magic != ESPFS_MAGIC) {
-			httpd_printf("Magic mismatch. EspFS image broken.\n");
+			error("[EspFS] Magic mismatch. EspFS image broken.");
 			return NULL;
 		}
 		if (h.flags & FLAG_LASTFILE) {
-			httpd_printf("File %s not found in EspFS.\n", fileName);
+			warn("[EspFS] File %s not found in EspFS.", fileName);
 			return NULL;
 		}
 		//Grab the name of the file.
@@ -167,6 +167,7 @@ EspFsFile ICACHE_FLASH_ATTR *espFsOpen(const char *fileName)
 			r->posStart = p;
 			r->posDecomp = 0;
 			if (h.compression == COMPRESS_NONE) {
+				info("[EspFS] File found.");
 				r->decompData = NULL;
 #ifdef ESPFS_HEATSHRINK
 			} else if (h.compression == COMPRESS_HEATSHRINK) {
@@ -176,12 +177,12 @@ EspFsFile ICACHE_FLASH_ATTR *espFsOpen(const char *fileName)
 				//Decoder params are stored in 1st byte.
 				readFlashUnaligned(&parm, (char*)r->posComp, 1);
 				r->posComp++;
-				httpd_printf("Heatshrink compressed file; decode parms = %x\n", parm);
+				info("[EspFS] Heatshrink compressed file found; decode params = %x", parm);
 				dec = heatshrink_decoder_alloc(16, (parm >> 4) & 0xf, parm & 0xf);
 				r->decompData = dec;
 #endif
 			} else {
-				httpd_printf("Invalid compression: %d\n", h.compression);
+				error("[EspFS] File found, but has invalid compression: %d", h.compression);
 				return NULL;
 			}
 			return r;

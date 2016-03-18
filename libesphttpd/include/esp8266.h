@@ -31,3 +31,4 @@
 #include "espmissingincludes.h"
 #include "esp_sdk_ver.h"
 
+#include "logging.h"

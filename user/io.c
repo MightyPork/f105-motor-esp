@@ -39,7 +39,7 @@ static void FLASH_FN resetBtnTimerCb(void *arg) {
 		if (resetCnt>=6) { //3 sec pressed
 			wifi_station_disconnect();
 			wifi_set_opmode(STATIONAP_MODE); //reset to AP+STA mode
-			os_printf("Reset to AP mode. Restarting system...\n");
+			warn("GPIO0 -> requested reset to AP+STA. Restarting...\n");
 			system_restart();
 		}
 		resetCnt=0;
@@ -53,13 +53,13 @@ void FLASH_FN ioInit() {
 
 	if (GPIO_INPUT_GET(BTNGPIO) == 0) {
 		// starting "in BOOT mode" - do not install the AP reset timer
-		os_printf("GPIO0 stuck low - AP reset button disabled.\n");
+		warn("GPIO0 stuck low - AP reset button disabled.\n");
 	} else {
 		os_timer_disarm(&resetBtntimer);
 		os_timer_setfn(&resetBtntimer, resetBtnTimerCb, NULL);
 		os_timer_arm(&resetBtntimer, 500, 1);
 
-		os_printf("Note: Hold GPIO0 low for reset to AP mode.\n");
+		dbg("Note: Hold GPIO0 low for reset to AP mode.\n");
 	}
 }
 

@@ -119,7 +119,8 @@ HEADERS += \
 	sbmp/sbmp_logging.h \
 	sbmp/sbmp_session.h \
 	user/datalink.h \
-	user/serial.h
+	user/serial.h \
+    libesphttpd/include/logging.h
 
 DISTFILES += \
 	style.astylerc \
