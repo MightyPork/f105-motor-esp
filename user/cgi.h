@@ -4,7 +4,7 @@
 #include <esp8266.h>
 #include "httpd.h"
 
-int tplCounter(HttpdConnData *connData, char *token, void **arg);
+int tplHome(HttpdConnData *connData, char *token, void **arg);
 
 //int cgiRandomNumbers(HttpdConnData *connData);
 

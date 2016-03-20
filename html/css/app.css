@@ -1074,4 +1074,14 @@ label.select-wrap {
       -ms-flex: 0 0 15%;
       flex: 0 0 15%; }
 
+.page-home #rssi-perc:after {
+  padding-left: 0.1459102934rem;
+  content: '%';
+  font-size: 0.8888888889em; }
+
+.page-home #rssi-dbm:after {
+  padding-left: 0.1459102934rem;
+  content: 'dBm';
+  font-size: 0.8888888889em; }
+
 /*# sourceMappingURL=app.css.map */

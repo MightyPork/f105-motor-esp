@@ -183,17 +183,18 @@ $1/%.o: %.S
 	$(Q) $(CC) $(INCDIR) $(MODULE_INCDIR) $(EXTRA_INCDIR) $(SDK_INCDIR) $(CFLAGS)  -c $$< -o $$@
 endef
 
-.PHONY: all checkdirs clean libesphttpd default-tgt
+.PHONY: all checkdirs clean libesphttpd default-tgt html
 
-all: checkdirs htmlbuild $(TARGET_OUT) $(FW_BASE)
+all: checkdirs $(TARGET_OUT) $(FW_BASE)
 	$(Q) echo -e "\nBuild OK.\n"
+
 
 # libesphttpd/Makefile:
 # 	$(Q) echo "No libesphttpd submodule found. Using git to fetch it..."
 # 	$(Q) git submodule init
 # 	$(Q) git submodule update
 
-htmlbuild: 
+html: 
 	$(vecho) "Building HTML..."
 	$(Q) ./html_build.sh
 

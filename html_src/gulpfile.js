@@ -21,5 +21,5 @@ elixir(function (mix) {
 	mix.scripts([
 		'js-src/app.js',
 		'js-src/chibi.js'
-	], 'js/all.min.js');
+	], 'js/all.js');
 });

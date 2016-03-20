@@ -9,16 +9,10 @@
 
 	<link href="/css/app.css" rel="stylesheet">
 
-	<!-- IE8 support (not tested) -->
-	<!--[if lt IE 9]>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-shim.min.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
-	<![endif]-->
-
-	<script src="/js/all.min.js"></script>
+	
+	<script src="/js/all.js"></script>
 </head>
-<body>
+<body class="page-home">
 <div id="outer">
 <nav id="menu">
 	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current analyzer</div>
@@ -27,7 +21,77 @@
 
 <h1>System Status</h1>
 
-<div class="Box">This page was shown %counter% times.</div>
+<div class="Box">
+	<h2>Runtime</h2>
+	<table>
+		<tbody>
+		<tr>
+			<th>Uptime:</th>
+			<td>%uptime%</td>
+		</tr>
+		<tr>
+			<th>Free heap:</th>
+			<td>%heap% bytes</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+
+<div class="Box">
+	<h2>Wireless</h2>
+	<table>
+		<tbody>
+		<tr>
+			<th>WiFi mode:</th>
+			<td>%wifiMode%</td>
+		</tr>
+		<tr class="sta-only">
+			<th>SSID:</th>
+			<td>%staSSID%</td>
+		</tr>
+		<tr class="sta-only">
+			<th>RSSI:</th>
+			<td><span id="rssi-perc"></span>, <span id="rssi-dbm"></span></td>
+		</tr>
+		<tr>
+			<th>Client MAC:</th>
+			<td>%staMAC%</td>
+		</tr>
+		<tr>
+			<th>AP MAC:</th>
+			<td>%apMAC%</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+
+<div class="Box">
+	<h2>Hardware</h2>
+	<table>
+		<tbody>
+		<tr>
+			<th>ESP8266 S/N:</th>
+			<td>%chipID%</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+
+<script>
+	var wifiMode = '%wifiMode%';
+	var staRSSI = '%staRSSI%';
+
+	$().ready(function() {
+		if (wifiMode == 'SoftAP') {
+			$('.sta-only').hide();
+		} else {
+			$('#rssi-perc').html(rssiPerc(staRSSI));
+			$('#rssi-dbm').html(staRSSI);
+		}
+
+		setTimeout(function(){location.reload()}, 10000);
+	});
+</script>
 
 <script>
 	$().ready(initDef);

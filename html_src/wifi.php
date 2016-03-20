@@ -16,7 +16,6 @@ include "_start.php"; ?>
 		</tr>
 		</tbody>
 	</table>
-
 </div>
 
 <div class="Box" id="ap-box">

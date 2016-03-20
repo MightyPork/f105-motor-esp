@@ -22,16 +22,18 @@ $appname = 'Current analyzer';
 
 	<link href="/css/app.css" rel="stylesheet">
 
-	<!-- IE8 support (not tested) -->
-	<!--[if lt IE 9]>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-shim.min.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
-	<![endif]-->
+	<?php if(false): ?>
+		<!-- IE8 support (not tested) -->
+		<!--[if lt IE 9]>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-shim.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+	<?php endif; ?>
 
-	<script src="/js/all.min.js"></script>
+	<script src="/js/all.js"></script>
 </head>
-<body>
+<body class="page-<?=$page?>">
 <div id="outer">
 <nav id="menu">
 	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current analyzer</div>

@@ -49,7 +49,8 @@ SOURCES += \
 	sbmp/sbmp_frame.c \
 	sbmp/sbmp_session.c \
 	user/datalink.c \
-	user/serial.c
+	user/serial.c \
+    user/uptime.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -120,7 +121,8 @@ HEADERS += \
 	sbmp/sbmp_session.h \
 	user/datalink.h \
 	user/serial.h \
-    libesphttpd/include/logging.h
+    libesphttpd/include/logging.h \
+    user/uptime.h
 
 DISTFILES += \
 	style.astylerc \

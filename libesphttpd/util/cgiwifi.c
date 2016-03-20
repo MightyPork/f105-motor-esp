@@ -23,8 +23,8 @@ typedef struct {
 	char ssid[32];
 	char bssid[8];
 	int channel;
-	char rssi;
-	char enc;
+	sint8 rssi;
+	uint8 enc;
 } ApData;
 
 //Scan result
@@ -118,9 +118,15 @@ int ICACHE_FLASH_ATTR cgiWiFiScan(HttpdConnData *connData) {
 	if (!cgiWifiAps.scanInProgress && pos!=0) {
 		//Fill in json code for an access point
 		if (pos-1<cgiWifiAps.noAps) {
-			len=sprintf(buff, "{\"essid\":\"%s\",\"bssid\":\"" MACSTR "\",\"rssi\":%d,\"enc\":%d,\"channel\":%d}%s",
-					cgiWifiAps.apData[pos-1]->ssid, MAC2STR(cgiWifiAps.apData[pos-1]->bssid), cgiWifiAps.apData[pos-1]->rssi,
-					cgiWifiAps.apData[pos-1]->enc, cgiWifiAps.apData[pos-1]->channel, (pos-1==cgiWifiAps.noAps-1) ? "" : ","); //<-terminator
+
+			len=sprintf(buff, "{\"essid\":\"%s\",\"bssid\":\""MACSTR"\",\"rssi\":%d,\"enc\":%d,\"channel\":%d}%s",
+					cgiWifiAps.apData[pos-1]->ssid,
+					MAC2STR(cgiWifiAps.apData[pos-1]->bssid),
+					cgiWifiAps.apData[pos-1]->rssi,
+					cgiWifiAps.apData[pos-1]->enc,
+					cgiWifiAps.apData[pos-1]->channel,
+					(pos-1==cgiWifiAps.noAps-1) ? "" : ","); //<-terminator
+
 			httpdSend(connData, buff, len);
 		}
 		pos++;

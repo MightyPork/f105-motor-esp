@@ -27,6 +27,14 @@ function regexEscape(s) {
 	return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
+/** Convert RSSI 0-255 to % */
+function rssiPerc(rssi) {
+	var r = parseInt(rssi);
+	if (r > -50) return 100; // 100%
+	if (r < -100) return 0; // 0%
+	return Math.round(2 * (r + 100)); // approximation
+}
+
 /** Perform a substitution in the given string.
  *
  * Arguments - array or list of replacements.
@@ -122,6 +130,7 @@ var wifi = (function () {
 
 		var done = !bool(resp.result.inProgress) && (resp.result.APs.length > 0);
 		rescan(done ? 15000 : 1000);
+		if (!done) return; // no redraw yet
 
 		// clear the AP list
 		var $list = $('#ap-list');
@@ -155,7 +164,7 @@ var wifi = (function () {
 
 				var inner = document.createElement('div');
 				var $inner = $(inner).addClass('inner')
-					.htmlAppend('<div class="rssi">{0}</div>'.format(Math.round(ap.rssi / 2.55)))
+					.htmlAppend('<div class="rssi">{0}</div>'.format(rssiPerc(ap.rssi)))
 					.htmlAppend('<div class="essid" title="{0}">{0}</div>'.format(e(ap.essid)))
 					.htmlAppend('<div class="auth">{0}</div>'.format(authStr[ap.enc]));
 
@@ -947,4 +956,4 @@ function initDef() {
 
 }());
 
-//# sourceMappingURL=all.min.js.map
+//# sourceMappingURL=all.js.map

@@ -1,0 +1,11 @@
+.page-home #rssi-perc:after {
+	padding-left: dist(-4);
+	content: '%';
+	font-size: fsize(-1);
+}
+
+.page-home #rssi-dbm:after {
+	padding-left: dist(-4);
+	content: 'dBm';
+	font-size: fsize(-1);
+}

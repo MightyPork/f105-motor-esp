@@ -25,6 +25,7 @@
 #include "io.h"
 #include "datalink.h"
 #include "uart_driver.h"
+#include "uptime.h"
 
 #include "sbmp.h"
 
@@ -34,7 +35,10 @@
 static ETSTimer prHeapTimer;
 
 static void ICACHE_FLASH_ATTR prHeapTimerCb(void *arg) {
-	os_printf("Heap: %ld\n", (unsigned long)system_get_free_heap_size());
+	u32 heap = system_get_free_heap_size();
+	char upt[20];
+	uptime_str(upt);
+	os_printf("Uptime: %s, Heap: %u\n", upt, heap);
 }
 #endif
 
@@ -112,7 +116,7 @@ CgiUploadFlashDef uploadParams = {
 static HttpdBuiltInUrl builtInUrls[] = {
 	ROUTE_CGI_ARG("*", cgiRedirectApClientToHostname, "esp8266.nonet"), // redirect func for the captive portal
 
-	ROUTE_TPL_FILE("/", tplCounter, "/pages/home.tpl"),
+	ROUTE_TPL_FILE("/", tplHome, "/pages/home.tpl"),
 
 	ROUTE_TPL_FILE("/multipart", tplMultipart, "/multipart.tpl"),
 
@@ -151,6 +155,7 @@ void user_init(void)
 {
 	// set up the debuging output
 	serialInit();
+	uptime_timer_init();
 
 	banner("\n*** ESP8266 starting, "
 			  "HTTPD v."HTTPDVER", "
