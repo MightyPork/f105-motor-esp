@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -x
+
 SRCDIR=html_src
 BLDDIR=html
 
@@ -12,10 +15,12 @@ gulp
 cd ..
 
 cp -R "$SRCDIR/css" "$BLDDIR"
-cp -R "$SRCDIR/images" "$BLDDIR"
 cp -R "$SRCDIR/js" "$BLDDIR"
 
 find "$BLDDIR" -name "*.map" -delete
 
-php "$SRCDIR/home.php" > "$BLDDIR/home.tpl"
-php "$SRCDIR/wifi.php" > "$BLDDIR/wifi.tpl"
+mkdir -p "$BLDDIR/pages"
+
+php "$SRCDIR/home.php" > "$BLDDIR/pages/home.tpl"
+php "$SRCDIR/wifi.php" > "$BLDDIR/pages/wifi.tpl"
+

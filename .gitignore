@@ -9,7 +9,9 @@ espfs/espfstest/espfstest
 html_compressed/
 ldscript_memspecific.ld
 eagle.app.sym
+*~
 
+# html
 .sass-cache
 node_modules
 build/

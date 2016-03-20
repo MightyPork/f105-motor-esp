@@ -185,13 +185,17 @@ endef
 
 .PHONY: all checkdirs clean libesphttpd default-tgt
 
-all: checkdirs $(TARGET_OUT) $(FW_BASE)
+all: checkdirs htmlbuild $(TARGET_OUT) $(FW_BASE)
 	$(Q) echo -e "\nBuild OK.\n"
 
 # libesphttpd/Makefile:
 # 	$(Q) echo "No libesphttpd submodule found. Using git to fetch it..."
 # 	$(Q) git submodule init
 # 	$(Q) git submodule update
+
+htmlbuild: 
+	$(vecho) "Building HTML..."
+	$(Q) ./html_build.sh
 
 libesphttpd: libesphttpd/Makefile
 	$(Q) make -C libesphttpd USE_OPENSDK=$(USE_OPENSDK)
