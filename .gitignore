@@ -10,4 +10,8 @@ html_compressed/
 ldscript_memspecific.ld
 eagle.app.sym
 
-html_preview/
+.sass-cache
+node_modules
+build/
+.idea
+

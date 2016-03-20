@@ -1,0 +1,100 @@
+@import "fancy_button_mixins";
+
+#{$all-buttons}, a.button {
+	@include fancy-btn-base();
+
+	// fontello
+/*	&::before {
+		margin-right: .4em;
+	}
+
+	&.icononly::before {
+		margin-right: 0;
+	}*/
+
+	&.narrow {
+		min-width: initial;
+	}
+
+	text-shadow: 1.5px 1.5px 2px rgba(black, 0.8);
+}
+
+
+
+
+$btn-gray-f: #DDDDDD;
+$btn-gray-b: #505050;
+$btn-gray-l: #343434; // line
+
+$btn-green-f:   #FEFEFE;
+$btn-green-b: #2ca94b;
+$btn-green-fa: #FEFEFE;
+$btn-green-ba: #28ba5c;
+
+$btn-red-f:   #FEFEFE;
+$btn-red-b:   #D04E51;
+$btn-red-fa: #FEFEFE;
+$btn-red-ba: #d4403f;
+
+$btn-blue-f:   #FEFEFE;
+$btn-blue-b: #3983cd;
+$btn-blue-fa: #FEFEFE;
+$btn-blue-ba: #2076C6;
+
+$btn-orange-f:   #FEFEFE;
+$btn-orange-b: #dd8751;
+$btn-orange-fa: #FEFEFE;
+$btn-orange-ba: #C6733F;
+
+
+input[type="submit"], .btn-green {
+	@include fancy-btn-colors($btn-green-f, $btn-green-b, $btn-green-fa, $btn-green-ba)
+}
+
+input[type="reset"], .btn-red {
+	@include fancy-btn-colors($btn-red-f, $btn-red-b, $btn-red-fa, $btn-red-ba)
+}
+
+//&.blue   {@include fancy-btn-colors($btn-blue-f, $btn-blue-b, $btn-blue-fa, $btn-blue-ba)}
+//&, &.orange {@include fancy-btn-colors($btn-orange-f, $btn-orange-b, $btn-orange-fa, $btn-orange-ba)}
+
+/*
+
+&[type="submit"],
+&.gray-green {
+	@include fancy-btn-colors-full(
+			$btn-gray-f, $btn-gray-b, $btn-gray-l,
+			$btn-green-fa, $btn-green-ba, darken($btn-green-ba, 16)
+	)
+}
+
+&.gray-blue {
+	@include fancy-btn-colors-full(
+			$btn-gray-f, $btn-gray-b, $btn-gray-l,
+			$btn-blue-fa, $btn-blue-ba, darken($btn-blue-ba, 16)
+	)
+}
+
+&.gray-red {
+	@include fancy-btn-colors-full(
+			$btn-gray-f, $btn-gray-b, $btn-gray-l,
+			$btn-red-fa, $btn-red-ba, darken($btn-red-ba, 16)
+	)
+}
+
+&.gray-orange {
+	@include fancy-btn-colors-full(
+			$btn-gray-f, $btn-gray-b, $btn-gray-l,
+			$btn-orange-fa, $btn-orange-ba, darken($btn-orange-ba, 16)
+	)
+}
+
+// No change on hover - to be used for disabled buttons
+&.gray-gray {
+	@include fancy-btn-colors-full(
+			$btn-gray-f, $btn-gray-b, $btn-gray-l,
+			$btn-gray-f, $btn-gray-b, $btn-gray-l
+	)
+}
+
+*/
