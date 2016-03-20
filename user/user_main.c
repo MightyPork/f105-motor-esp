@@ -112,16 +112,18 @@ CgiUploadFlashDef uploadParams = {
 static HttpdBuiltInUrl builtInUrls[] = {
 	ROUTE_CGI_ARG("*", cgiRedirectApClientToHostname, "esp8266.nonet"), // redirect func for the captive portal
 
-	ROUTE_TPL("/", tplCounter),
+	ROUTE_TPL_FILE("/", tplCounter, "/pages/home.tpl"),
+
 	ROUTE_TPL_FILE("/multipart", tplMultipart, "/multipart.tpl"),
 
 //Enable the line below to protect the WiFi configuration with an username/password combo.
 //  ROUTE_AUTH("/wifi/*", myPassFn),
 
-	ROUTE_REDIRECT("/wifi",  "/wifi/"),
-	ROUTE_TPL_FILE("/wifi/", tplWlan, "/wifi/index.tpl"),
+	ROUTE_REDIRECT("/wifi/",  "/wifi"),
 
-	ROUTE_CGI("/wifi/wifiscan.cgi", cgiWiFiScan),
+	ROUTE_TPL_FILE("/wifi", tplWlan, "/pages/wifi.tpl"),
+
+	ROUTE_CGI("/wifi/scan.cgi", cgiWiFiScan),
 	ROUTE_CGI("/wifi/connect.cgi", cgiWiFiConnect),
 	ROUTE_CGI("/wifi/connstatus.cgi", cgiWiFiConnStatus),
 	ROUTE_CGI("/wifi/setmode.cgi", cgiWiFiSetMode),
