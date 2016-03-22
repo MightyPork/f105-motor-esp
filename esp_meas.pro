@@ -43,11 +43,12 @@ SOURCES += \
 	user/io.c \
 	user/user_main.c \
 	user/uart_driver.c \
-	sbmp/crc32.c \
-	sbmp/sbmp_checksum.c \
-	sbmp/sbmp_datagram.c \
-	sbmp/sbmp_frame.c \
-	sbmp/sbmp_session.c \
+	sbmp/library/crc32.c \
+	sbmp/library/sbmp_checksum.c \
+	sbmp/library/sbmp_datagram.c \
+	sbmp/library/sbmp_frame.c \
+	sbmp/library/sbmp_session.c \
+	sbmp/library/sbmp_bulk.c \
 	user/datalink.c \
 	user/serial.c \
     user/uptime.c
@@ -111,14 +112,15 @@ HEADERS += \
 	esp_iot_sdk_v1.5.2/include/upgrade.h \
 	esp_iot_sdk_v1.5.2/include/user_interface.h \
 	user/uart_driver.h \
-	sbmp/crc32.h \
-	sbmp/sbmp.h \
-	sbmp/sbmp_checksum.h \
-	sbmp/sbmp_config.h \
-	sbmp/sbmp_datagram.h \
-	sbmp/sbmp_frame.h \
-	sbmp/sbmp_logging.h \
-	sbmp/sbmp_session.h \
+	sbmp/library/crc32.h \
+	sbmp/library/sbmp.h \
+	sbmp/library/sbmp_checksum.h \
+	sbmp/library/sbmp_config.h \
+	sbmp/library/sbmp_datagram.h \
+	sbmp/library/sbmp_frame.h \
+	sbmp/library/sbmp_logging.h \
+	sbmp/library/sbmp_session.h \
+	sbmp/library/sbmp_bulk.h \
 	user/datalink.h \
 	user/serial.h \
     libesphttpd/include/logging.h \

@@ -1,0 +1,4 @@
+[submodule "sbmp"]
+	path = sbmp
+	url = git@github.com:MightyPork/sbmp.git
+	branch = esp8266
