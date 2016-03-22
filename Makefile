@@ -55,8 +55,8 @@ APPGEN		?= $(SDK_BASE)/tools/gen_appbin.py
 TARGET		= httpd
 
 # which modules (subdirectories) of the project to include in compiling
-MODULES		= user sbmp
-EXTRA_INCDIR	= include libesphttpd/include sbmp
+MODULES		= user sbmp/library
+EXTRA_INCDIR	= include libesphttpd/include sbmp/library
 
 # libraries used in this project, mainly provided by the SDK
 LIBS		= c gcc hal phy pp net80211 wpa main lwip crypto
@@ -194,7 +194,7 @@ all: checkdirs $(TARGET_OUT) $(FW_BASE)
 # 	$(Q) git submodule init
 # 	$(Q) git submodule update
 
-html: 
+html:
 	$(vecho) "Building HTML..."
 	$(Q) ./html_build.sh
 

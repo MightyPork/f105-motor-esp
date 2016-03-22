@@ -12,7 +12,7 @@ INCLUDEPATH = . \
 	libesphttpd/espfs \
 	libesphttpd/core \
 	libesphttpd/lib/heatshrink \
-	sbmp
+	sbmp/library
 
 SOURCES += \
 	libesphttpd/core/auth.c \
@@ -51,7 +51,7 @@ SOURCES += \
 	sbmp/library/sbmp_bulk.c \
 	user/datalink.c \
 	user/serial.c \
-    user/uptime.c
+	user/uptime.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -123,8 +123,8 @@ HEADERS += \
 	sbmp/library/sbmp_bulk.h \
 	user/datalink.h \
 	user/serial.h \
-    libesphttpd/include/logging.h \
-    user/uptime.h
+	libesphttpd/include/logging.h \
+	user/uptime.h
 
 DISTFILES += \
 	style.astylerc \
