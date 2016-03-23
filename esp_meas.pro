@@ -51,7 +51,8 @@ SOURCES += \
 	sbmp/library/sbmp_bulk.c \
 	user/datalink.c \
 	user/serial.c \
-	user/uptime.c
+	user/uptime.c \
+    sbmp/library/payload_parser.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -124,7 +125,8 @@ HEADERS += \
 	user/datalink.h \
 	user/serial.h \
 	libesphttpd/include/logging.h \
-	user/uptime.h
+	user/uptime.h \
+    sbmp/library/payload_parser.h
 
 DISTFILES += \
 	style.astylerc \
