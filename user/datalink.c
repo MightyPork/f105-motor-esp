@@ -1,11 +1,11 @@
-#include "esp8266.h"
 #include "uart_driver.h"
-#include "sbmp.h"
-
 #include "datalink.h"
 
+// payload rx buffer
+#define PAYLOAD_BUFFER_LEN (256+3)
 
-static SBMP_Endpoint *ep;
+
+SBMP_Endpoint *dlnk_ep;
 
 
 /** func used for sending bytes by SBMP */
@@ -17,21 +17,21 @@ static void FLASH_FN u0_putc(uint8_t c)
 
 static void FLASH_FN dg_handler(SBMP_Datagram *dg)
 {
-	dbg("[SBMP] Datagram received.");
+	dbg("[SBMP] Datagram received, type %d", dg->type);
 }
 
-
+/** This is called by the UART rx handler */
 void datalink_receive(uint8_t byte)
 {
-	sbmp_ep_receive(ep, byte);
+	sbmp_ep_receive(dlnk_ep, byte);
 }
 
 /** Datalink */
 void FLASH_FN datalinkInit(void)
 {
-	ep = sbmp_ep_init(NULL, NULL, 256, dg_handler, u0_putc);
+	dlnk_ep = sbmp_ep_init(NULL, NULL, PAYLOAD_BUFFER_LEN, dg_handler, u0_putc);
 
-	sbmp_ep_enable(ep, true);
+	sbmp_ep_enable(dlnk_ep, true);
 
 	info("SBMP started on UART0");
 }

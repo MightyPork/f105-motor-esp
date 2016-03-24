@@ -27,20 +27,33 @@
 #include "uart_driver.h"
 #include "uptime.h"
 
+#include "page_home.h"
+#include "sampling.h"
+
 #include "sbmp.h"
 
-#define SHOW_HEAP_USE
-
-#ifdef SHOW_HEAP_USE
 static ETSTimer prHeapTimer;
 
-static void ICACHE_FLASH_ATTR prHeapTimerCb(void *arg) {
-	u32 heap = system_get_free_heap_size();
-	char upt[20];
-	uptime_str(upt);
-	os_printf("Uptime: %s, Heap: %u\n", upt, heap);
+/** Timer called each second */
+static void ICACHE_FLASH_ATTR prHeapTimerCb(void *arg)
+{
+	static u8 cnt = 0;
+	static u32 last = 0;
+
+	if (++cnt == 3) {
+		cnt = 0;
+		u32 heap = system_get_free_heap_size();
+		char upt[20];
+		uptime_str(upt);
+		os_printf("%s, heap: %u (~ %d)\n", upt, heap, (heap-last));
+		last = heap;
+	}
+
+	// we will also try to set up a SBMP connection
+	if (sbmp_ep_handshake_status(dlnk_ep) != SBMP_HSK_SUCCESS) {
+		sbmp_ep_start_handshake(dlnk_ep);
+	}
 }
-#endif
 
 
 /**
@@ -118,6 +131,8 @@ static HttpdBuiltInUrl builtInUrls[] = {
 
 	ROUTE_TPL_FILE("/", tplHome, "/pages/home.tpl"),
 
+	ROUTE_CGI("/acquire.cgi", cgiReadSamples),
+
 	ROUTE_TPL_FILE("/multipart", tplMultipart, "/multipart.tpl"),
 
 //Enable the line below to protect the WiFi configuration with an username/password combo.
@@ -185,16 +200,9 @@ void user_init(void)
 
 	info("\nReady\n");
 
-#ifdef SHOW_HEAP_USE
 	os_timer_disarm(&prHeapTimer);
 	os_timer_setfn(&prHeapTimer, prHeapTimerCb, NULL);
-	os_timer_arm(&prHeapTimer, 3000, 1);
-#endif
-
-//	// print TEST on the command interface every 500 ms
-//	os_timer_disarm(&prTestTimer);
-//	os_timer_setfn(&prTestTimer, test_timer_task, NULL);
-//	os_timer_arm(&prTestTimer, 500, 1);
+	os_timer_arm(&prHeapTimer, 1000, 1);
 }
 
 

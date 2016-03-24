@@ -136,8 +136,7 @@ int ICACHE_FLASH_ATTR cgiWebsockBroadcast(char *resource, char *data, int len, i
 		}
 		lw=lw->priv->next;
 	}
-	return ret;
-*/
+	return ret;*/
 	return 0;
 }
 
@@ -217,7 +216,7 @@ int ICACHE_FLASH_ATTR cgiWebSocketRecv(HttpdConnData *connData, char *data, int 
 			//received here at the same time; no more byte iterations till the end of this frame.
 			//First, unmask the data
 			sl=len-i;
-			dbg("[WS] Frame payload. wasHeaderByte %d fr.len %d sl %d cmd 0x%x\n", wasHeaderByte, (int)ws->priv->fr.len, (int)sl, ws->priv->fr.flags);
+			dbg("[WS] Frame payload. wasHeaderByte %d fr.len %d sl %d cmd 0x%x", wasHeaderByte, (int)ws->priv->fr.len, (int)sl, ws->priv->fr.flags);
 			if (sl > ws->priv->fr.len) sl=ws->priv->fr.len;
 			for (j=0; j<sl; j++) data[i+j]^=(ws->priv->fr.mask[(ws->priv->maskCtr++)&3]);
 

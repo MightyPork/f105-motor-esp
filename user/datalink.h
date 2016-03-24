@@ -2,6 +2,13 @@
 #define DATALINK_H
 
 #include <esp8266.h>
+#include <sbmp.h>
+
+// request to capture data...
+#define DG_REQUEST_CAPTURE 40
+
+
+extern SBMP_Endpoint *dlnk_ep;
 
 void datalinkInit(void);
 
