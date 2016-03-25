@@ -3,6 +3,7 @@
 
 #include <esp8266.h>
 
+
 /* ---------- CRC32 ---------------- */
 
 /**
@@ -54,7 +55,7 @@
 /**
  * @brief Enable detailed logging (only for debugging, disable for better performance).
  */
-#define SBMP_DEBUG 1
+#define SBMP_DEBUG 0
 
 // here are the actual logging functions
 #define sbmp_error(fmt, ...) (SBMP_DEBUG||SBMP_LOGGING ? os_printf("\x1b[31;1m[SBMP][E] "fmt"\x1b[0m\n", ##__VA_ARGS__) : 0)
@@ -62,5 +63,14 @@
 #define sbmp_info(fmt, ...)  (SBMP_DEBUG||SBMP_LOGGING ? os_printf("\x1b[32m[SBMP][i] "fmt"\x1b[0m\n", ##__VA_ARGS__) : 0)
 #define sbmp_dbg(fmt, ...)   (SBMP_DEBUG  ? os_printf("[SBMP][ ] "fmt"\n", ##__VA_ARGS__) : 0)
 
+
+/* ---------- Fix formatting -------------- */
+
+#define PRIu16 "u"
+#define PRIu32 "u"
+#define PRIu8  "u"
+#define PRIi16 "d"
+#define PRIi32 "d"
+#define PRIi8  "d"
 
 #endif // SBMP_CONFIG_H

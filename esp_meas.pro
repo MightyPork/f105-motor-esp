@@ -13,7 +13,8 @@ INCLUDEPATH = . \
 	libesphttpd/espfs \
 	libesphttpd/core \
 	libesphttpd/lib/heatshrink \
-	sbmp/library
+	sbmp/library \
+	/home/ondra/devel/esp/sdk/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include
 
 SOURCES += \
 	libesphttpd/core/auth.c \
@@ -55,7 +56,8 @@ SOURCES += \
 	user/uptime.c \
 	sbmp/library/payload_parser.c \
 	user/sampling.c \
-	user/page_home.c
+	user/page_home.c \
+	user/ftoa.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -134,7 +136,8 @@ HEADERS += \
 	user/page_home.h \
 	user/timeout.h \
 	user/sbmp_config.h \
-	sbmp/library/sbmp_config.example.h
+	sbmp/library/sbmp_config.example.h \
+	user/ftoa.h
 
 DISTFILES += \
 	style.astylerc \

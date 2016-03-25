@@ -66,7 +66,7 @@ LIBS += esphttpd
 # compiler flags using during compilation of source files
 CFLAGS		= -Os -ggdb -std=gnu99 -Werror -Wpointer-arith -Wundef -Wall -Wl,-EL -fno-inline-functions \
 		-nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH \
-		-Wno-address -ffunction-sections
+		-Wno-address -ffunction-sections -Wno-unused-value
 #-Wno-strict-aliasing
 
 # linker flags used to generate the main object file
