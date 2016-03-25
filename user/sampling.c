@@ -7,11 +7,9 @@
 
 // The buffer is big enough for 256 data bytes - 4*64
 
-// number of 32-bit vars in the chunk
-#define CHUNK_LEN_32 64
-
-// chunk size for bulk transfer - 64 floats
-#define CHUNK_LEN (CHUNK_LEN_32*4)
+// chunk size for bulk transfer (must be multiple of 4 - length of uint32 / float)
+// NOTE: If too large, strange errors occur (problem with the UART FIFO at high speed)
+#define CHUNK_LEN 100
 
 
 static volatile bool acquire_pending = false;
@@ -37,6 +35,7 @@ static void FLASH_FN prSampleAbortTimerCb(void *arg)
 
 static void setReadoutTmeoTimer(int ms)
 {
+	dbg("Set read timeout %d", ms);
 	os_timer_disarm(&prSampleAbortTimer);
 	os_timer_setfn(&prSampleAbortTimer, prSampleAbortTimerCb, NULL);
 	os_timer_arm(&prSampleAbortTimer, ms, 0);
@@ -44,6 +43,7 @@ static void setReadoutTmeoTimer(int ms)
 
 static void stopReadoutTmeoTimer(void)
 {
+	dbg("Stop read timeout");
 	os_timer_disarm(&prSampleAbortTimer);
 }
 
@@ -55,7 +55,6 @@ typedef struct {
 
 static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram *dg, void **obj)
 {
-	bool suc = false;
 	dbg("Received msg in session %d, dg type %d", dg->session, dg->type);
 
 	DataReadState *readState = *obj;
@@ -69,8 +68,8 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 	PayloadParser pp;
 	switch (dg->type) {
 		case DG_BULK_OFFER:// Data ready notification
+			stopReadoutTmeoTimer();
 			info("--- Data offered for bulk transfer ---");
-			setReadoutTmeoTimer(1000);
 
 			// data is ready to be read
 			pp = pp_start(dg->payload, dg->length);
@@ -82,12 +81,13 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 
 			// we choose to request the data immediately
 
-			retry_TO(100, sbmp_bulk_request(ep, readState->pos, CHUNK_LEN, dg->session));
+			setReadoutTmeoTimer(1000);
+			sbmp_bulk_request(ep, readState->pos, CHUNK_LEN, dg->session);
 			break;
 
 		case DG_BULK_DATA: // data received
+			stopReadoutTmeoTimer();
 			info("--- Received a chunk, length %d ---", dg->length);
-			setReadoutTmeoTimer(1000);
 
 			// Process the received data
 			pp = pp_start(dg->payload, dg->length);
@@ -107,11 +107,12 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 				// make sure the peer has freed the buffer
 				// (may be waiting for us if we wanted to re-read something)
 
-				retry_TO(100, sbmp_bulk_abort(ep, dg->session));
+				sbmp_bulk_abort(ep, dg->session);
 				goto cleanup;
 			} else {
 				// read next part
-				retry_TO(100, sbmp_bulk_request(ep, readState->pos, CHUNK_LEN, dg->session));
+				setReadoutTmeoTimer(1000);
+				sbmp_bulk_request(ep, readState->pos, CHUNK_LEN, dg->session);
 			}
 			break;
 
@@ -158,7 +159,7 @@ static bool FLASH_FN meas_request_data(uint16_t count)
 
 	// start a message
 	uint16_t sesn = 0;
-	retry_TO(100, sbmp_ep_start_message(dlnk_ep, DG_REQUEST_CAPTURE, sizeof(uint16_t), &sesn));
+	suc = sbmp_ep_start_message(dlnk_ep, DG_REQUEST_CAPTURE, sizeof(uint16_t), &sesn);
 	if (!suc) goto fail;
 
 	// register the session listener
