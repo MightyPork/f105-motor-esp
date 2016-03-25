@@ -56,7 +56,7 @@ TARGET		= httpd
 
 # which modules (subdirectories) of the project to include in compiling
 MODULES		= user sbmp/library
-EXTRA_INCDIR	= include libesphttpd/include sbmp/library
+EXTRA_INCDIR	= include libesphttpd/include sbmp/library user/
 
 # libraries used in this project, mainly provided by the SDK
 LIBS		= c gcc hal phy pp net80211 wpa main lwip crypto

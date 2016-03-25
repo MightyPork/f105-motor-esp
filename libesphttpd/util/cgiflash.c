@@ -55,7 +55,7 @@ int ICACHE_FLASH_ATTR cgiGetFirmwareNext(HttpdConnData *connData) {
 	httpdEndHeaders(connData);
 	char *next = id == 1 ? "user1.bin" : "user2.bin";
 	httpdSend(connData, next, -1);
-	httpd_printf("Next firmware: %s (got %d)\n", next, id);
+	dbg("Next firmware: %s (got %d)", next, id);
 	return HTTPD_CGI_DONE;
 }
 
@@ -70,7 +70,7 @@ int ICACHE_FLASH_ATTR cgiReadFlash(HttpdConnData *connData) {
 	}
 
 	if (*pos==0) {
-		httpd_printf("Start flash download.\n");
+		info("Start flash download.");
 		httpdStartResponse(connData, 200);
 		httpdHeader(connData, "Content-Type", "application/bin");
 		httpdEndHeaders(connData);

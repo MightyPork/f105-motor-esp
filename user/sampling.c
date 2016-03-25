@@ -70,6 +70,7 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 	switch (dg->type) {
 		case DG_BULK_OFFER:// Data ready notification
 			info("--- Data offered for bulk transfer ---");
+			setReadoutTmeoTimer(1000);
 
 			// data is ready to be read
 			pp = pp_start(dg->payload, dg->length);
@@ -79,13 +80,14 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 
 			dbg("Total bytes: %d", readState->total);
 
-			retry_TO(100, sbmp_bulk_request(ep, readState->pos, CHUNK_LEN, dg->session));
+			// we choose to request the data immediately
 
-			setReadoutTmeoTimer(500);
+			retry_TO(100, sbmp_bulk_request(ep, readState->pos, CHUNK_LEN, dg->session));
 			break;
 
 		case DG_BULK_DATA: // data received
 			info("--- Received a chunk, length %d ---", dg->length);
+			setReadoutTmeoTimer(1000);
 
 			// Process the received data
 			pp = pp_start(dg->payload, dg->length);
@@ -110,7 +112,6 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 			} else {
 				// read next part
 				retry_TO(100, sbmp_bulk_request(ep, readState->pos, CHUNK_LEN, dg->session));
-				setReadoutTmeoTimer(500);
 			}
 			break;
 

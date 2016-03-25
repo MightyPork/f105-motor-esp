@@ -43,9 +43,7 @@ static void ICACHE_FLASH_ATTR prHeapTimerCb(void *arg)
 	if (++cnt == 3) {
 		cnt = 0;
 		u32 heap = system_get_free_heap_size();
-		char upt[20];
-		uptime_str(upt);
-		os_printf("%s, heap: %u (~ %d)\n", upt, heap, (heap-last));
+		dbg("Heap: %u (~ %d)\n", heap, (heap-last));
 		last = heap;
 	}
 

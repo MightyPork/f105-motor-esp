@@ -55,13 +55,25 @@
 /**
  * @brief Enable detailed logging (only for debugging, disable for better performance).
  */
-#define SBMP_DEBUG 0
+#define SBMP_DEBUG 1
 
 // here are the actual logging functions
-#define sbmp_error(fmt, ...) (SBMP_DEBUG||SBMP_LOGGING ? os_printf("\x1b[31;1m[SBMP][E] "fmt"\x1b[0m\n", ##__VA_ARGS__) : 0)
-#define sbmp_warn(fmt, ...)  (SBMP_DEBUG||SBMP_LOGGING ? os_printf("\x1b[33;1m[SBMP][E] "fmt"\x1b[0m\n", ##__VA_ARGS__) : 0)
-#define sbmp_info(fmt, ...)  (SBMP_DEBUG||SBMP_LOGGING ? os_printf("\x1b[32m[SBMP][i] "fmt"\x1b[0m\n", ##__VA_ARGS__) : 0)
-#define sbmp_dbg(fmt, ...)   (SBMP_DEBUG  ? os_printf("[SBMP][ ] "fmt"\n", ##__VA_ARGS__) : 0)
+
+#if SBMP_DEBUG||SBMP_LOGGING
+# define sbmp_error(fmt, ...) error("[SBMP] "fmt, ##__VA_ARGS__)
+# define sbmp_warn(fmt, ...)  warn("[SBMP] "fmt, ##__VA_ARGS__)
+# define sbmp_info(fmt, ...)  info("[SBMP] "fmt, ##__VA_ARGS__)
+#else
+# define sbmp_error(fmt, ...)
+# define sbmp_warn(fmt, ...)
+# define sbmp_info(fmt, ...)
+#endif
+
+#if SBMP_DEBUG
+# define sbmp_dbg(fmt, ...)   dbg("[SBMP] "fmt, ##__VA_ARGS__)
+#else
+# define sbmp_dbg(fmt, ...)
+#endif
 
 
 /* ---------- Fix formatting -------------- */

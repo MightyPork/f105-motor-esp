@@ -48,7 +48,8 @@ LIB		= libesphttpd.a
 MODULES		= espfs core util
 EXTRA_INCDIR	= ./include \
 					. \
-					lib/heatshrink/
+					lib/heatshrink/ \
+					../user
 
 
 # compiler flags using during compilation of source files

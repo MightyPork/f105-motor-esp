@@ -36,3 +36,24 @@ void uptime_str(char *buf)
 		sprintf(buf, "%02u:%02u:%02u", hours, mins, secs);
 	}
 }
+
+void uptime_print(void)
+{
+	u32 a = uptime;
+	u32 days = a / 86400;
+	a -= days * 86400;
+
+	u32 hours = a / 3600;
+	a -= hours * 3600;
+
+	u32 mins = a / 60;
+	a -= mins * 60;
+
+	u32 secs = a;
+
+	if (days > 0) {
+		printf("%ud %02u:%02u:%02u", days, hours, mins, secs);
+	} else {
+		printf("%02u:%02u:%02u", hours, mins, secs);
+	}
+}
