@@ -3,6 +3,7 @@
 
 #include "datalink.h"
 #include "sampling.h"
+#include "timeout.h"
 
 // The buffer is big enough for 256 data bytes - 4*64
 
@@ -37,6 +38,7 @@ typedef struct {
 
 static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram *dg, void **obj)
 {
+	bool suc = false;
 	dbg("Received msg in session %d, dg type %d", dg->session, dg->type);
 
 	DataReadState *state = *obj;
@@ -46,7 +48,6 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 		state = malloc(sizeof(DataReadState));
 		*obj = state;
 	}
-
 
 	PayloadParser pp;
 	switch (dg->type) {
@@ -61,7 +62,7 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 
 			dbg("Total bytes: %d", state->total);
 
-			sbmp_bulk_request(ep, state->pos, CHUNK_LEN, dg->session); // 64 floats in one message
+			retry_until_timeout(10, sbmp_bulk_request(ep, state->pos, CHUNK_LEN, dg->session));
 			break;
 
 		case DG_BULK_DATA: // data received
@@ -83,11 +84,12 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 
 				// make sure the peer has freed the buffer
 				// (may be waiting for us if we wanted to re-read something)
-				sbmp_bulk_abort(ep, dg->session);
+
+				retry_until_timeout(10, sbmp_bulk_abort(ep, dg->session));
 				goto cleanup;
 			} else {
 				// read next part
-				sbmp_bulk_request(ep, state->pos, CHUNK_LEN, dg->session);
+				retry_until_timeout(10, sbmp_bulk_request(ep, state->pos, CHUNK_LEN, dg->session));
 			}
 			break;
 
@@ -130,10 +132,11 @@ static bool FLASH_FN meas_request_data(uint16_t count)
 	// start a message
 	uint16_t sesn;
 	bool suc = sbmp_ep_start_message(dlnk_ep, DG_REQUEST_CAPTURE, sizeof(uint16_t), &sesn);
-	if (!suc) return false;
+	if (!suc) goto fail;
 
 	// register the session listener
-	sbmp_ep_add_listener(dlnk_ep, sesn, request_data_sesn_listener, NULL);
+	suc = sbmp_ep_add_listener(dlnk_ep, sesn, request_data_sesn_listener, NULL);
+	if (!suc) goto fail;
 
 	// request N values
 	sbmp_ep_send_u16(dlnk_ep, count);
@@ -143,6 +146,10 @@ static bool FLASH_FN meas_request_data(uint16_t count)
 	acquire_session = sesn;
 
 	return true;
+
+fail:
+	os_timer_disarm(&prSampleAbortTimer);
+	return false;
 }
 
 

@@ -8,6 +8,7 @@ DEFINES = ESPFS_HEATSHRINK HTTPD_MAX_CONNECTIONS=4 __ets__
 INCLUDEPATH = . \
 	esp_iot_sdk_v1.5.2/include \
 	include \
+	user \
 	libesphttpd/include \
 	libesphttpd/espfs \
 	libesphttpd/core \
@@ -52,9 +53,9 @@ SOURCES += \
 	user/datalink.c \
 	user/serial.c \
 	user/uptime.c \
-    sbmp/library/payload_parser.c \
-    user/sampling.c \
-    user/page_home.c
+	sbmp/library/payload_parser.c \
+	user/sampling.c \
+	user/page_home.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -128,10 +129,12 @@ HEADERS += \
 	user/serial.h \
 	libesphttpd/include/logging.h \
 	user/uptime.h \
-    sbmp/library/payload_parser.h \
-    user/sampling.h \
-    user/page_home.h \
-    include/sbmp_config.h
+	sbmp/library/payload_parser.h \
+	user/sampling.h \
+	user/page_home.h \
+	user/timeout.h \
+	user/sbmp_config.h \
+	sbmp/library/sbmp_config.example.h
 
 DISTFILES += \
 	style.astylerc \

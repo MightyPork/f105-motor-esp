@@ -200,7 +200,7 @@ html:
 	$(Q) ./html_build.sh
 
 libesphttpd: libesphttpd/Makefile
-	$(Q) make -C libesphttpd USE_OPENSDK=$(USE_OPENSDK)
+	$(Q) make -j4 -C libesphttpd USE_OPENSDK=$(USE_OPENSDK)
 
 $(APP_AR): libesphttpd $(OBJ)
 	$(vecho) "AR $@"

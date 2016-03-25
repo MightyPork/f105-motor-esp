@@ -17,7 +17,7 @@ static void FLASH_FN u0_putc(uint8_t c)
 
 static void FLASH_FN dg_handler(SBMP_Datagram *dg)
 {
-	dbg("[SBMP] Datagram received, type %d", dg->type);
+	dbg("[SBMP] Datagram received, type %d, session %d", dg->type, dg->session);
 }
 
 /** This is called by the UART rx handler */
@@ -30,6 +30,7 @@ void datalink_receive(uint8_t byte)
 void FLASH_FN datalinkInit(void)
 {
 	dlnk_ep = sbmp_ep_init(NULL, NULL, PAYLOAD_BUFFER_LEN, dg_handler, u0_putc);
+	sbmp_ep_init_listeners(dlnk_ep, NULL, 4);
 
 	sbmp_ep_enable(dlnk_ep, true);
 
