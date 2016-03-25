@@ -130,7 +130,8 @@ HEADERS += \
 	user/uptime.h \
     sbmp/library/payload_parser.h \
     user/sampling.h \
-    user/page_home.h
+    user/page_home.h \
+    include/sbmp_config.h
 
 DISTFILES += \
 	style.astylerc \
