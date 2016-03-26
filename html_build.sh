@@ -21,6 +21,5 @@ find "$BLDDIR" -name "*.map" -delete
 
 mkdir -p "$BLDDIR/pages"
 
-php "$SRCDIR/home.php" > "$BLDDIR/pages/home.tpl"
-php "$SRCDIR/wifi.php" > "$BLDDIR/pages/wifi.tpl"
-
+php "$SRCDIR/home.php" > "$BLDDIR/pages/home.tpl.html"
+php "$SRCDIR/wifi.php" > "$BLDDIR/pages/wifi.tpl.html"

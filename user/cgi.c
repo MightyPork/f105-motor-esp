@@ -18,69 +18,97 @@ flash as a binary. Also handles the hit counter on the main page.
 #include "uptime.h"
 #include "datalink.h"
 
-// ---- demonstration of a multi-part substituion in a template ----
+
+// -------------------------------------------------------------------------------
+
+// Read multiple samples from the ADC as JSON
 
 typedef struct {
-	uint32_t count_remain;
-} RandomNumberState;
+	uint32_t total_count;
+	uint32_t done_count;
+	bool success;
+} tplReadSamplesJSON_state;
 
 
-//Template code for the counter on the index page.
-int FLASH_FN tplMultipart(HttpdConnData *connData, char *token, void **arg)
+int FLASH_FN tplReadSamplesJSON(HttpdConnData *connData, char *token, void **arg)
 {
+	char buff20[20];
+
+	tplReadSamplesJSON_state *st = *arg;
+
 	if (token == NULL) {
-		if (*arg != NULL) {
-			free(*arg);
-			*arg = NULL; // mark as already freed
-		}
+		// end of template, cleanup
+		if (st != NULL) free(st);
 		return HTTPD_CGI_DONE; // cleanup
 	}
 
-	if (os_strcmp(token, "numbers") == 0) {
-		RandomNumberState *rns = *arg;
-		char buff[20];
+	if (st == NULL) {
+		// first call - allocate the struct
+		st = malloc(sizeof(tplReadSamplesJSON_state));
+		*arg = st;
 
-		// first call in this substitution
-		if (rns == NULL) {
-			//First call to this cgi. Open the file so we can read it.
-			rns=(RandomNumberState *)malloc(sizeof(RandomNumberState));
-			*arg=rns;
+		// check how many samples are requested
+		uint16_t count = 1;
+		int len = httpdFindArg(connData->getArgs, "count", buff20, sizeof(buff20));
+		if (len != -1) count = (uint16_t)atoi(buff20);
+		if (count > 4096) {
+			warn("Requested %d samples, capping at 4096.", count);
+			count = 4096;
+		}
+		st->total_count = count;
+		st->done_count = 0;
+		st->success = true;
 
-			// parse count
-			uint32_t count = 1;
-			int len = httpdFindArg(connData->getArgs, "count", buff, sizeof(buff));
-			if (len==-1) {
-				// no such get arg
-			} else {
-				count = (uint32_t)atoi(buff);
+		// TODO Start the capture
+	}
+
+	// the "success" field is after the data,
+	// so if readout fails, success can be set to false.
+
+	if (strcmp(token, "values") == 0) {
+
+		if (st->done_count == 0) {
+			dbg("Delay to simulate readout...");
+			// 1000 ms delay
+			for(int i=0;i<1000;i++) {
+				os_delay_us(1000);
 			}
-			rns->count_remain = count;
-
-			info("User wants %d numbers.", count);
 		}
 
-		// print the numbers
-		for (int i = 0; i < 100; i++) {
-			os_sprintf(buff, "<li>%lu\n", os_random());
-			httpdSend(connData, buff, -1);
+		// TODO wait for data to be received
+		// on error, terminate and proceed to the "success" field.
 
-			if (--rns->count_remain == 0) {
-				break;
+		u32 chunk = MIN(10, st->total_count - st->done_count); // chunks of 10
+
+		// chunk of data...
+		for (u32 i = 0; i < chunk; i++, st->done_count++) {
+			// preceding comma if not the first number
+			if (st->done_count > 0) {
+				httpdSend(connData, ", ", 2);
 			}
+
+			// one number
+			os_sprintf(buff20, "%lu", os_random());
+			httpdSend(connData, buff20, -1);
 		}
 
-		// We are done.
-		if (rns->count_remain == 0) {
-			free(rns);
-			*arg = NULL; // mark as already freed
-			return HTTPD_CGI_DONE;
-		}
+		// wait for more in this substitution
+		if (st->done_count < st->total_count)
+			return HTTPD_CGI_MORE; // more numbers to come
 
-		return HTTPD_CGI_MORE;
+	} else if (strcmp(token, "success") == 0) {
+		// success status
+		httpdSend(connData, (st->success ? "true" : "false"), -1);
 	}
 
 	return HTTPD_CGI_DONE;
 }
+
+
+
+
+// Example of multi-pass generation of a html file
+
 
 /*
 // better to put it in the fs...
@@ -121,8 +149,8 @@ int FLASH_FN cgiRandomNumbers(HttpdConnData *connData) {
 		httpdSend(connData, "<!DOCTYPE html>"
 							"<html>"
 							"<head>"
-							"	<title>Generated page.</title>"
-							"	<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"
+							"   <title>Generated page.</title>"
+							"   <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">"
 							"</head>"
 							"<body>"
 							"<div id=\"main\">"

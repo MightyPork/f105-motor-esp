@@ -18,9 +18,9 @@
 
 #define banner(fmt, ...) \
 	do {  \
-		printf("\x1b[32;1m");  \
+		printf(LOG_EOL "\x1b[32;1m");  \
 		uptime_print();  \
-		printf(" [i] "fmt"\x1b[0m"LOG_EOL, ##__VA_ARGS__);  \
+		printf(" [i] "fmt"\x1b[0m" LOG_EOL, ##__VA_ARGS__);  \
 	} while(0)
 
 

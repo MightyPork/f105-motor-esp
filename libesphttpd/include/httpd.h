@@ -72,7 +72,7 @@ typedef struct {
 #define ROUTE_CGI_ARG(path, handler, arg1)         ROUTE_CGI_ARG2(path, handler, arg1, NULL)
 #define ROUTE_CGI(path, handler)                   ROUTE_CGI_ARG2(path, handler, NULL, NULL)
 
-#define ROUTE_FILE(path, filepath)                 ROUTE_CGI_ARG(path, cgiEspFsStaticFile, filepath)
+#define ROUTE_FILE(path, filepath)                 ROUTE_CGI_ARG(path, cgiEspFsFile, filepath)
 
 // the argument of a template route is accessible as cgiArg2 on the connData struct.
 #define ROUTE_TPL(path, replacer)                  ROUTE_CGI_ARG(path, cgiEspFsTemplate, replacer)

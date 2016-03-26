@@ -4,6 +4,6 @@
 #include <esp8266.h>
 #include "httpd.h"
 
-int tplMultipart(HttpdConnData *connData, char *token, void **arg);
+int tplReadSamplesJSON(HttpdConnData *connData, char *token, void **arg);
 
 #endif

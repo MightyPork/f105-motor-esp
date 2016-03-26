@@ -57,7 +57,8 @@ SOURCES += \
 	sbmp/library/payload_parser.c \
 	user/sampling.c \
 	user/page_home.c \
-	user/ftoa.c
+	user/ftoa.c \
+    user/routes.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -137,7 +138,8 @@ HEADERS += \
 	user/timeout.h \
 	user/sbmp_config.h \
 	sbmp/library/sbmp_config.example.h \
-	user/ftoa.h
+	user/ftoa.h \
+    user/routes.h
 
 DISTFILES += \
 	style.astylerc \

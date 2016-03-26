@@ -73,16 +73,21 @@ typedef struct {
 //The mappings from file extensions to mime types. If you need an extra mime type,
 //add it here.
 static const ICACHE_RODATA_ATTR MimeMap mimeTypes[]={
-	{"htm", "text/htm"},
+	// html
 	{"html", "text/html"},
-	{"css", "text/css"},
-	{"js", "text/javascript"},
-	{"txt", "text/plain"},
-	{"jpg", "image/jpeg"},
-	{"jpeg", "image/jpeg"},
-	{"png", "image/png"},
-	{"svg", "image/svg+xml"},
-	{NULL, "text/html"}, //default value
+
+	{"css",  "text/css"},
+	{"json", "application/json"},
+	{"js",   "text/javascript"},
+	{"txt",  "text/plain"},
+	{"csv",  "text/csv"},
+
+	// images
+	{"ico",  "image/x-icon"},
+	{"jpg",  "image/jpeg"},
+	{"png",  "image/png"},
+	{"svg",  "image/svg+xml"},
+	{NULL,   "text/html"}, //default value
 };
 
 //Returns a static char* to a mime type for a given url to a file.

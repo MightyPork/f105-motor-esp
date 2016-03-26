@@ -194,7 +194,7 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 
 	if (connData->conn == NULL) {
 		//Connection aborted. Clean up.
-		((TplCallback)(connData->cgiArg))(connData, NULL, &tpd->tplArg);
+		((TplCallback)(connData->cgiArg))(connData, NULL, &tpd->tplArg); // call the template func with NULL token
 		espFsClose(tpd->file);
 		free(tpd);
 		return HTTPD_CGI_DONE;

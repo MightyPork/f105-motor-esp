@@ -28,6 +28,12 @@
 // this ideally would allow flash arrays, but alas works only for uint32_t
 #define FLASH_DATA ICACHE_RODATA_ATTR STORE_ATTR
 
+#define MIN(a,b) ((a)>(b)?(b):(a))
+#define MAX(a,b) ((a)<(b)?(b):(a))
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+
 #include "platform.h"
 #include "espmissingincludes.h"
 #include "esp_sdk_ver.h"
