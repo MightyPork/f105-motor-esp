@@ -35,13 +35,10 @@ static int FLASH_FN myPassFn(HttpdConnData *connData, int no, char *user, int us
 HttpdBuiltInUrl builtInUrls[] = {
 	ROUTE_CGI_ARG("*", cgiRedirectApClientToHostname, "esp8266.nonet"), // redirect func for the captive portal
 
-	ROUTE_TPL_FILE("/", tplHome, "/pages/home.tpl.html"),
-
-	ROUTE_CGI("/acquire.cgi", cgiReadSamples),
-
+	ROUTE_TPL_FILE("/", tplHome, "/pages/home.tpl"),
 
 	// API for measurements
-	ROUTE_TPL_FILE("/meas/samples.json", tplReadSamplesJSON, "/json/samples.tpl.json"),
+	ROUTE_TPL_FILE("/api/raw.json", tplReadSamplesJSON, "/json/samples.tpl"),
 
 
 #if WIFI_PROTECT
@@ -49,7 +46,7 @@ HttpdBuiltInUrl builtInUrls[] = {
 #endif
 
 	ROUTE_REDIRECT("/wifi/",  "/wifi"),
-	ROUTE_TPL_FILE("/wifi", tplWlan, "/pages/wifi.tpl.html"),
+	ROUTE_TPL_FILE("/wifi", tplWlan, "/pages/wifi.tpl"),
 
 	ROUTE_CGI("/wifi/scan.cgi", cgiWiFiScan),
 	ROUTE_CGI("/wifi/connect.cgi", cgiWiFiConnect),

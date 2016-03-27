@@ -135,7 +135,6 @@ HEADERS += \
 	sbmp/library/payload_parser.h \
 	user/sampling.h \
 	user/page_home.h \
-	user/timeout.h \
 	user/sbmp_config.h \
 	sbmp/library/sbmp_config.example.h \
 	user/ftoa.h \

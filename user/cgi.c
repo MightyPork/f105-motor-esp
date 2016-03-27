@@ -17,6 +17,8 @@ flash as a binary. Also handles the hit counter on the main page.
 #include "cgi.h"
 #include "uptime.h"
 #include "datalink.h"
+#include "sampling.h"
+#include "serial.h"
 
 
 // -------------------------------------------------------------------------------
@@ -24,8 +26,8 @@ flash as a binary. Also handles the hit counter on the main page.
 // Read multiple samples from the ADC as JSON
 
 typedef struct {
-	uint32_t total_count;
-	uint32_t done_count;
+	uint16_t total_count;
+	uint16_t done_count;
 	bool success;
 } tplReadSamplesJSON_state;
 
@@ -57,9 +59,10 @@ int FLASH_FN tplReadSamplesJSON(HttpdConnData *connData, char *token, void **arg
 		}
 		st->total_count = count;
 		st->done_count = 0;
-		st->success = true;
+		st->success = true; // success true by default
 
-		// TODO Start the capture
+		// REQUEST THE DATA
+		meas_request_data(st->total_count);
 	}
 
 	// the "success" field is after the data,
@@ -67,34 +70,52 @@ int FLASH_FN tplReadSamplesJSON(HttpdConnData *connData, char *token, void **arg
 
 	if (strcmp(token, "values") == 0) {
 
-		if (st->done_count == 0) {
-			dbg("Delay to simulate readout...");
-			// 1000 ms delay
-			for(int i=0;i<1000;i++) {
-				os_delay_us(1000);
-			}
+		// Wait for a chunk
+
+		uint8_t *chunk = NULL;
+		uint16_t chunk_len = 0;
+
+		// 5 secs or 500 ms
+		for (int i = 0; i < (st->done_count == 0 ? 5000*100: 500*100); i++) {
+			uart_poll();
+			if (meas_chunk_ready()) break;
+			os_delay_us(10); // 1 ms
+			system_soft_wdt_feed();
+		}
+		chunk = meas_get_chunk(&chunk_len);
+
+		if (!chunk) {
+			// abort, proceed to the next field.
+			meas_close();
+			st->success = false;
+			return HTTPD_CGI_DONE;
 		}
 
-		// TODO wait for data to be received
-		// on error, terminate and proceed to the "success" field.
-
-		u32 chunk = MIN(10, st->total_count - st->done_count); // chunks of 10
+		PayloadParser pp = pp_start(chunk, chunk_len);
 
 		// chunk of data...
-		for (u32 i = 0; i < chunk; i++, st->done_count++) {
+		for (; pp.ptr < pp.len; st->done_count++) {
 			// preceding comma if not the first number
 			if (st->done_count > 0) {
 				httpdSend(connData, ", ", 2);
 			}
 
-			// one number
-			os_sprintf(buff20, "%lu", os_random());
+			uint32_t samp = pp_u32(&pp);
+
+			// print the number
+			os_sprintf(buff20, "%d", samp);
 			httpdSend(connData, buff20, -1);
 		}
 
 		// wait for more in this substitution
-		if (st->done_count < st->total_count)
+		if (st->done_count < st->total_count) {
+			meas_request_next_chunk();
 			return HTTPD_CGI_MORE; // more numbers to come
+		} else {
+			// we're done
+			meas_close();
+			return HTTPD_CGI_DONE;
+		}
 
 	} else if (strcmp(token, "success") == 0) {
 		// success status

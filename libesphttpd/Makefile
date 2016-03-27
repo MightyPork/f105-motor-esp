@@ -169,7 +169,7 @@ ifeq ("$(COMPRESS_W_YUI)","yes")
 	$(Q) for file in `find html_compressed -type f -name "*.js"`; do $(YUI-COMPRESSOR) --type js $$file -o $$file; done
 	$(Q) for file in `find html_compressed -type f -name "*.css"`; do $(YUI-COMPRESSOR) --type css $$file -o $$file; done
 ifeq ("$(COMPRESS_W_HTMLMINIFIER)","yes")
-	$(Q) for file in `find html_compressed -type f -name "*.html" -o -name "*.htm" -o -name "*.tpl"`; do $(HTML-MINIFIER) $$file -o $$file; done
+	$(Q) for file in `find html_compressed/pages -type f -name "*.html" -o -name "*.htm" -o -name "*.tpl"`; do $(HTML-MINIFIER) $$file -o $$file; done
 endif
 	$(Q) awk "BEGIN {printf \"YUI compression ratio was: %.2f%%\\n\", (`du -b -s html_compressed/ | sed 's/\([0-9]*\).*/\1/'`/`du -b -s ../html/ | sed 's/\([0-9]*\).*/\1/'`)*100}"
 # mkespfsimage will compress html, css, svg and js files with gzip by default if enabled

@@ -17,7 +17,7 @@
 static void uart0_rx_intr_handler(void *para);
 static void uart_recvTask(os_event_t *events);
 
-#define uart_recvTaskPrio        0
+#define uart_recvTaskPrio        1
 #define uart_recvTaskQueueLen    10
 static os_event_t uart_recvTaskQueue[uart_recvTaskQueueLen];
 
@@ -123,18 +123,21 @@ void uart_rx_intr_enable(uint8 uart_no)
 #define UART_GetRxFifoCount(uart_no) ((READ_PERI_REG(UART_STATUS((uart_no))) >> UART_RXFIFO_CNT_S) & UART_RXFIFO_CNT)
 
 
+void FLASH_FN uart_poll(void)
+{
+	uint8 fifo_len = UART_GetRxFifoCount(UART0);
+
+	for (uint8 idx = 0; idx < fifo_len; idx++) {
+		uint8 d_tmp = READ_PERI_REG(UART_FIFO(UART0)) & 0xFF;
+		datalink_receive(d_tmp);
+	}
+}
+
+
 static void FLASH_FN uart_recvTask(os_event_t *events)
 {
 	if (events->sig == 0) {
-		uint8 fifo_len = UART_GetRxFifoCount(UART0);
-
-		// read from the FIFO & print back
-		for (uint8 idx = 0; idx < fifo_len; idx++) {
-			uint8 d_tmp = READ_PERI_REG(UART_FIFO(UART0)) & 0xFF;
-			//UART_WriteChar(UART0, d_tmp, 0);
-
-			datalink_receive(d_tmp);
-		}
+		uart_poll();
 
 		// clear irq flags
 		WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_FULL_INT_CLR | UART_RXFIFO_TOUT_INT_CLR);

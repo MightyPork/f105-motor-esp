@@ -3,116 +3,167 @@
 
 #include "datalink.h"
 #include "sampling.h"
-#include "timeout.h"
 
 // The buffer is big enough for 256 data bytes - 4*64
 
 // chunk size for bulk transfer (must be multiple of 4 - length of uint32 / float)
-// NOTE: If too large, strange errors occur (problem with the UART FIFO at high speed)
+// NOTE: If too large, strange errors can occur (problem with the underlying UART FIFO at high speed)
+// the FIFO has 128 bytes, and should accomodate ideally the whole frame.
 #define CHUNK_LEN 100
 
 
-static volatile bool acquire_pending = false;
-static volatile uint16_t acquire_session;
+// Only one readout can happen at a time.
+
+static struct {
+	bool pending;                       /*!< Flag that data is currently being read */
+	uint16_t sesn;                      /*!< SBMP session of the readout sequence */
+	bool chunk_ready;                   /*!< Chunk was received and is ready for reading */
+	uint8_t received_chunk[CHUNK_LEN];  /*!< Copy of the latest received chunk of data */
+	uint16_t received_chunk_size;            /*!< Size of the chunk in latest_chunk_copy */
+
+	// the readout state
+	uint32_t pos;
+	uint32_t total;
+	ETSTimer abortTimer;
+} rd;
 
 
-static ETSTimer prSampleAbortTimer;
+// --- timeout ---
 
-static void FLASH_FN prSampleAbortTimerCb(void *arg)
+static void FLASH_FN abortTimerCb(void *arg)
 {
+	(void)arg;
 	warn("Sampling aborted due to timeout.");
 
 	// try to abort the readout
-	sbmp_bulk_abort(dlnk_ep, acquire_session);
+	sbmp_bulk_abort(dlnk_ep, rd.sesn);
 
 	// free the data obj if not NULL
-	sbmp_ep_free_listener_obj(dlnk_ep, acquire_session);
+	sbmp_ep_free_listener_obj(dlnk_ep, rd.sesn);
 	// release the slot
-	sbmp_ep_remove_listener(dlnk_ep, acquire_session);
-	acquire_pending = false;
+	sbmp_ep_remove_listener(dlnk_ep, rd.sesn);
+
+	// invalidate the chunk buffer and indicate that a new readout can start
+	rd.pending = false;
 }
 
-
-static void setReadoutTmeoTimer(int ms)
+static void FLASH_FN setReadoutTmeoTimer(int ms)
 {
-	dbg("Set read timeout %d", ms);
-	os_timer_disarm(&prSampleAbortTimer);
-	os_timer_setfn(&prSampleAbortTimer, prSampleAbortTimerCb, NULL);
-	os_timer_arm(&prSampleAbortTimer, ms, 0);
+//	dbg("Set read timeout %d", ms);
+	os_timer_disarm(&rd.abortTimer);
+	os_timer_setfn(&rd.abortTimer, abortTimerCb, NULL);
+	os_timer_arm(&rd.abortTimer, ms, 0);
 }
 
-static void stopReadoutTmeoTimer(void)
+static void FLASH_FN stopReadoutTmeoTimer(void)
 {
-	dbg("Stop read timeout");
-	os_timer_disarm(&prSampleAbortTimer);
+//	dbg("Stop read timeout");
+	os_timer_disarm(&rd.abortTimer);
 }
 
+// -------------
 
-typedef struct {
-	uint32_t pos;
-	uint32_t total;
-} DataReadState;
+
+
+/** request next chunk */
+void FLASH_FN meas_request_next_chunk(void)
+{
+	if (!rd.pending) return;
+	rd.chunk_ready = false; // invalidate the current chunk, so waiting for chunk is possible.
+	sbmp_bulk_request(dlnk_ep, rd.pos, CHUNK_LEN, rd.sesn);
+}
+
+/** Check if chunk ready to be read */
+bool FLASH_FN meas_chunk_ready(void)
+{
+	return rd.pending && rd.chunk_ready;
+}
+
+/**
+ * @brief Get received chunk. NULL if none.
+ *
+ * The array is valid until next chunk is requested.
+ * Chunk length in bytes is stored in the argument.
+ */
+uint8_t FLASH_FN *meas_get_chunk(uint16_t *chunk_len)
+{
+	if (!rd.pending) {
+		warn("Meas not pending, cant get chunk");
+		return NULL;
+	}
+	if (!rd.chunk_ready) {
+		warn("Rx chunk not ready");
+		return NULL;
+	}
+
+	*chunk_len = rd.received_chunk_size;
+	return rd.received_chunk;
+}
+
+/** Check if this was the last chunk */
+bool FLASH_FN meas_is_last_chunk(void)
+{
+	return rd.pos >= rd.total;
+}
+
+/** Terminate the readout. */
+void FLASH_FN meas_close(void)
+{
+	sbmp_ep_remove_listener(dlnk_ep, rd.sesn);
+	stopReadoutTmeoTimer();
+	rd.pending = false;
+
+	info("Transfer closed.");
+}
+
 
 static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram *dg, void **obj)
 {
-	dbg("Received msg in session %d, dg type %d", dg->session, dg->type);
+	(void)obj;
 
-	DataReadState *readState = *obj;
-
-	// allocate the state struct
-	if (readState == NULL) {
-		readState = malloc(sizeof(DataReadState));
-		*obj = readState;
-	}
+//	dbg("Received msg in session %d, dg type %d", dg->session, dg->type);
 
 	PayloadParser pp;
 	switch (dg->type) {
 		case DG_BULK_OFFER:// Data ready notification
 			stopReadoutTmeoTimer();
-			info("--- Data offered for bulk transfer ---");
+//			info("--- Peer offers data for bulk transfer ---");
 
 			// data is ready to be read
 			pp = pp_start(dg->payload, dg->length);
 
-			readState->pos = 0;
-			readState->total = pp_u32(&pp);
+			rd.pos = 0;
+			rd.total = pp_u32(&pp);
 
-			dbg("Total bytes: %d", readState->total);
+//			dbg("Total bytes avail: %d", rd.total);
 
-			// we choose to request the data immediately
-
+			// renew the timeout
 			setReadoutTmeoTimer(1000);
-			sbmp_bulk_request(ep, readState->pos, CHUNK_LEN, dg->session);
+
+			// request first chunk
+			sbmp_bulk_request(ep, rd.pos, CHUNK_LEN, dg->session);
 			break;
 
 		case DG_BULK_DATA: // data received
 			stopReadoutTmeoTimer();
-			info("--- Received a chunk, length %d ---", dg->length);
+//			info("--- Received a chunk, length %d ---", dg->length);
 
 			// Process the received data
-			pp = pp_start(dg->payload, dg->length);
-			while(pp.ptr < pp.len) {
-				uint32_t x = pp_u32(&pp);
-				printf("%d,", x);
-			}
-			printf("\n");
+			memcpy(rd.received_chunk, dg->payload, dg->length);
+			rd.chunk_ready = true;
+			rd.received_chunk_size = dg->length;
 
-			// and ask for more
-			readState->pos += dg->length;
+			// move the pointer for next request
+			rd.pos += dg->length;
 
-			if (readState->pos >= readState->total) {
-				dbg("Transfer is complete.");
+			setReadoutTmeoTimer(1000); // timeout to retrieve the data & ask for more
+
+			if (rd.pos >= rd.total) {
+				info("Transfer is complete.");
 				// transfer complete
 
-				// make sure the peer has freed the buffer
-				// (may be waiting for us if we wanted to re-read something)
-
+				// ask peer to release the buffer & go idle
 				sbmp_bulk_abort(ep, dg->session);
-				goto cleanup;
-			} else {
-				// read next part
-				setReadoutTmeoTimer(1000);
-				sbmp_bulk_request(ep, readState->pos, CHUNK_LEN, dg->session);
 			}
 			break;
 
@@ -125,24 +176,18 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 	return;
 
 cleanup:
-	// free the obj
-	free(readState);
 	// remove the listener
-	sbmp_ep_remove_listener(ep, dg->session);
-	stopReadoutTmeoTimer();
-	acquire_pending = false;
-
-	// In case the error was in SBMP (bad state)
+	meas_close();
 }
 
 
-static bool FLASH_FN meas_request_data(uint16_t count)
+bool FLASH_FN meas_request_data(uint16_t count)
 {
 	bool suc = false;
 
 	info("Requesting data capture - %d samples.", count);
 
-	if (acquire_pending) {
+	if (rd.pending) {
 		error("Acquire request already in progress.");
 		return false;
 	}
@@ -152,7 +197,10 @@ static bool FLASH_FN meas_request_data(uint16_t count)
 		return false;
 	}
 
-	acquire_pending = true;
+	rd.chunk_ready = false;
+	rd.pos = 0;
+	rd.total = 0;
+	rd.pending = true;
 
 	// start the abort timer - timeout
 	setReadoutTmeoTimer(6000);
@@ -170,7 +218,7 @@ static bool FLASH_FN meas_request_data(uint16_t count)
 		goto fail;
 	}
 
-	acquire_session = sesn;
+	rd.sesn = sesn;
 
 	// request N values
 	sbmp_ep_send_u16(dlnk_ep, count);
@@ -181,7 +229,7 @@ static bool FLASH_FN meas_request_data(uint16_t count)
 
 fail:
 	stopReadoutTmeoTimer();
-	acquire_pending = false;
+	rd.pending = false;
 	return false;
 }
 
@@ -189,7 +237,7 @@ fail:
 // ------ C G I ---------
 
 
-
+/*
 int FLASH_FN cgiReadSamples(HttpdConnData *connData)
 {
 	char buff[128];
@@ -218,3 +266,4 @@ int FLASH_FN cgiReadSamples(HttpdConnData *connData)
 
 	return HTTPD_CGI_DONE;
 }
+*/
