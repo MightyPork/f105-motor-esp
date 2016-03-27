@@ -10,3 +10,13 @@ html, body {
 	height: 100%;
 	overflow: hidden;
 }
+
+a, a:visited, a:link {
+	color: #5abfff;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #5abfff;
+	text-decoration: underline;
+}

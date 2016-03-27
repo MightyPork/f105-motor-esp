@@ -17,10 +17,14 @@ elixir(function (mix) {
 
 	// JS libs
 	mix.scripts([
+		'js-src/lib/chibi.js',
+		'js-src/lib/chartist.js',
+		'js-src/lib/chartist.axis-title.js',
+		'js-src/lib/chartist.zoom.js',
+		'js-src/utils.js',
+		'js-src/modal.js',
 		'js-src/app.js',
-		'js-src/chibi.js',
-		'js-src/chartist.js',
-		'js-src/chartist.axis-title.js',
-		'js-src/chartist.zoom.js',
+		'js-src/wifi.js',
+		'js-src/waveform.js',
 	], 'js/all.js');
 });

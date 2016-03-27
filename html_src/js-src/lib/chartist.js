@@ -906,19 +906,23 @@ var Chartist = {
     positionalData[axis.units.len] = length;
     positionalData[axis.counterUnits.len] = axisOffset - 10;
 
+	var lblText = labels[index];
+	//round (!! will brak for non-numeric)
+	lblText = Math.round(+lblText*100)/100;
+
     if(useForeignObject) {
       // We need to set width and height explicitly to px as span will not expand with width and height being
       // 100% in all browsers
       var content = '<span class="' + classes.join(' ') + '" style="' +
         axis.units.len + ': ' + Math.round(positionalData[axis.units.len]) + 'px; ' +
         axis.counterUnits.len + ': ' + Math.round(positionalData[axis.counterUnits.len]) + 'px">' +
-        labels[index] + '</span>';
+		  lblText + '</span>';
 
       labelElement = group.foreignObject(content, Chartist.extend({
         style: 'overflow: visible;'
       }, positionalData));
     } else {
-      labelElement = group.elem('text', positionalData, classes.join(' ')).text(labels[index]);
+      labelElement = group.elem('text', positionalData, classes.join(' ')).text(lblText);
     }
 
     eventEmitter.emit('draw', Chartist.extend({
@@ -927,7 +931,7 @@ var Chartist = {
       index: index,
       group: group,
       element: labelElement,
-      text: labels[index]
+      text: lblText
     }, positionalData));
   };
 

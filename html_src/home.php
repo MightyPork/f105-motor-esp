@@ -70,6 +70,7 @@
 			$('#rssi-dbm').html(staRSSI);
 		}
 
+		// TODO use json + ajax instead
 		setTimeout(function(){location.reload()}, 10000);
 	});
 </script>

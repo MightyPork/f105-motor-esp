@@ -32,7 +32,11 @@
 @mixin fancy-btn-colors-full($text_p, $back_p, $side_p, $text_a, $back_a, $side_a) {
 	background-color: $back_p;
 	box-shadow: 0 3px 0 $side_p;
-	color: $text_p;
+	text-decoration: none !important;
+
+	&, &:link, &:visited {
+		color: $text_p;
+	}
 
 	&:hover, &:active, &.active, &.selected {
 		background-color: $back_a;

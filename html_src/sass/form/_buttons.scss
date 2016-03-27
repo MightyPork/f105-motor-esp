@@ -1,6 +1,6 @@
 @import "fancy_button_mixins";
 
-#{$all-buttons}, a.button {
+#{$all-buttons}, .button {
 	@include fancy-btn-base();
 
 	// fontello
