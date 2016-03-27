@@ -3,6 +3,7 @@
 $menu = [
 	'home'        => [ '/',            'Home'               ],
 	'wifi'        => [ '/wifi',        'WiFi config'        ],
+	'waveform'    => [ '/waveform',    'Waveform'           ],
 	'fft'         => [ '/fft',         'FFT'                ],
 	'spectrogram' => [ '/spectrogram', 'Spectrogram'        ],
 	'transient'   => [ '/transient',   'Power-on transient' ],

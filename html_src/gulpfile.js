@@ -1,14 +1,12 @@
-//process.env.DISABLE_NOTIFIER = true;
-
-// process.env.NODE_ENV = 'production';
-
 var elixir = require('laravel-elixir');
-var gutils = require('gulp-util');
+var autoprefixer = require('autoprefixer');
 
-// gutils.env.production = true;
+elixir.config.css.autoprefix.options.browsers = ["> 2.5% in CZ"];
+elixir.config.css.autoprefix.options.flexbox = "no-2009";
 
-//elixir.config.css.sass.pluginOptions.outputStyle = 'compressed';//gutils.env.production ? 'compressed' : 'expanded';
-elixir.config.css.autoprefix.options.browsers = ["last 2 versions", "> 5%"];
+// var info = autoprefixer(elixir.config.css.autoprefix).info();
+// console.log(info);
+
 
 elixir.config.assetsPath='.';
 elixir.config.publicPath='.';
@@ -20,6 +18,9 @@ elixir(function (mix) {
 	// JS libs
 	mix.scripts([
 		'js-src/app.js',
-		'js-src/chibi.js'
+		'js-src/chibi.js',
+		'js-src/chartist.js',
+		'js-src/chartist.axis-title.js',
+		'js-src/chartist.zoom.js',
 	], 'js/all.js');
 });

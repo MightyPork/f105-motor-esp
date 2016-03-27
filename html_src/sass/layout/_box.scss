@@ -24,4 +24,8 @@
 		width: initial;
 		max-width: initial;
 	}
+
+	&.medium {
+		max-width: 1200px;
+	}
 }
