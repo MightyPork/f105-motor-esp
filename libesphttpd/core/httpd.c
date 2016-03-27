@@ -243,6 +243,10 @@ void ICACHE_FLASH_ATTR httpdStartResponse(HttpdConnData *conn, int code) {
 			code,
 			(conn->priv->flags&HFL_CHUNKED)?"Transfer-Encoding: chunked":"Connection: close");
 	httpdSend(conn, buff, l);
+
+	// CORS headers
+	httpdSend(conn, "Access-Control-Allow-Origin: *\r\n", -1);
+	httpdSend(conn, "Access-Control-Allow-Methods: GET,POST,OPTIONS\r\n", -1);
 }
 
 //Send a http header.
@@ -570,6 +574,9 @@ static void ICACHE_FLASH_ATTR httpdParseHeader(char *h, HttpdConnData *conn) {
 	} else if (strncmp(h, "POST ", 5)==0) {
 		conn->requestType = HTTPD_METHOD_POST;
 		firstLine=1;
+	} else if (strncmp(h, "OPTIONS ", 8)==0) {
+		conn->requestType = HTTPD_METHOD_OPTIONS;
+		firstLine=1;
 	}
 
 	if (firstLine) {
@@ -632,6 +639,15 @@ static void ICACHE_FLASH_ATTR httpdParseHeader(char *h, HttpdConnData *conn) {
 				dbg("boundary = %s", conn->post->multipartBoundary);
 			}
 		}
+	} else if (strncmp(h, "Access-Control-Request-Headers: ", 32)==0) {
+		// CORS crap that needs to be repeated in the response
+
+		info("CORS preflight request.");
+
+//		int len = strlen(h);
+//		info("h = %s, len %d", h, len);
+
+		//strcpy(conn->priv->corsReqHdrs, h+32);//MAX_CORS_HDR_LEN
 	}
 }
 

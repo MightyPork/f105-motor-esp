@@ -12,6 +12,7 @@
 
 #define HTTPD_METHOD_GET 1
 #define HTTPD_METHOD_POST 2
+#define HTTPD_METHOD_OPTIONS 3
 
 typedef struct HttpdPriv HttpdPriv;
 typedef struct HttpdConnData HttpdConnData;
