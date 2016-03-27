@@ -81,10 +81,15 @@ var wfm = (function () {
 	}
 
 	wfm.init = function() {
+		//	var resp = {
+		//		"samples": [1878, 1883, 1887, 1897, 1906, 1915, 1926, 1940, 1955, 1970, 1982, 1996, 2012, 2026, 2038, 2049],
+		//		"success": true
+		//	};
+
 		$('#load').on('click', function() {
 			var samples = $('#count').val();
 
-			$().get('http://192.168.1.13/api/raw.json?count='+samples, onRxData, true, true);
+			$().get('http://192.168.1.13/api/raw.json?n='+samples, onRxData, true, true);
 		});
 	};
 

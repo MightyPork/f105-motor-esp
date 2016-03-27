@@ -51,7 +51,7 @@ int FLASH_FN tplReadSamplesJSON(HttpdConnData *connData, char *token, void **arg
 
 		// check how many samples are requested
 		uint16_t count = 1;
-		int len = httpdFindArg(connData->getArgs, "count", buff20, sizeof(buff20));
+		int len = httpdFindArg(connData->getArgs, "n", buff20, sizeof(buff20));
 		if (len != -1) count = (uint16_t)atoi(buff20);
 		if (count > 4096) {
 			warn("Requested %d samples, capping at 4096.", count);

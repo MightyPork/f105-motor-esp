@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<title>Waveform - Current analyzer</title>
+
+	<link href="/css/app.css" rel="stylesheet">
+
+	
+	<script src="/js/all.js"></script>
+</head>
+<body class="page-waveform">
+<div id="outer">
+<nav id="menu">
+	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current analyzer</div>
+	<a href="/">Home</a><a href="/wifi">WiFi config</a><a href="/waveform" class="selected">Waveform</a><a href="/fft">FFT</a><a href="/spectrogram">Spectrogram</a><a href="/transient">Power-on transient</a><a href="/about">Credits &amp; About</a></nav>
+<div id="content">
+
+<h1>Waveform</h1>
+
+<div class="Box center">
+	<label for="count">Samples:</label>
+	<input id="count" type="number" value="100" style="width:100px">&nbsp;
+	<a id="load" class="button btn-green">Load</a>
+</div>
+
+<div class="Box medium">
+	<div id="chart" class="ct-chart ct-wide"></div>
+</div>
+
+<script>
+	$().ready(wfm.init());
+</script>
+
+</div>
+</div>
+</body>
+</html>

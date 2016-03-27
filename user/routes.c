@@ -35,11 +35,12 @@ static int FLASH_FN myPassFn(HttpdConnData *connData, int no, char *user, int us
 HttpdBuiltInUrl builtInUrls[] = {
 	ROUTE_CGI_ARG("*", cgiRedirectApClientToHostname, "esp8266.nonet"), // redirect func for the captive portal
 
+	// --- UI pages ---
+
 	ROUTE_TPL_FILE("/", tplHome, "/pages/home.tpl"),
+	ROUTE_FILE("/waveform", "/pages/wfm.html"), // static file
 
-	// API for measurements
-	ROUTE_TPL_FILE("/api/raw.json", tplReadSamplesJSON, "/json/samples.tpl"),
-
+	// --- WiFi config ---
 
 #if WIFI_PROTECT
 	ROUTE_AUTH("/wifi/*", myPassFn),
@@ -52,6 +53,13 @@ HttpdBuiltInUrl builtInUrls[] = {
 	ROUTE_CGI("/wifi/connect.cgi", cgiWiFiConnect),
 	ROUTE_CGI("/wifi/connstatus.cgi", cgiWiFiConnStatus),
 	ROUTE_CGI("/wifi/setmode.cgi", cgiWiFiSetMode),
+
+	// --- API ---
+
+	// API for measurements
+	ROUTE_TPL_FILE("/api/raw.json", tplReadSamplesJSON, "/json/samples.tpl"),
+
+	// --- FS ---
 
 	ROUTE_FS("*"), //Catch-all cgi function for the filesystem NOTE: unsafe, lets user read templates.
 

@@ -16,7 +16,7 @@
 <div id="outer">
 <nav id="menu">
 	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current analyzer</div>
-	<a href="/" class="selected">Home</a><a href="/wifi">WiFi config</a><a href="/fft">FFT</a><a href="/spectrogram">Spectrogram</a><a href="/transient">Power-on transient</a><a href="/about">Credits &amp; About</a></nav>
+	<a href="/" class="selected">Home</a><a href="/wifi">WiFi config</a><a href="/waveform">Waveform</a><a href="/fft">FFT</a><a href="/spectrogram">Spectrogram</a><a href="/transient">Power-on transient</a><a href="/about">Credits &amp; About</a></nav>
 <div id="content">
 
 <h1>System Status</h1>
@@ -89,13 +89,11 @@
 			$('#rssi-dbm').html(staRSSI);
 		}
 
+		// TODO use json + ajax instead
 		setTimeout(function(){location.reload()}, 10000);
 	});
 </script>
 
-<script>
-	$().ready(initDef);
-</script>
 </div>
 </div>
 </body>

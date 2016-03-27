@@ -2220,7 +2220,7 @@ var Chartist = {
     };
 
     constr.prototype = proto;
-    constr.super = superProto;
+    constr['super'] = superProto;
     constr.extend = this.extend;
 
     return constr;
@@ -3567,7 +3567,7 @@ var Chartist = {
       max: this.bounds.max
     };
 
-    Chartist.AutoScaleAxis.super.constructor.call(this,
+    Chartist.AutoScaleAxis['super'].constructor.call(this,
       axisUnit,
       chartRect,
       this.bounds.values,
@@ -3621,7 +3621,7 @@ var Chartist = {
       max: highLow.high
     };
 
-    Chartist.FixedScaleAxis.super.constructor.call(this,
+    Chartist.FixedScaleAxis['super'].constructor.call(this,
       axisUnit,
       chartRect,
       this.ticks,
@@ -3660,7 +3660,7 @@ var Chartist = {
   'use strict';
 
   function StepAxis(axisUnit, data, chartRect, options) {
-    Chartist.StepAxis.super.constructor.call(this,
+    Chartist.StepAxis['super'].constructor.call(this,
       axisUnit,
       chartRect,
       options.ticks,
@@ -4075,7 +4075,7 @@ var Chartist = {
    *
    */
   function Line(query, data, options, responsiveOptions) {
-    Chartist.Line.super.constructor.call(this,
+    Chartist.Line['super'].constructor.call(this,
       query,
       data,
       defaultOptions,
@@ -4505,7 +4505,7 @@ var Chartist = {
    *
    */
   function Bar(query, data, options, responsiveOptions) {
-    Chartist.Bar.super.constructor.call(this,
+    Chartist.Bar['super'].constructor.call(this,
       query,
       data,
       defaultOptions,
@@ -5269,10 +5269,15 @@ var wfm = (function () {
 	}
 
 	wfm.init = function() {
+		//	var resp = {
+		//		"samples": [1878, 1883, 1887, 1897, 1906, 1915, 1926, 1940, 1955, 1970, 1982, 1996, 2012, 2026, 2038, 2049],
+		//		"success": true
+		//	};
+
 		$('#load').on('click', function() {
 			var samples = $('#count').val();
 
-			$().get('http://192.168.1.13/api/raw.json?count='+samples, onRxData, true, true);
+			$().get('http://192.168.1.13/api/raw.json?n='+samples, onRxData, true, true);
 		});
 	};
 

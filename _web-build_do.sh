@@ -11,7 +11,7 @@ rm -rf "$BLDDIR/js"
 rm -rf "$BLDDIR/css"
 
 cd "$SRCDIR"
-gulp
+gulp --production
 cd ..
 
 cp -R "$SRCDIR/css" "$BLDDIR"
@@ -23,3 +23,4 @@ mkdir -p "$BLDDIR/pages"
 
 php "$SRCDIR/home.php" > "$BLDDIR/pages/home.tpl"
 php "$SRCDIR/wifi.php" > "$BLDDIR/pages/wifi.tpl"
+php "$SRCDIR/waveform.php" > "$BLDDIR/pages/wfm.html" # no substitutions, .html allows to gzip it.

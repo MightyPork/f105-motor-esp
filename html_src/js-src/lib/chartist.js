@@ -1513,7 +1513,7 @@ var Chartist = {
     };
 
     constr.prototype = proto;
-    constr.super = superProto;
+    constr['super'] = superProto;
     constr.extend = this.extend;
 
     return constr;
@@ -2860,7 +2860,7 @@ var Chartist = {
       max: this.bounds.max
     };
 
-    Chartist.AutoScaleAxis.super.constructor.call(this,
+    Chartist.AutoScaleAxis['super'].constructor.call(this,
       axisUnit,
       chartRect,
       this.bounds.values,
@@ -2914,7 +2914,7 @@ var Chartist = {
       max: highLow.high
     };
 
-    Chartist.FixedScaleAxis.super.constructor.call(this,
+    Chartist.FixedScaleAxis['super'].constructor.call(this,
       axisUnit,
       chartRect,
       this.ticks,
@@ -2953,7 +2953,7 @@ var Chartist = {
   'use strict';
 
   function StepAxis(axisUnit, data, chartRect, options) {
-    Chartist.StepAxis.super.constructor.call(this,
+    Chartist.StepAxis['super'].constructor.call(this,
       axisUnit,
       chartRect,
       options.ticks,
@@ -3368,7 +3368,7 @@ var Chartist = {
    *
    */
   function Line(query, data, options, responsiveOptions) {
-    Chartist.Line.super.constructor.call(this,
+    Chartist.Line['super'].constructor.call(this,
       query,
       data,
       defaultOptions,
@@ -3798,7 +3798,7 @@ var Chartist = {
    *
    */
   function Bar(query, data, options, responsiveOptions) {
-    Chartist.Bar.super.constructor.call(this,
+    Chartist.Bar['super'].constructor.call(this,
       query,
       data,
       defaultOptions,
