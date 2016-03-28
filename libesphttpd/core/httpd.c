@@ -28,6 +28,8 @@ Esp8266 http server - core routines
 //size of the backlog.
 #define MAX_BACKLOG_SIZE (4*1024)
 
+#define MAX_CORS_TOKEN_LEN 256
+
 //This gets set at init time.
 static HttpdBuiltInUrl *builtInUrls;
 
@@ -48,6 +50,7 @@ struct HttpSendBacklogItem {
 //Private data for http connection
 struct HttpdPriv {
 	char head[MAX_HEAD_LEN];
+	char corsToken[MAX_CORS_TOKEN_LEN];
 	int headPos;
 	char *sendBuff;
 	int sendBuffLen;
@@ -91,15 +94,24 @@ static const ICACHE_RODATA_ATTR MimeMap mimeTypes[]={
 };
 
 //Returns a static char* to a mime type for a given url to a file.
-const char ICACHE_FLASH_ATTR *httpdGetMimetype(const char *url) {
+const char ICACHE_FLASH_ATTR *httpdGetMimetype(const char *filepath) {
 	int i=0;
-	//Go find the extension
-	const char *ext=url+(strlen(url)-1);
-	while (ext!=url && *ext!='.') ext--;
+	//Go find the extension (searching from the end)
+	const char *ext=filepath+(strlen(filepath)-1);
+	while (ext!=filepath && *ext!='.') ext--;
 	if (*ext=='.') ext++;
 
 	//ToDo: strcmp is case sensitive; we may want to do case-intensive matching here...
 	while (mimeTypes[i].ext!=NULL && strcmp(ext, mimeTypes[i].ext)!=0) i++;
+
+	if (mimeTypes[i].ext == NULL) {
+		// we didn't find any proper match
+		if (strncmp(filepath, "/json/", 6) == 0) {
+			// if it's in the json folder, it surely is json!
+			return "application/json";
+		}
+	}
+
 	return mimeTypes[i].mimetype;
 }
 
@@ -508,6 +520,18 @@ static void ICACHE_FLASH_ATTR httpdProcessRequest(HttpdConnData *conn) {
 		error("WtF? url = NULL");
 		return; //Shouldn't happen
 	}
+
+	if (conn->requestType == HTTPD_METHOD_OPTIONS /*&& conn->priv->chunkHdr[0] != 0*/) {
+		// we have a CORS preflight
+		httpdStartResponse(conn, 200);
+		httpdHeader(conn, "Access-Control-Allow-Headers", conn->priv->corsToken);
+		httpdEndHeaders(conn);
+		httpdCgiIsDone(conn);
+
+		dbg("CORS preflight resp sent.");
+		return;
+	}
+
 	//See if we can find a CGI that's happy to handle the request.
 	while (1) {
 		//Look up URL in the built-in URL table.
@@ -647,7 +671,7 @@ static void ICACHE_FLASH_ATTR httpdParseHeader(char *h, HttpdConnData *conn) {
 //		int len = strlen(h);
 //		info("h = %s, len %d", h, len);
 
-		//strcpy(conn->priv->corsReqHdrs, h+32);//MAX_CORS_HDR_LEN
+		strncpy(conn->priv->corsToken, h+32, MAX_CORS_TOKEN_LEN);
 	}
 }
 
@@ -661,6 +685,7 @@ void httpdRecvCb(ConnTypePtr rconn, char *remIp, int remPort, char *data, unsign
 	if (conn==NULL) return;
 	conn->priv->sendBuff=sendBuff;
 	conn->priv->sendBuffLen=0;
+	conn->priv->corsToken[0] = 0;
 
 	//This is slightly evil/dirty: we abuse conn->post->len as a state variable for where in the http communications we are:
 	//<0 (-1): Post len unknown because we're still receiving headers

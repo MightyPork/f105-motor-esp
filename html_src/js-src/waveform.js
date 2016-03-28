@@ -77,7 +77,7 @@ var wfm = (function () {
 			return;
 		}
 
-		buildChart(resp.samples, 'Sample Nr.', 'ADC value');
+		buildChart(json.samples, 'Sample Nr.', 'ADC value');
 	}
 
 	wfm.init = function() {
@@ -86,10 +86,19 @@ var wfm = (function () {
 		//		"success": true
 		//	};
 
-		$('#load').on('click', function() {
+		function clickHdl() {
 			var samples = $('#count').val();
 
-			$().get('http://192.168.1.13/api/raw.json?n='+samples, onRxData, true, true);
+			//http://192.168.1.13
+			$().get('/api/raw.json?n='+samples, onRxData, true, true);
+		}
+
+		$('#load').on('click', clickHdl);
+
+		$('#count').on('keyup', function(e) {
+			if (e.which == 13) {
+				clickHdl();
+			}
 		});
 	};
 

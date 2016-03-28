@@ -116,6 +116,7 @@
 
 	.ct-axis-title {
 		fill: $ct-axis-label-color;
+		@include noselect;
 	}
 
 	// --- Label ---

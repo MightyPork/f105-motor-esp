@@ -3,7 +3,7 @@
   "removeCommentsFromCDATA": true,
   "removeCDATASectionsFromCDATA": true,
   "collapseWhitespace": true,
-  "conservativeCollapse": false,
+  "conservativeCollapse": true,
   "collapseBooleanAttributes": true,
   "removeTagWhitespace": true,
   "removeAttributeQuotes": true,

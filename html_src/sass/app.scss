@@ -1,11 +1,12 @@
 @import "normalize";
-@import "lib/chartist/chartist";
 @import "lib/bourbon/bourbon";
 
 @import "grid-settings";
 @import "lib/neat/neat";
 
 @import "utils/index";
+
+@import "lib/chartist/chartist";
 
 $form-label-w: 130px;
 $form-label-gap: 8px;

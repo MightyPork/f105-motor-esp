@@ -3,6 +3,8 @@ var autoprefixer = require('autoprefixer');
 
 elixir.config.css.autoprefix.options.browsers = ["> 2.5% in CZ"];
 elixir.config.css.autoprefix.options.flexbox = "no-2009";
+elixir.config.css.cssnano.pluginOptions.discardComments = {removeAll: true};
+elixir.config.css.cssnano.pluginOptions.colormin = false;
 
 // var info = autoprefixer(elixir.config.css.autoprefix).info();
 // console.log(info);
