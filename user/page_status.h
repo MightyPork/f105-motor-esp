@@ -3,6 +3,6 @@
 
 #include <httpd.h>
 
-int tplHome(HttpdConnData *connData, char *token, void **arg);
+int tplSystemStatus(HttpdConnData *connData, char *token, void **arg);
 
 #endif // PAGE_HOME_H

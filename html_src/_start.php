@@ -4,10 +4,10 @@ $menu = [
 	'home'        => [ '/',            'Home'               ],
 	'wifi'        => [ '/wifi',        'WiFi config'        ],
 	'waveform'    => [ '/waveform',    'Waveform'           ],
-	'fft'         => [ '/fft',         'FFT'                ],
-	'spectrogram' => [ '/spectrogram', 'Spectrogram'        ],
-	'transient'   => [ '/transient',   'Power-on transient' ],
-	'about'       => [ '/about',       'Credits & About'    ],
+// 	'fft'         => [ '/fft',         'FFT'                ],
+// 	'spectrogram' => [ '/spectrogram', 'Spectrogram'        ],
+// 	'transient'   => [ '/transient',   'Power-on transient' ],
+// 	'about'       => [ '/about',       'Credits & About'    ],
 ];
 
 $appname = 'Current analyzer';

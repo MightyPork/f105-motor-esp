@@ -15,6 +15,8 @@ Cgi/template routines for the /wifi url.
 #include <esp8266.h>
 #include "cgiwifi.h"
 
+#include "utils.h" // ADDED
+
 //Enable this to disallow any changes in AP settings
 //#define DEMO_MODE
 
@@ -113,7 +115,7 @@ static void ICACHE_FLASH_ATTR wifiStartScan() {
 int ICACHE_FLASH_ATTR cgiWiFiScan(HttpdConnData *connData) {
 	int pos=(int)connData->cgiData;
 	int len;
-	char buff[1024];
+	char buff[256];
 
 	if (!cgiWifiAps.scanInProgress && pos!=0) {
 		//Fill in json code for an access point
@@ -238,7 +240,7 @@ int ICACHE_FLASH_ATTR cgiWiFiConnect(HttpdConnData *connData) {
 //given ESSID using the given password.
 int ICACHE_FLASH_ATTR cgiWiFiSetMode(HttpdConnData *connData) {
 	int len;
-	char buff[1024];
+	char buff[64];
 
 	if (connData->conn==NULL) {
 		//Connection aborted. Clean up.
@@ -258,7 +260,7 @@ int ICACHE_FLASH_ATTR cgiWiFiSetMode(HttpdConnData *connData) {
 }
 
 int ICACHE_FLASH_ATTR cgiWiFiConnStatus(HttpdConnData *connData) {
-	char buff[1024];
+	char buff[256];
 	int len;
 	struct ip_info info;
 	int st=wifi_station_get_connect_status();
@@ -290,7 +292,7 @@ int ICACHE_FLASH_ATTR cgiWiFiConnStatus(HttpdConnData *connData) {
 
 //Template code for the WLAN page.
 int ICACHE_FLASH_ATTR tplWlan(HttpdConnData *connData, char *token, void **arg) {
-	char buff[1024];
+	char buff[256];
 	int x;
 	static struct station_config stconf;
 	if (token==NULL) return HTTPD_CGI_DONE;
@@ -299,12 +301,10 @@ int ICACHE_FLASH_ATTR tplWlan(HttpdConnData *connData, char *token, void **arg) 
 	strcpy(buff, "Unknown");
 	if (strcmp(token, "WiFiMode")==0) {
 		x=wifi_get_opmode();
-		if (x==1) strcpy(buff, "Client");
-		if (x==2) strcpy(buff, "SoftAP");
-		if (x==3) strcpy(buff, "STA+AP");
+		strcpy(buff, opmode2str(x));
 	} else if (strcmp(token, "currSsid")==0) {
 		strcpy(buff, (char*)stconf.ssid);
-//	} else if (strcmp(token, "WiFiPasswd")==0) {
+//	} else if (strcmp(token, "WiFiPasswd")==0) { // don't expose password
 //		strcpy(buff, (char*)stconf.password);
 	} else if (strcmp(token, "WiFiapwarn")==0) {
 		x=wifi_get_opmode();

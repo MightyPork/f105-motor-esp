@@ -14,7 +14,7 @@ include "_start.php"; ?>
 </div>
 
 <script>
-	$().ready(wfm.init());
+	$().ready(page_waveform.init());
 </script>
 
 <?php include "_end.php"; ?>

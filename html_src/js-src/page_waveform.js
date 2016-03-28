@@ -1,4 +1,4 @@
-var wfm = (function () {
+var page_waveform = (function () {
 	var wfm = {};
 
 	function buildChart(samples, xlabel, ylabel) {

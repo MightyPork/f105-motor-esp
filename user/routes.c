@@ -10,9 +10,8 @@
 //#include "cgiwebsocket.h"
 
 // user files
-#include "cgi.h"
-#include "page_home.h"
-#include "sampling.h"
+#include "page_status.h"
+#include "page_waveform.h"
 
 #define WIFI_PROTECT 0
 
@@ -35,10 +34,19 @@ static int FLASH_FN myPassFn(HttpdConnData *connData, int no, char *user, int us
 HttpdBuiltInUrl builtInUrls[] = {
 	ROUTE_CGI_ARG("*", cgiRedirectApClientToHostname, "esp8266.nonet"), // redirect func for the captive portal
 
+	// ! Templates in the JSON folder will have application/json content type !
+	// otherwise they're encoded the same like the HTML ones -> no heatshrink, no gzip
+
 	// --- UI pages ---
 
-	ROUTE_TPL_FILE("/", tplHome, "/pages/home.tpl"),
-	ROUTE_FILE("/waveform", "/pages/wfm.html"), // static file
+	// System Status page
+	ROUTE_TPL_FILE("/",        tplSystemStatus, "/pages/status.tpl"),
+	ROUTE_TPL_FILE("/status",  tplSystemStatus, "/pages/status.tpl"),
+	ROUTE_TPL_FILE("/api/status.json", tplSystemStatus, "/json/status.tpl"),
+
+	// Waveform page
+	ROUTE_FILE("/waveform", "/pages/waveform.html"), // static file, html -> can use gzip
+	ROUTE_TPL_FILE("/api/raw.json", tplWaveformJSON, "/json/samples.tpl"),
 
 	// --- WiFi config ---
 
@@ -46,18 +54,12 @@ HttpdBuiltInUrl builtInUrls[] = {
 	ROUTE_AUTH("/wifi/*", myPassFn),
 #endif
 
-	ROUTE_REDIRECT("/wifi/",  "/wifi"),
 	ROUTE_TPL_FILE("/wifi", tplWlan, "/pages/wifi.tpl"),
 
 	ROUTE_CGI("/wifi/scan.cgi", cgiWiFiScan),
 	ROUTE_CGI("/wifi/connect.cgi", cgiWiFiConnect),
 	ROUTE_CGI("/wifi/connstatus.cgi", cgiWiFiConnStatus),
 	ROUTE_CGI("/wifi/setmode.cgi", cgiWiFiSetMode),
-
-	// --- API ---
-
-	// API for measurements
-	ROUTE_TPL_FILE("/api/raw.json", tplReadSamplesJSON, "/json/samples.tpl"),
 
 	// --- FS ---
 

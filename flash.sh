@@ -1,3 +1,3 @@
 #!/bin/bash
 
-xterm -title "ESP html build" -e "source $HOME/.bashrc && make flash -B -j4"
+xterm -title "ESP flash" -e "source $HOME/.bashrc && make flash -B -j4"

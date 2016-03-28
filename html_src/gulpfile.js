@@ -5,6 +5,7 @@ elixir.config.css.autoprefix.options.browsers = ["> 2.5% in CZ"];
 elixir.config.css.autoprefix.options.flexbox = "no-2009";
 elixir.config.css.cssnano.pluginOptions.discardComments = {removeAll: true};
 elixir.config.css.cssnano.pluginOptions.colormin = false;
+elixir.config.js.uglify.options.compress.drop_console = false;
 
 // var info = autoprefixer(elixir.config.css.autoprefix).info();
 // console.log(info);
@@ -26,7 +27,8 @@ elixir(function (mix) {
 		'js-src/utils.js',
 		'js-src/modal.js',
 		'js-src/app.js',
-		'js-src/wifi.js',
-		'js-src/waveform.js',
+		'js-src/page_wifi.js',
+		'js-src/page_waveform.js',
+		'js-src/page_status.js',
 	], 'js/all.js');
 });

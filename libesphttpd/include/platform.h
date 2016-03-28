@@ -1,6 +1,10 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
+#include <osapi.h>
+#include "espmissingprotos.h"
+
+
 #ifdef FREERTOS
 //#include "esp_timer.h"
 typedef struct RtosConnType RtosConnType;
@@ -16,6 +20,10 @@ typedef RtosConnType* ConnTypePtr;
 #define strncpy(a, b, c) os_strncpy(a, b, c)
 #define strcmp(a, b) os_strcmp(a, b)
 #define strncmp(a, b, c) os_strncmp(a, b, c)
+
+#define streq(a, b) (strcmp(a, b) == 0)
+#define strneq(a, b, n) (strncmp(a, b, n) == 0)
+
 #define malloc(x) os_malloc(x)
 #define free(x) os_free(x)
 #define memset(x, a, b) os_memset(x, a, b)

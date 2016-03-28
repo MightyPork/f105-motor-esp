@@ -21,6 +21,6 @@ find "$BLDDIR" -name "*.map" -delete
 
 mkdir -p "$BLDDIR/pages"
 
-php "$SRCDIR/home.php" > "$BLDDIR/pages/home.tpl"
-php "$SRCDIR/wifi.php" > "$BLDDIR/pages/wifi.tpl"
-php "$SRCDIR/waveform.php" > "$BLDDIR/pages/wfm.html" # no substitutions, .html allows to gzip it.
+php "$SRCDIR/page_status.php" > "$BLDDIR/pages/status.tpl"
+php "$SRCDIR/page_wifi.php" > "$BLDDIR/pages/wifi.tpl"
+php "$SRCDIR/page_waveform.php" > "$BLDDIR/pages/waveform.html" # no substitutions, .html allows to gzip it.

@@ -1,10 +1,10 @@
-.page-home #rssi-perc:after {
+.page-home #staRSSIperc:after {
 	padding-left: dist(-4);
 	content: '%';
 	font-size: fsize(-1);
 }
 
-.page-home #rssi-dbm:after {
+.page-home #staRSSI:after {
 	padding-left: dist(-4);
 	content: 'dBm';
 	font-size: fsize(-1);

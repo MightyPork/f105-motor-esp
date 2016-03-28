@@ -16,7 +16,7 @@
 <div id="outer">
 <nav id="menu">
 	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current analyzer</div>
-	<a href="/">Home</a><a href="/wifi" class="selected">WiFi config</a><a href="/waveform">Waveform</a><a href="/fft">FFT</a><a href="/spectrogram">Spectrogram</a><a href="/transient">Power-on transient</a><a href="/about">Credits &amp; About</a></nav>
+	<a href="/">Home</a><a href="/wifi" class="selected">WiFi config</a><a href="/waveform">Waveform</a></nav>
 <div id="content">
 
 <h1>Wireless Setup</h1>
@@ -44,8 +44,8 @@
 
 <script>
 	// Current SSID
-	wifi.current = '%currSsid%';
-	$().ready(wifi.init);
+	page_wifi.current = '%currSsid%';
+	$().ready(page_wifi.init);
 </script>
 
 <div class="Modal hidden" id="psk-modal">

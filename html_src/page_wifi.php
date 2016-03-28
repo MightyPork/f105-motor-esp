@@ -26,8 +26,8 @@ include "_start.php"; ?>
 
 <script>
 	// Current SSID
-	wifi.current = '%currSsid%';
-	$().ready(wifi.init);
+	page_wifi.current = '%currSsid%';
+	$().ready(page_wifi.init);
 </script>
 
 <div class="Modal hidden" id="psk-modal">

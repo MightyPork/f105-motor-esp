@@ -41,7 +41,6 @@ SOURCES += \
 	libesphttpd/util/cgiwebsocket.c \
 	libesphttpd/util/cgiwifi.c \
 	user/cgi-test.c \
-	user/cgi.c \
 	user/io.c \
 	user/user_main.c \
 	user/uart_driver.c \
@@ -56,9 +55,11 @@ SOURCES += \
 	user/uptime.c \
 	sbmp/library/payload_parser.c \
 	user/sampling.c \
-	user/page_home.c \
 	user/ftoa.c \
-    user/routes.c
+    user/routes.c \
+    user/page_status.c \
+    user/page_waveform.c \
+    user/utils.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -74,7 +75,6 @@ HEADERS += \
 	libesphttpd/include/cgiwifi.h \
 	libesphttpd/include/esp8266.h \
 	libesphttpd/include/espfs.h \
-	libesphttpd/include/espmissingincludes.h \
 	libesphttpd/include/httpd.h \
 	libesphttpd/include/httpdespfs.h \
 	libesphttpd/include/platform.h \
@@ -87,7 +87,6 @@ HEADERS += \
 	libesphttpd/lib/heatshrink/heatshrink_decoder.h \
 	libesphttpd/lib/heatshrink/heatshrink_encoder.h \
 	user/cgi-test.h \
-	user/cgi.h \
 	user/io.h \
 	user/uart_register.h \
 	esp_iot_sdk_v1.5.2/include/json/json.h \
@@ -134,11 +133,14 @@ HEADERS += \
 	user/uptime.h \
 	sbmp/library/payload_parser.h \
 	user/sampling.h \
-	user/page_home.h \
 	user/sbmp_config.h \
 	sbmp/library/sbmp_config.example.h \
 	user/ftoa.h \
-    user/routes.h
+    user/routes.h \
+    user/page_status.h \
+    user/page_waveform.h \
+    libesphttpd/include/espmissingprotos.h \
+    user/utils.h
 
 DISTFILES += \
 	style.astylerc \
