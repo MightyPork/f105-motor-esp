@@ -3,10 +3,10 @@ var page_waveform = (function () {
 
 	var zoomResetFn;
 
-	function buildChart(samples, xlabel, ylabel) {
-		var data = [];
-		samples.forEach(function (a, i) {
-			data.push({x: i, y: a});
+	function buildChart(obj, xlabel, ylabel) {
+		var points = [];
+		obj.samples.forEach(function (a, i) {
+			points.push({x: i, y: a});
 		});
 
 		// Build the chart
@@ -45,11 +45,13 @@ var page_waveform = (function () {
 			}
 		}));
 
+		var peak = obj.stats.peak;
+
 		new Chartist.Line('#chart', {
 			series: [
 				{
 					name: 'a',
-					data: data
+					data: points
 				},
 			]
 		}, {
@@ -69,6 +71,8 @@ var page_waveform = (function () {
 			axisY: {
 				type: Chartist.AutoScaleAxis,
 				//onlyInteger: true
+				high: peak,
+				low: -peak,
 			},
 			plugins: plugins
 		});
@@ -81,13 +85,21 @@ var page_waveform = (function () {
 			return;
 		}
 
-		var json = JSON.parse(resp);
-		if (!json.success) {
+		var j = JSON.parse(resp);
+		if (!j.success) {
 			alert("Sampling failed.");
 			return;
 		}
 
-		buildChart(json.samples, 'Sample number', 'Current - mA');
+		j.stats.peak = Math.max(-j.stats.min, j.stats.max);
+
+		buildChart(j, 'Sample number', 'Current - mA');
+
+		$('#stat-count').html(j.stats.count);
+		$('#stat-f-s').html(j.stats.freq);
+		$('#stat-i-peak').html(j.stats.peak);
+		$('#stat-i-rms').html(j.stats.rms);
+		$('.stats').removeClass('invis');
 	}
 
 	wfm.init = function() {
@@ -96,7 +108,7 @@ var page_waveform = (function () {
 		//		"success": true
 		//	};
 
-		function clickHdl() {
+		function loadBtnClick() {
 			var samples = $('#count').val();
 			var freq = $('#freq').val();
 
@@ -104,14 +116,15 @@ var page_waveform = (function () {
 			$().get('/api/raw.json?n='+samples+'&fs='+freq, onRxData, true, true);
 		}
 
-		$('#load').on('click', clickHdl);
+		$('#load').on('click', loadBtnClick);
 
 		$('#count,#freq').on('keyup', function(e) {
 			if (e.which == 13) {
-				clickHdl();
+				loadBtnClick();
 			}
 		});
 
+		// chart zooming
 		$('#chart').on('contextmenu', function(e) {
 			zoomResetFn && zoomResetFn();
 			zoomResetFn = null;

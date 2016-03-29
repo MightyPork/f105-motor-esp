@@ -5,7 +5,6 @@ include "_start.php"; ?>
 
 <div class="Box">
 	<table>
-		<tbody>
 		<tr>
 			<th>WiFi mode:</th>
 			<td>%WiFiMode%</td>
@@ -14,7 +13,6 @@ include "_start.php"; ?>
 			<th>Note:</th>
 			<td>%WiFiapwarn%</td>
 		</tr>
-		</tbody>
 	</table>
 </div>
 

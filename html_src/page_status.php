@@ -22,12 +22,10 @@ include "_start.php"; ?>
 <div class="Box">
 	<h2>WiFi</h2>
 	<table>
-		<tbody>
 		<tr>
 			<th>WiFi mode:</th>
 			<td id="wmode">%wifiMode%</td>
 		</tr>
-		</tbody>
 	</table>
 </div>
 
@@ -36,7 +34,6 @@ include "_start.php"; ?>
 <div class="Box sta-only" style="display:none">
 	<h2>WiFi Station</h2>
 	<table>
-		<tbody>
 		<tr>
 			<th>SSID:</th>
 			<td id="staSSID"></td>
@@ -52,14 +49,12 @@ include "_start.php"; ?>
 			<th>MAC:</th>
 			<td id="staMAC"></td>
 		</tr>
-		</tbody>
 	</table>
 </div>
 
 <div class="Box ap-only" style="display:none">
 	<h2>WiFi AP</h2>
 	<table>
-		<tbody>
 		<tr>
 			<th>SSID:</th>
 			<td id="apSSID"></td>
@@ -84,7 +79,6 @@ include "_start.php"; ?>
 			<th>MAC:</th>
 			<td id="apMAC"></td>
 		</tr>
-		</tbody>
 	</table>
 </div>
 

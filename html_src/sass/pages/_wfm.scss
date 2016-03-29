@@ -27,3 +27,46 @@
 		}
 	}
 }
+
+.Box.chartbox {
+	display: flex;
+	flex-direction: row;
+
+	@include media($phone) {
+		flex-direction: column;
+	}
+
+	.stats {
+		flex: 0 1;
+
+		@include media($phone) {
+			table {
+				margin: 0 auto;
+			} // center the table
+
+			td,th {
+				width: 50%;
+			}
+		}
+
+		th,td {
+			@include nowrap;
+		}
+
+		th sub { font-weight: normal;}
+
+		td {
+			min-width: 100px;
+		}
+
+		td:after {
+			font-size: 90%;
+			padding-left: .5em;
+		}
+
+		//#stat-count
+		#stat-f-s:after {content: "Hz"}
+		#stat-i-peak:after {content: "mA"}
+		#stat-i-rms:after {content: "mA"}
+	}
+}

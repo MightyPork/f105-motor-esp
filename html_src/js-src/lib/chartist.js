@@ -907,7 +907,7 @@ var Chartist = {
     positionalData[axis.counterUnits.len] = axisOffset - 10;
 
 	var lblText = labels[index];
-	//round (!! will brak for non-numeric)
+	//round (!! will break for non-numeric)
 	lblText = Math.round(+lblText*100)/100;
 
     if(useForeignObject) {
@@ -2907,7 +2907,8 @@ var Chartist = {
   }
 
   function createGridAndLabels(gridGroup, labelGroup, useForeignObject, chartOptions, eventEmitter) {
-    var axisOptions = chartOptions['axis' + this.units.pos.toUpperCase()];
+    var xy = this.units.pos.toUpperCase();
+    var axisOptions = chartOptions['axis' + xy];
     var projectedValues = this.ticks.map(this.projectValue.bind(this));
     var labelValues = this.ticks.map(axisOptions.labelInterpolationFnc);
 
@@ -2920,21 +2921,25 @@ var Chartist = {
 
       // TODO: Find better solution for solving this problem
       // Calculate how much space we have available for the label
-      var labelLength=0;/*
-      if(projectedValues[index + 1]) {
-        // If we still have one label ahead, we can calculate the distance to the next tick / label
-        labelLength = projectedValues[index + 1] - projectedValue;
-		  lastWidth = labelLength;
-      } else if (typeof lastWidth != 'undefined') {
-		  labelLength = lastWidth; // EDIT. added the lastWidth thing
-	  }
-	  // else {
-      //   // If we don't have a label ahead and we have only two labels in total, we just take the remaining distance to
-      //   // on the whole axis length. We limit that to a minimum of 30 pixel, so that labels close to the border will
-      //   // still be visible inside of the chart padding.
-      //   labelLength = Math.max(this.axisLength - projectedValue, 30);
-      // }
-		*/
+
+
+      var labelLength=0;
+
+
+      if (xy == 'Y') { // X doesnt use this
+        if (projectedValues[index + 1]) {
+          // If we still have one label ahead, we can calculate the distance to the next tick / label
+          labelLength = projectedValues[index + 1] - projectedValue;
+        //  lastWidth = labelLength;
+        // } else if (typeof lastWidth != 'undefined') {
+        //   labelLength = lastWidth; // EDIT. added the lastWidth thing
+        } else {
+          // If we don't have a label ahead and we have only two labels in total, we just take the remaining distance to
+          // on the whole axis length. We limit that to a minimum of 30 pixel, so that labels close to the border will
+          // still be visible inside of the chart padding.
+          labelLength = Math.max(this.axisLength - projectedValue, 30);
+        }
+      }
 
       // Skip grid lines and labels where interpolated label values are falsey (execpt for 0)
       if(Chartist.isFalseyButZero(labelValues[index]) && labelValues[index] !== '') {

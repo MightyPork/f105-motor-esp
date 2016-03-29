@@ -23,7 +23,6 @@
 
 <div class="Box">
 	<table>
-		<tbody>
 		<tr>
 			<th>WiFi mode:</th>
 			<td>%WiFiMode%</td>
@@ -32,7 +31,6 @@
 			<th>Note:</th>
 			<td>%WiFiapwarn%</td>
 		</tr>
-		</tbody>
 	</table>
 </div>
 

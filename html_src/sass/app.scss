@@ -30,6 +30,14 @@ $c-form-highlight-a: #28bc65;
 	text-align: center;
 }
 
+.invis {
+	visibility: hidden;
+}
+
+.hidden {
+	display: none;
+}
+
 @import "layout/index";
 @import "form/index";
 

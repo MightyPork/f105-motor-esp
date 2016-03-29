@@ -27,7 +27,7 @@
 		<input id="count" type="number" value="500">
 	</div>
 	<div>
-		<label for="freq">Freq. <span class="mq-tablet-max" style="font-weight:normal;">(Hz)</span></label>
+		<label for="freq">Rate <span class="mq-tablet-max" style="font-weight:normal;">(Hz)</span></label>
 		<input id="freq" type="number" value="4000">
 		<span class="mq-normal-min">Hz</span>
 	</div>
@@ -36,8 +36,28 @@
 	</div>
 </div>
 
-<div class="Box medium">
+<div class="Box medium chartbox">
 	<div id="chart" class="ct-chart ct-wide"></div>
+	<div class="stats invis">
+		<table>
+			<tr>
+				<th>#</th>
+				<td id="stat-count"></td>
+			</tr>
+			<tr>
+				<th>f<sub>s</sub></th>
+				<td id="stat-f-s"></td>
+			</tr>
+			<tr>
+				<th>I<sub>peak</sub></th>
+				<td id="stat-i-peak"></td>
+			</tr>
+			<tr>
+				<th>I<sub>RMS</sub></th>
+				<td id="stat-i-rms"></td>
+			</tr>
+		</table>
+	</div>
 </div>
 
 <script>
