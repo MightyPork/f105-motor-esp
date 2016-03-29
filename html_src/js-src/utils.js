@@ -27,14 +27,6 @@ function regexEscape(s) {
 	return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
-/** Convert RSSI 0-255 to % */
-function rssiPerc(rssi) {
-	var r = parseInt(rssi);
-	if (r > -50) return 100; // 100%
-	if (r < -100) return 0; // 0%
-	return Math.round(2 * (r + 100)); // approximation
-}
-
 /** Perform a substitution in the given string.
  *
  * Arguments - array or list of replacements.

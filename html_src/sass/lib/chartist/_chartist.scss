@@ -113,6 +113,10 @@
 	$ct-series-names: $ct-series-names,
 	$ct-series-colors: $ct-series-colors) {
 
+	.ct-zoom-rect {
+		fill: rgba(200, 100, 100, 0.3);
+		stroke: red;
+	}
 
 	.ct-axis-title {
 		fill: $ct-axis-label-color;

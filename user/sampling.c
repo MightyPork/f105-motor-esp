@@ -11,6 +11,8 @@
 // the FIFO has 128 bytes, and should accomodate ideally the whole frame.
 #define CHUNK_LEN 100
 
+#define SAMPLING_TMEO 10000
+#define READOUT_TMEO 100
 
 // Only one readout can happen at a time.
 
@@ -138,7 +140,7 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 //			dbg("Total bytes avail: %d", rd.total);
 
 			// renew the timeout
-			setReadoutTmeoTimer(1000);
+			setReadoutTmeoTimer(READOUT_TMEO);
 
 			// request first chunk
 			sbmp_bulk_request(ep, rd.pos, CHUNK_LEN, dg->session);
@@ -156,7 +158,7 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 			// move the pointer for next request
 			rd.pos += dg->length;
 
-			setReadoutTmeoTimer(1000); // timeout to retrieve the data & ask for more
+			setReadoutTmeoTimer(READOUT_TMEO); // timeout to retrieve the data & ask for more
 
 			if (rd.pos >= rd.total) {
 				info("Transfer is complete.");
@@ -181,11 +183,11 @@ cleanup:
 }
 
 
-bool FLASH_FN meas_request_data(uint16_t count)
+bool FLASH_FN meas_request_data(uint16_t count, uint32_t freq)
 {
 	bool suc = false;
 
-	info("Requesting data capture - %d samples.", count);
+	info("Requesting data capture - %d samples @ %d Hz.", count, freq);
 
 	if (rd.pending) {
 		error("Acquire request already in progress.");
@@ -203,11 +205,11 @@ bool FLASH_FN meas_request_data(uint16_t count)
 	rd.pending = true;
 
 	// start the abort timer - timeout
-	setReadoutTmeoTimer(6000);
+	setReadoutTmeoTimer(SAMPLING_TMEO);
 
 	// start a message
 	uint16_t sesn = 0;
-	suc = sbmp_ep_start_message(dlnk_ep, DG_REQUEST_CAPTURE, sizeof(uint16_t), &sesn);
+	suc = sbmp_ep_start_message(dlnk_ep, DG_REQUEST_CAPTURE, sizeof(uint16_t)+sizeof(uint32_t), &sesn);
 	if (!suc) goto fail;
 
 	// register the session listener
@@ -222,6 +224,9 @@ bool FLASH_FN meas_request_data(uint16_t count)
 
 	// request N values
 	sbmp_ep_send_u16(dlnk_ep, count);
+
+	// at freq F
+	sbmp_ep_send_u32(dlnk_ep, freq);
 
 	dbg("Request sent, session nr %d", sesn);
 

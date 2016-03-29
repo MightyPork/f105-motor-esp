@@ -1,6 +1,8 @@
 var page_waveform = (function () {
 	var wfm = {};
 
+	var zoomResetFn;
+
 	function buildChart(samples, xlabel, ylabel) {
 		var data = [];
 		samples.forEach(function (a, i) {
@@ -35,6 +37,14 @@ var page_waveform = (function () {
 			);
 		}
 
+		// zoom
+		plugins.push(Chartist.plugins.zoom({
+			resetOnRightMouseBtn:true,
+			onZoom: function(chart, reset) {
+				zoomResetFn = reset;
+			}
+		}));
+
 		new Chartist.Line('#chart', {
 			series: [
 				{
@@ -49,7 +59,7 @@ var page_waveform = (function () {
 			chartPadding: (isPhone ? {right: 20, bottom: 5, left: 0} : {right: 25, bottom: 30, left: 25}),
 			series: {
 				'a': {
-					lineSmooth: Chartist.Interpolation.none()
+					lineSmooth: Chartist.Interpolation.monotoneCubic()
 				}
 			},
 			axisX: {
@@ -88,17 +98,25 @@ var page_waveform = (function () {
 
 		function clickHdl() {
 			var samples = $('#count').val();
+			var freq = $('#freq').val();
 
 			//http://192.168.1.13
-			$().get('/api/raw.json?n='+samples, onRxData, true, true);
+			$().get('http://192.168.1.13/api/raw.json?n='+samples+'&fs='+freq, onRxData, true, true);
 		}
 
 		$('#load').on('click', clickHdl);
 
-		$('#count').on('keyup', function(e) {
+		$('#count,#freq').on('keyup', function(e) {
 			if (e.which == 13) {
 				clickHdl();
 			}
+		});
+
+		$('#chart').on('contextmenu', function(e) {
+			zoomResetFn && zoomResetFn();
+			zoomResetFn = null;
+			e.preventDefault();
+			return false;
 		});
 	};
 

@@ -18,7 +18,7 @@
  */
 
 /** Request data from the sampling module. Count - number of samples. */
-bool meas_request_data(uint16_t count); // TODO specify what kind of data - currently direct samples.
+bool meas_request_data(uint16_t count, uint32_t freq); // TODO specify what kind of data - currently direct samples.
 
 /** request next chunk */
 void meas_request_next_chunk(void);

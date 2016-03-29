@@ -1148,38 +1148,175 @@ var Chartist = {
     };
   };
 
+  // /**
+  //  * Cardinal / Catmull-Rome spline interpolation is the default smoothing function in Chartist. It produces nice results where the splines will always meet the points. It produces some artifacts though when data values are increased or decreased rapidly. The line may not follow a very accurate path and if the line should be accurate this smoothing function does not produce the best results.
+  //  *
+  //  * Cardinal splines can only be created if there are more than two data points. If this is not the case this smoothing will fallback to `Chartist.Smoothing.none`.
+  //  *
+  //  * All smoothing functions within Chartist are factory functions that accept an options parameter. The cardinal interpolation function accepts one configuration parameter `tension`, between 0 and 1, which controls the smoothing intensity.
+  //  *
+  //  * @example
+  //  * var chart = new Chartist.Line('.ct-chart', {
+  //  *   labels: [1, 2, 3, 4, 5],
+  //  *   series: [[1, 2, 8, 1, 7]]
+  //  * }, {
+  //  *   lineSmooth: Chartist.Interpolation.cardinal({
+  //  *     tension: 1,
+  //  *     fillHoles: false
+  //  *   })
+  //  * });
+  //  *
+  //  * @memberof Chartist.Interpolation
+  //  * @param {Object} options The options of the cardinal factory function.
+  //  * @return {Function}
+  //  */
+  // Chartist.Interpolation.cardinal = function(options) {
+  //   var defaultOptions = {
+  //     tension: 1,
+  //     fillHoles: false
+  //   };
+  //
+  //   options = Chartist.extend({}, defaultOptions, options);
+  //
+  //   var t = Math.min(1, Math.max(0, options.tension)),
+  //     c = 1 - t;
+  //
+  //   // This function will help us to split pathCoordinates and valueData into segments that also contain pathCoordinates
+  //   // and valueData. This way the existing functions can be reused and the segment paths can be joined afterwards.
+  //   // This functionality is necessary to treat "holes" in the line charts
+  //   function splitIntoSegments(pathCoordinates, valueData) {
+  //     var segments = [];
+  //     var hole = true;
+  //
+  //     for(var i = 0; i < pathCoordinates.length; i += 2) {
+  //       // If this value is a "hole" we set the hole flag
+  //       if(valueData[i / 2].value === undefined) {
+  //         if(!options.fillHoles) {
+  //           hole = true;
+  //         }
+  //       } else {
+  //         // If it's a valid value we need to check if we're coming out of a hole and create a new empty segment
+  //         if(hole) {
+  //           segments.push({
+  //             pathCoordinates: [],
+  //             valueData: []
+  //           });
+  //           // As we have a valid value now, we are not in a "hole" anymore
+  //           hole = false;
+  //         }
+  //
+  //         // Add to the segment pathCoordinates and valueData
+  //         segments[segments.length - 1].pathCoordinates.push(pathCoordinates[i], pathCoordinates[i + 1]);
+  //         segments[segments.length - 1].valueData.push(valueData[i / 2]);
+  //       }
+  //     }
+  //
+  //     return segments;
+  //   }
+  //
+  //   return function cardinal(pathCoordinates, valueData) {
+  //     // First we try to split the coordinates into segments
+  //     // This is necessary to treat "holes" in line charts
+  //     var segments = splitIntoSegments(pathCoordinates, valueData);
+  //
+  //     if(!segments.length) {
+  //       // If there were no segments return 'Chartist.Interpolation.none'
+  //       return Chartist.Interpolation.none()([]);
+  //     } else if(segments.length > 1) {
+  //       // If the split resulted in more that one segment we need to interpolate each segment individually and join them
+  //       // afterwards together into a single path.
+  //         var paths = [];
+  //       // For each segment we will recurse the cardinal function
+  //       segments.forEach(function(segment) {
+  //         paths.push(cardinal(segment.pathCoordinates, segment.valueData));
+  //       });
+  //       // Join the segment path data into a single path and return
+  //       return Chartist.Svg.Path.join(paths);
+  //     } else {
+  //       // If there was only one segment we can proceed regularly by using pathCoordinates and valueData from the first
+  //       // segment
+  //       pathCoordinates = segments[0].pathCoordinates;
+  //       valueData = segments[0].valueData;
+  //
+  //       // If less than two points we need to fallback to no smoothing
+  //       if(pathCoordinates.length <= 4) {
+  //         return Chartist.Interpolation.none()(pathCoordinates, valueData);
+  //       }
+  //
+  //       var path = new Chartist.Svg.Path().move(pathCoordinates[0], pathCoordinates[1], false, valueData[0]),
+  //         z;
+  //
+  //       for (var i = 0, iLen = pathCoordinates.length; iLen - 2 * !z > i; i += 2) {
+  //         var p = [
+  //           {x: +pathCoordinates[i - 2], y: +pathCoordinates[i - 1]},
+  //           {x: +pathCoordinates[i], y: +pathCoordinates[i + 1]},
+  //           {x: +pathCoordinates[i + 2], y: +pathCoordinates[i + 3]},
+  //           {x: +pathCoordinates[i + 4], y: +pathCoordinates[i + 5]}
+  //         ];
+  //         if (z) {
+  //           if (!i) {
+  //             p[0] = {x: +pathCoordinates[iLen - 2], y: +pathCoordinates[iLen - 1]};
+  //           } else if (iLen - 4 === i) {
+  //             p[3] = {x: +pathCoordinates[0], y: +pathCoordinates[1]};
+  //           } else if (iLen - 2 === i) {
+  //             p[2] = {x: +pathCoordinates[0], y: +pathCoordinates[1]};
+  //             p[3] = {x: +pathCoordinates[2], y: +pathCoordinates[3]};
+  //           }
+  //         } else {
+  //           if (iLen - 4 === i) {
+  //             p[3] = p[2];
+  //           } else if (!i) {
+  //             p[0] = {x: +pathCoordinates[i], y: +pathCoordinates[i + 1]};
+  //           }
+  //         }
+  //
+  //         path.curve(
+  //           (t * (-p[0].x + 6 * p[1].x + p[2].x) / 6) + (c * p[2].x),
+  //           (t * (-p[0].y + 6 * p[1].y + p[2].y) / 6) + (c * p[2].y),
+  //           (t * (p[1].x + 6 * p[2].x - p[3].x) / 6) + (c * p[2].x),
+  //           (t * (p[1].y + 6 * p[2].y - p[3].y) / 6) + (c * p[2].y),
+  //           p[2].x,
+  //           p[2].y,
+  //           false,
+  //           valueData[(i + 2) / 2]
+  //         );
+  //       }
+  //
+  //       return path;
+  //     }
+  //   };
+  // };
+
+
   /**
-   * Cardinal / Catmull-Rome spline interpolation is the default smoothing function in Chartist. It produces nice results where the splines will always meet the points. It produces some artifacts though when data values are increased or decreased rapidly. The line may not follow a very accurate path and if the line should be accurate this smoothing function does not produce the best results.
+   * Monotone Cubic spline interpolation produces a smooth curve which preserves monotonicity. Unlike cardinal splines, the curve will not extend beyond the range of y-values of the original data points.
    *
-   * Cardinal splines can only be created if there are more than two data points. If this is not the case this smoothing will fallback to `Chartist.Smoothing.none`.
+   * Monotone Cubic splines can only be created if there are more than two data points. If this is not the case this smoothing will fallback to `Chartist.Smoothing.none`.
    *
-   * All smoothing functions within Chartist are factory functions that accept an options parameter. The cardinal interpolation function accepts one configuration parameter `tension`, between 0 and 1, which controls the smoothing intensity.
+   * The x-values of subsequent points must be increasing to fit a Monotone Cubic spline. If this condition is not met for a pair of adjacent points, then there will be a break in the curve between those data points.
+   *
+   * All smoothing functions within Chartist are factory functions that accept an options parameter.
    *
    * @example
    * var chart = new Chartist.Line('.ct-chart', {
    *   labels: [1, 2, 3, 4, 5],
    *   series: [[1, 2, 8, 1, 7]]
    * }, {
-   *   lineSmooth: Chartist.Interpolation.cardinal({
-   *     tension: 1,
+   *   lineSmooth: Chartist.Interpolation.monotoneCubic({
    *     fillHoles: false
    *   })
    * });
    *
    * @memberof Chartist.Interpolation
-   * @param {Object} options The options of the cardinal factory function.
+   * @param {Object} options The options of the monotoneCubic factory function.
    * @return {Function}
    */
-  Chartist.Interpolation.cardinal = function(options) {
+  Chartist.Interpolation.monotoneCubic = function(options) {
     var defaultOptions = {
-      tension: 1,
       fillHoles: false
     };
 
     options = Chartist.extend({}, defaultOptions, options);
-
-    var t = Math.min(1, Math.max(0, options.tension)),
-      c = 1 - t;
 
     // This function will help us to split pathCoordinates and valueData into segments that also contain pathCoordinates
     // and valueData. This way the existing functions can be reused and the segment paths can be joined afterwards.
@@ -1194,6 +1331,13 @@ var Chartist = {
           if(!options.fillHoles) {
             hole = true;
           }
+        } else if(i >= 2 && pathCoordinates[i] <= pathCoordinates[i-2]) {
+          // Because we are doing monotone interpolation, curve fitting only makes sense for
+          // increasing x values. Therefore if two subsequent points have the same x value, or
+          // the x value is decreasing, then we create a hole at this point. (Which cannot be
+          // filled in even with the 'fillHoles' option)
+
+          hole = true;
         } else {
           // If it's a valid value we need to check if we're coming out of a hole and create a new empty segment
           if(hole) {
@@ -1214,7 +1358,7 @@ var Chartist = {
       return segments;
     }
 
-    return function cardinal(pathCoordinates, valueData) {
+    return function monotoneCubic(pathCoordinates, valueData) {
       // First we try to split the coordinates into segments
       // This is necessary to treat "holes" in line charts
       var segments = splitIntoSegments(pathCoordinates, valueData);
@@ -1225,10 +1369,10 @@ var Chartist = {
       } else if(segments.length > 1) {
         // If the split resulted in more that one segment we need to interpolate each segment individually and join them
         // afterwards together into a single path.
-          var paths = [];
-        // For each segment we will recurse the cardinal function
+        var paths = [];
+        // For each segment we will recurse the monotoneCubic fn function
         segments.forEach(function(segment) {
-          paths.push(cardinal(segment.pathCoordinates, segment.valueData));
+          paths.push(monotoneCubic(segment.pathCoordinates, segment.valueData));
         });
         // Join the segment path data into a single path and return
         return Chartist.Svg.Path.join(paths);
@@ -1238,47 +1382,72 @@ var Chartist = {
         pathCoordinates = segments[0].pathCoordinates;
         valueData = segments[0].valueData;
 
-        // If less than two points we need to fallback to no smoothing
+        // If less than three points we need to fallback to no smoothing
         if(pathCoordinates.length <= 4) {
           return Chartist.Interpolation.none()(pathCoordinates, valueData);
         }
 
-        var path = new Chartist.Svg.Path().move(pathCoordinates[0], pathCoordinates[1], false, valueData[0]),
-          z;
+        var xs = [],
+            ys = [],
+            i,
+            n = pathCoordinates.length / 2,
+            ms = [],
+            ds = [], dys = [], dxs = [],
+            path;
 
-        for (var i = 0, iLen = pathCoordinates.length; iLen - 2 * !z > i; i += 2) {
-          var p = [
-            {x: +pathCoordinates[i - 2], y: +pathCoordinates[i - 1]},
-            {x: +pathCoordinates[i], y: +pathCoordinates[i + 1]},
-            {x: +pathCoordinates[i + 2], y: +pathCoordinates[i + 3]},
-            {x: +pathCoordinates[i + 4], y: +pathCoordinates[i + 5]}
-          ];
-          if (z) {
-            if (!i) {
-              p[0] = {x: +pathCoordinates[iLen - 2], y: +pathCoordinates[iLen - 1]};
-            } else if (iLen - 4 === i) {
-              p[3] = {x: +pathCoordinates[0], y: +pathCoordinates[1]};
-            } else if (iLen - 2 === i) {
-              p[2] = {x: +pathCoordinates[0], y: +pathCoordinates[1]};
-              p[3] = {x: +pathCoordinates[2], y: +pathCoordinates[3]};
-            }
+        // Populate x and y coordinates into separate arrays, for readability
+
+        for(i = 0; i < n; i++) {
+          xs[i] = pathCoordinates[i * 2];
+          ys[i] = pathCoordinates[i * 2 + 1];
+        }
+
+        // Calculate deltas and derivative
+
+        for(i = 0; i < n - 1; i++) {
+          dys[i] = ys[i + 1] - ys[i];
+          dxs[i] = xs[i + 1] - xs[i];
+          ds[i] = dys[i] / dxs[i];
+        }
+
+        // Determine desired slope (m) at each point using Fritsch-Carlson method
+        // See: http://math.stackexchange.com/questions/45218/implementation-of-monotone-cubic-interpolation
+
+        ms[0] = ds[0];
+        ms[n - 1] = ds[n - 2];
+
+        for(i = 1; i < n - 1; i++) {
+          if(ds[i] === 0 || ds[i - 1] === 0 || (ds[i - 1] > 0) !== (ds[i] > 0)) {
+            ms[i] = 0;
           } else {
-            if (iLen - 4 === i) {
-              p[3] = p[2];
-            } else if (!i) {
-              p[0] = {x: +pathCoordinates[i], y: +pathCoordinates[i + 1]};
+            ms[i] = 3 * (dxs[i - 1] + dxs[i]) / (
+                (2 * dxs[i] + dxs[i - 1]) / ds[i - 1] +
+                (dxs[i] + 2 * dxs[i - 1]) / ds[i]);
+
+            if(!isFinite(ms[i])) {
+              ms[i] = 0;
             }
           }
+        }
 
+        // Now build a path from the slopes
+
+        path = new Chartist.Svg.Path().move(xs[0], ys[0], false, valueData[0]);
+
+        for(i = 0; i < n - 1; i++) {
           path.curve(
-            (t * (-p[0].x + 6 * p[1].x + p[2].x) / 6) + (c * p[2].x),
-            (t * (-p[0].y + 6 * p[1].y + p[2].y) / 6) + (c * p[2].y),
-            (t * (p[1].x + 6 * p[2].x - p[3].x) / 6) + (c * p[2].x),
-            (t * (p[1].y + 6 * p[2].y - p[3].y) / 6) + (c * p[2].y),
-            p[2].x,
-            p[2].y,
-            false,
-            valueData[(i + 2) / 2]
+              // First control point
+              xs[i] + dxs[i] / 3,
+              ys[i] + ms[i] * dxs[i] / 3,
+              // Second control point
+              xs[i + 1] - dxs[i] / 3,
+              ys[i + 1] - ms[i + 1] * dxs[i] / 3,
+              // End point
+              xs[i + 1],
+              ys[i + 1],
+
+              false,
+              valueData[i]
           );
         }
 

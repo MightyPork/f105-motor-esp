@@ -13,3 +13,5 @@ $large: new-breakpoint(min-width 1377px);
 
 $tablet-max: new-breakpoint(max-width 1000px);
 $normal-max: new-breakpoint(max-width 1376px);
+$tablet-min: new-breakpoint(min-width 545px);
+$normal-min: new-breakpoint(min-width 1001px);

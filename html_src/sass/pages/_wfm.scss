@@ -1,0 +1,29 @@
+#samp-ctrl {
+	display: flex;
+	padding: dist(-2);
+
+	flex-direction: row;
+	@include media($phone) {
+		flex-direction: column;
+	}
+
+	justify-content: center;
+	align-items: stretch;
+
+	> div {
+		margin: dist(-2);
+	}
+
+	label {
+		line-height: 1.8;
+		font-weight: bold;
+	}
+
+	input {
+		width: 150px;
+
+		@include media($phone) {
+			width: 100%;
+		}
+	}
+}

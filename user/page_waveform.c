@@ -20,6 +20,7 @@ typedef struct {
 int FLASH_FN tplWaveformJSON(HttpdConnData *connData, char *token, void **arg)
 {
 	char buff20[20];
+	int len;
 
 	tplReadSamplesJSON_state *st = *arg;
 
@@ -36,18 +37,31 @@ int FLASH_FN tplWaveformJSON(HttpdConnData *connData, char *token, void **arg)
 
 		// check how many samples are requested
 		uint16_t count = 1;
-		int len = httpdFindArg(connData->getArgs, "n", buff20, sizeof(buff20));
+		len = httpdFindArg(connData->getArgs, "n", buff20, sizeof(buff20));
 		if (len != -1) count = (uint16_t)atoi(buff20);
 		if (count > 4096) {
 			warn("Requested %d samples, capping at 4096.", count);
 			count = 4096;
 		}
+
+		uint32_t freq = 4096;
+		len = httpdFindArg(connData->getArgs, "fs", buff20, sizeof(buff20));
+		if (len != -1) freq = (uint32_t)atoi(buff20);
+		if (freq > 5000000) {
+			warn("Requested fs %d Hz, capping at 5 MHz.", freq);
+			freq = 5000000;
+		}
+		if (freq == 0) {
+			error("Requested fs 0 Hz, using 1 Hz");
+			freq = 1;
+		}
+
 		st->total_count = count;
 		st->done_count = 0;
 		st->success = true; // success true by default
 
 		// REQUEST THE DATA
-		meas_request_data(st->total_count);
+		meas_request_data(count, freq);
 	}
 
 	// the "success" field is after the data,

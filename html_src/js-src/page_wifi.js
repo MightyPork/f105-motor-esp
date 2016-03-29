@@ -49,7 +49,7 @@ var page_wifi = (function () {
 
 				var inner = document.createElement('div');
 				var $inner = $(inner).addClass('inner')
-					.htmlAppend('<div class="rssi">{0}</div>'.format(rssiPerc(ap.rssi)))
+					.htmlAppend('<div class="rssi">{0}</div>'.format(ap.rssi_perc))
 					.htmlAppend('<div class="essid" title="{0}">{0}</div>'.format(e(ap.essid)))
 					.htmlAppend('<div class="auth">{0}</div>'.format(authStr[ap.enc]));
 
