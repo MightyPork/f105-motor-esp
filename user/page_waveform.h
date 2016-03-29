@@ -5,4 +5,6 @@
 
 int tplWaveformJSON(HttpdConnData *connData, char *token, void **arg);
 
+int tplFourierJSON(HttpdConnData *connData, char *token, void **arg);
+
 #endif // PAGE_WAVEFORM_H

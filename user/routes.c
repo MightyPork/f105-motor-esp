@@ -42,11 +42,14 @@ HttpdBuiltInUrl builtInUrls[] = {
 	// System Status page
 	ROUTE_TPL_FILE("/",        tplSystemStatus, "/pages/status.tpl"),
 	ROUTE_TPL_FILE("/status",  tplSystemStatus, "/pages/status.tpl"),
+
 	ROUTE_TPL_FILE("/api/status.json", tplSystemStatus, "/json/status.tpl"),
 
 	// Waveform page
 	ROUTE_FILE("/waveform", "/pages/waveform.html"), // static file, html -> can use gzip
+
 	ROUTE_TPL_FILE("/api/raw.json", tplWaveformJSON, "/json/samples.tpl"),
+	ROUTE_TPL_FILE("/api/fft.json", tplFourierJSON, "/json/samples.tpl"),
 
 	// --- WiFi config ---
 

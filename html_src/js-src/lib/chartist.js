@@ -1447,7 +1447,7 @@ var Chartist = {
               ys[i + 1],
 
               false,
-              valueData[i]
+              valueData[i + 1] // changed as per patch on github
           );
         }
 

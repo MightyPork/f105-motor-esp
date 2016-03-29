@@ -254,7 +254,7 @@ int ICACHE_FLASH_ATTR cgiWiFiSetMode(HttpdConnData *connData) {
 		info("cgiWifiSetMode: %s", buff);
 #ifndef DEMO_MODE
 		wifi_set_opmode(atoi(buff));
-		system_restart();
+		system_restart(); // FIXME we should do this in a timer task, so the browser gets a response.
 #endif
 	}
 	httpdRedirect(connData, "/wifi");

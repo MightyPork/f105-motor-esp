@@ -87,7 +87,7 @@ var page_waveform = (function () {
 			return;
 		}
 
-		buildChart(json.samples, 'Sample Nr.', 'ADC value');
+		buildChart(json.samples, 'Sample number', 'Current - mA');
 	}
 
 	wfm.init = function() {
@@ -101,7 +101,7 @@ var page_waveform = (function () {
 			var freq = $('#freq').val();
 
 			//http://192.168.1.13
-			$().get('http://192.168.1.13/api/raw.json?n='+samples+'&fs='+freq, onRxData, true, true);
+			$().get('/api/raw.json?n='+samples+'&fs='+freq, onRxData, true, true);
 		}
 
 		$('#load').on('click', clickHdl);

@@ -5,7 +5,8 @@
 #include <sbmp.h>
 
 // request to capture data...
-#define DG_REQUEST_CAPTURE 40
+#define DG_REQUEST_RAW 40
+#define DG_REQUEST_FFT 41
 
 
 extern SBMP_Endpoint *dlnk_ep;

@@ -3,6 +3,24 @@
 
 #include <esp8266.h>
 #include <httpd.h>
+#include "datalink.h"
+
+#define SAMPLING_TMEO 6000
+#define SAMP_READOUT_TMEO 100
+
+typedef struct {
+	uint32_t count;
+	float freq; // actual frequency - not exact due to the prescaller limitations
+	float min;
+	float max;
+	float rms;
+} MeasStats;
+
+typedef enum {
+	RAW = DG_REQUEST_RAW, // same as the SBMP packet numbers used to request it
+	FFT = DG_REQUEST_FFT
+} MEAS_FORMAT;
+
 
 /**
  * Reading procedure
@@ -18,13 +36,19 @@
  */
 
 /** Request data from the sampling module. Count - number of samples. */
-bool meas_request_data(uint16_t count, uint32_t freq); // TODO specify what kind of data - currently direct samples.
+bool meas_request_data(MEAS_FORMAT format, uint16_t count, uint32_t freq); // TODO specify what kind of data - currently direct samples.
 
 /** request next chunk */
 void meas_request_next_chunk(void);
 
 /** Check if chunk ready to be read */
 bool meas_chunk_ready(void);
+
+/** Check if closed (if data was expected, this means the peer aborted the transaction) */
+bool meas_is_closed(void);
+
+/** Get the stats struct */
+MeasStats *meas_get_stats(void);
 
 /**
  * @brief Get received chunk. NULL if none.

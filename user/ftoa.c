@@ -1,7 +1,7 @@
 #include <esp8266.h>
 
 /* reverse:  reverse string s in place */
-static void str_reverse(char *s)
+static FLASH_FN void str_reverse(char *s)
 {
 	for (int i = 0, j = (int)(strlen(s) - 1); i < j; i++, j--) {
 		char c = s[i];
@@ -11,7 +11,7 @@ static void str_reverse(char *s)
 }
 
 /* itoa:  convert n to characters in s. returns length */
-int my_itoa(int n, char *s)
+int FLASH_FN my_itoa(int n, char *s)
 {
 	int i, sign;
 
@@ -30,7 +30,7 @@ int my_itoa(int n, char *s)
 	return i;
 }
 
-int my_ftoa(char *buffer, float f, int precision)
+int FLASH_FN my_ftoa(char *buffer, float f, int precision)
 {
 	// add 0.5 * 10^-precision
 	float rounder = 0.5;
