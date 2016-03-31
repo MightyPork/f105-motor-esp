@@ -12,6 +12,7 @@
 // user files
 #include "page_status.h"
 #include "page_waveform.h"
+#include "page_about.h"
 
 #define WIFI_PROTECT 0
 
@@ -45,8 +46,13 @@ HttpdBuiltInUrl builtInUrls[] = {
 
 	ROUTE_TPL_FILE("/api/status.json", tplSystemStatus, "/json/status.tpl"),
 
+	// About
+	ROUTE_TPL_FILE("/about",  tplAbout, "/pages/about.tpl"),
+
 	// Waveform page
-	ROUTE_FILE("/waveform", "/pages/waveform.html"), // static file, html -> can use gzip
+	ROUTE_FILE("/waveform", "/pages/wfm.html"), // static file, html -> can use gzip
+	// FFT
+	ROUTE_FILE("/fft", "/pages/fft.html"), // static file, html -> can use gzip
 
 	ROUTE_TPL_FILE("/api/raw.json", tplWaveformJSON, "/json/samples.tpl"),
 	ROUTE_TPL_FILE("/api/fft.json", tplFourierJSON, "/json/samples.tpl"),

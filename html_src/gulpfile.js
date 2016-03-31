@@ -24,6 +24,7 @@ elixir(function (mix) {
 		'js-src/lib/chartist.js',
 		'js-src/lib/chartist.axis-title.js',
 		'js-src/lib/chartist.zoom.js',
+		'js-src/lib/lodash.custom.js',
 		'js-src/utils.js',
 		'js-src/modal.js',
 		'js-src/app.js',

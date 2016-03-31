@@ -2,32 +2,8 @@ function bool(x) {
 	return (x === 1 || x === '1' || x === true || x === 'true');
 }
 
-/** html entities */
-function e(x) {
-	return String(x)
-		.replace(/&/g, '&amp;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&#39;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;');
-}
-
-/** Returns true if argument is array [] */
-function isArray(obj) {
-	return Object.prototype.toString.call(obj) === '[object Array]';
-}
-
-/** Returns true if argument is object {} */
-function isObject(obj) {
-	return Object.prototype.toString.call(obj) === '[object Object]';
-}
-
-/** escape a string to have no special meaning in regex */
-function regexEscape(s) {
-	return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-}
-
-/** Perform a substitution in the given string.
+/**
+ * Perform a substitution in the given string.
  *
  * Arguments - array or list of replacements.
  * Arguments numeric keys will replace {0}, {1} etc.
@@ -42,7 +18,7 @@ String.prototype.format = function () {
 
 	var repl = arguments;
 
-	if (arguments.length == 1 && (isArray(arguments[0]) || isObject(arguments[0]))) {
+	if (arguments.length == 1 && (_.isArray(arguments[0]) || _.isObject(arguments[0]))) {
 		repl = arguments[0];
 	}
 
@@ -55,7 +31,7 @@ String.prototype.format = function () {
 			}
 
 			// replace all occurrences
-			var pattern = new RegExp(regexEscape(ph), "g");
+			var pattern = new RegExp(_.escapeRegExp(ph), "g");
 			out = out.replace(pattern, repl[ph_orig]);
 		}
 	}

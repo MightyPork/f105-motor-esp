@@ -1,15 +1,26 @@
-<?php $page = 'waveform'; include "_start.php"; ?>
+<?php $page = 'fft'; include "_start.php"; ?>
 
-<h1>Waveform</h1>
+<h1>FFT</h1>
 
 <div class="Box center" id="samp-ctrl">
 	<div>
-		<label for="count">Samples</label>
-		<input id="count" type="number" value="500">
+		<label for="count">Bins</label>
+		<label for="count" class="select-wrap">
+			<select name="count" id="count">
+<!--				<option value="16">8-->
+<!--				<option value="32">16-->
+<!--				<option value="64">32-->
+<!--				<option value="128">64-->
+<!--				<option value="256">128-->
+				<option value="512">256
+				<option value="1024">512
+				<option value="2048" selected>1024
+			</select>
+		</label>
 	</div>
 	<div>
 		<label for="freq">Rate <span class="mq-tablet-max" style="font-weight:normal;">(Hz)</span></label>
-		<input id="freq" type="number" value="4000">
+		<input id="freq" type="number" value="4096">
 		<span class="mq-normal-min">Hz</span>
 	</div>
 	<div>
@@ -18,7 +29,7 @@
 </div>
 
 <div class="Box medium chartbox">
-	<div id="chart" class="ct-chart ct-wide"></div>
+	<div id="chart" class="ct-chart ct-wide ct-with-area"></div>
 	<div class="stats invis">
 		<table>
 			<tr>
@@ -46,7 +57,7 @@
 </div>
 
 <script>
-	$().ready(page_waveform.init('raw'));
+	$().ready(page_waveform.init('fft'));
 </script>
 
 <?php include "_end.php"; ?>

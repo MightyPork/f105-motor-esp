@@ -42,8 +42,6 @@
 
 			options = Chartist.extend({}, defaultOptions, options);
 
-			console.log(options);
-
 			return function ctAxisTitle(chart) {
 
 				chart.on('created', function (data) {

@@ -2,50 +2,98 @@ var page_waveform = (function () {
 	var wfm = {};
 
 	var zoomResetFn;
+	var dataFormat;
 
-	function buildChart(obj, xlabel, ylabel) {
-		var points = [];
-		obj.samples.forEach(function (a, i) {
-			points.push({x: i, y: a});
-		});
+	var readoutPending = false;
+	var autoReload = false;
+	var autoReloadTime = 1;
+	var arTimeout = -1;
 
+	var zoomSavedX, zoomSavedY;
+
+	function buildChart(j) {
 		// Build the chart
-		var plugins = [];
 		var mql = window.matchMedia('screen and (min-width: 544px)');
 		var isPhone = !mql.matches;
 
-		if (!isPhone) {
-			// larger than phone
-			plugins.push(
-				Chartist.plugins.ctAxisTitle({
-					axisX: {
-						axisTitle: xlabel,
-						offset: {
-							x: 0,
-							y: 55
-						}
-					},
-					axisY: {
-						axisTitle: ylabel,
-						flipText: true,
-						offset: {
-							x: 0,
-							y: 15
-						}
-					}
-				})
-			);
+		var fft = (j.stats.format == 'FFT');
+
+		var xLabel, yLabel;
+		if (fft) {
+			xLabel = 'Frequency - [ Hz ]';
+			yLabel = 'Magnitude - [ mA ]';
+		} else {
+			xLabel = 'Sample time - [ ms ]';
+			yLabel = 'Current - [ mA ]';
 		}
 
-		// zoom
-		plugins.push(Chartist.plugins.zoom({
-			resetOnRightMouseBtn:true,
-			onZoom: function(chart, reset) {
-				zoomResetFn = reset;
-			}
-		}));
+		var peak = Math.max(-j.stats.min, j.stats.max);
+		var displayPeak = Math.max(peak, 10);
 
-		var peak = obj.stats.peak;
+		// Sidebar
+
+		$('#stat-count').html(j.stats.count);
+		$('#stat-f-s').html(j.stats.freq);
+		$('#stat-i-peak').html(peak);
+		$('#stat-i-rms').html(j.stats.rms);
+		$('.stats').removeClass('invis');
+
+		// --- chart ---
+
+		// Generate point entries
+		// add synthetic properties
+		var step = fft ? (j.stats.freq/j.stats.count) : (1000/j.stats.freq);
+		var points = _.map(j.samples, function (a, i) {
+			return {
+				x: i * step,
+				y: a
+			};
+		});
+
+		var plugins = [
+			Chartist.plugins.zoom({
+				resetOnRightMouseBtn: true,
+				onZoom: function (chart, reset) {
+					zoomResetFn = reset;
+
+					zoomSavedX = chart.options.axisX.highLow;
+					zoomSavedY = chart.options.axisY.highLow;
+				}
+			})
+		];
+
+		if (!isPhone) plugins.push( // larger than phone
+			Chartist.plugins.ctAxisTitle({
+				axisX: {
+					axisTitle: xLabel,
+					offset: {
+						x: 0,
+						y: 55
+					}
+				},
+				axisY: {
+					axisTitle: yLabel,
+					flipText: true,
+					offset: {
+						x: 0,
+						y: 15
+					}
+				}
+			})
+		);
+
+		var xHigh, xLow, yHigh, yLow;
+
+		if (zoomSavedX) {
+			// we have saved coords of the zoom rect, restore the zoom.
+			xHigh = zoomSavedX.high;
+			xLow = zoomSavedX.low;
+			yHigh = zoomSavedY.high;
+			yLow = zoomSavedY.low;
+		} else {
+			yHigh = fft ? undefined : displayPeak;
+			yLow = fft ? 0 : -displayPeak;
+		}
 
 		new Chartist.Line('#chart', {
 			series: [
@@ -56,7 +104,7 @@ var page_waveform = (function () {
 			]
 		}, {
 			showPoint: false,
-			// showArea: true,
+			showArea: fft,
 			fullWidth: true,
 			chartPadding: (isPhone ? {right: 20, bottom: 5, left: 0} : {right: 25, bottom: 30, left: 25}),
 			series: {
@@ -66,22 +114,32 @@ var page_waveform = (function () {
 			},
 			axisX: {
 				type: Chartist.AutoScaleAxis,
-				onlyInteger: true
+				//onlyInteger: !fft // only for raw
+				high: xHigh,
+				low: xLow,
 			},
 			axisY: {
 				type: Chartist.AutoScaleAxis,
 				//onlyInteger: true
-				high: peak,
-				low: -peak,
+				high: yHigh,
+				low: yLow,
+			},
+			explicitBounds: {
+				xLow: 0,
+				yLow: fft ? 0 : undefined,
+				xHigh: points[points.length-1].x
 			},
 			plugins: plugins
 		});
 	}
 
 	function onRxData(resp, status) {
+		readoutPending = false;
+
 		if (status != 200) {
-			// bad response
-			alert("Request failed.");
+			if (status != 0) { // 0 = aborted
+				alert("Request failed.");
+			}
 			return;
 		}
 
@@ -91,45 +149,83 @@ var page_waveform = (function () {
 			return;
 		}
 
-		j.stats.peak = Math.max(-j.stats.min, j.stats.max);
+		if (autoReload)
+			arTimeout = setTimeout(requestReload, autoReloadTime);
 
-		buildChart(j, 'Sample number', 'Current - mA');
-
-		$('#stat-count').html(j.stats.count);
-		$('#stat-f-s').html(j.stats.freq);
-		$('#stat-i-peak').html(j.stats.peak);
-		$('#stat-i-rms').html(j.stats.rms);
-		$('.stats').removeClass('invis');
+		buildChart(j);
 	}
 
-	wfm.init = function() {
-		//	var resp = {
-		//		"samples": [1878, 1883, 1887, 1897, 1906, 1915, 1926, 1940, 1955, 1970, 1982, 1996, 2012, 2026, 2038, 2049],
-		//		"success": true
-		//	};
+	function requestReload() {
+		if (readoutPending) return false;
 
-		function loadBtnClick() {
-			var samples = $('#count').val();
-			var freq = $('#freq').val();
+		readoutPending = true;
 
-			//http://192.168.1.13
-			$().get('/api/raw.json?n='+samples+'&fs='+freq, onRxData, true, true);
-		}
+		//http://192.168.1.13
+		var url = '/api/{fmt}.json?n={n}&fs={fs}'.format({
+			fmt: dataFormat,
+			n: $('#count').val(),
+			fs: $('#freq').val()
+		});
 
-		$('#load').on('click', loadBtnClick);
+		$().get(url, onRxData, true, true);
 
-		$('#count,#freq').on('keyup', function(e) {
+		return true;
+	}
+
+	wfm.init = function (format) {
+		// --- Load data ---
+		dataFormat = format;
+
+		// initial
+//		requestReload();
+
+		$('#load').on('click', requestReload);
+		$('#count,#freq').on('keyup', function (e) {
 			if (e.which == 13) {
-				loadBtnClick();
+				requestReload();
 			}
 		});
 
-		// chart zooming
-		$('#chart').on('contextmenu', function(e) {
+		// --- zooming ---
+
+		$('#chart').on('contextmenu', function (e) { // right click on the chart -> reset
 			zoomResetFn && zoomResetFn();
 			zoomResetFn = null;
+
+			zoomSavedX = null;
+			zoomSavedY = null;
+
 			e.preventDefault();
 			return false;
+		});
+
+		// --- scroll the input box ---
+		$('input[type=number]').on('mousewheel', function(e) {
+			var val = +$(this).val();
+			var step = +($(this).attr('step') || 1);
+			if(e.wheelDelta > 0) {
+				val += step;
+			} else {
+				val -= step;
+			}
+			$(this).val(val);
+		});
+
+		// auto-reload button
+		$('#ar-btn').on('click', function() {
+			autoReloadTime = +$('#ar-time').val() * 1000; // ms
+
+			autoReload = !autoReload;
+			if (autoReload) {
+				requestReload();
+			} else {
+				clearTimeout(arTimeout);
+			}
+
+			$('#ar-btn')
+				.toggleClass('btn-blue')
+				.toggleClass('btn-red')
+				.val(autoReload ? 'Stop' : 'Auto');
 		});
 	};
 

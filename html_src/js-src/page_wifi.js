@@ -50,7 +50,7 @@ var page_wifi = (function () {
 				var inner = document.createElement('div');
 				var $inner = $(inner).addClass('inner')
 					.htmlAppend('<div class="rssi">{0}</div>'.format(ap.rssi_perc))
-					.htmlAppend('<div class="essid" title="{0}">{0}</div>'.format(e(ap.essid)))
+					.htmlAppend('<div class="essid" title="{0}">{0}</div>'.format(_.escape(ap.essid)))
 					.htmlAppend('<div class="auth">{0}</div>'.format(authStr[ap.enc]));
 
 				$item.on('click', function () {
@@ -76,7 +76,7 @@ var page_wifi = (function () {
 
 	/** Ask the CGI what APs are visible (async) */
 	function scanAPs() {
-		$().get('/wifi/scan.cgi', onScan, true, true); // no cache, no jsonp
+		$().get('http://192.168.1.13/wifi/scan.cgi', onScan, true, true); // no cache, no jsonp
 	}
 
 	function rescan(time) {

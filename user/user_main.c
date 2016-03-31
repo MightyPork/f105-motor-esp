@@ -21,6 +21,7 @@
 #include "datalink.h"
 #include "uptime.h"
 #include "routes.h"
+#include "fw_version.h"
 
 extern HttpdBuiltInUrl builtInUrls[];
 
@@ -80,10 +81,13 @@ void user_init(void)
 	serialInit();
 	uptime_timer_init();
 
-	banner("*** ESP8266 starting ***");
+	banner("*** AC current analyser - WiFi module ***");
+	info("(c) Ondrej Hruska, 2016");
+	info("Katedra mereni FEL CVUT");
+	info("");
+	info("Version "FIRMWARE_VERSION", built "__DATE__" at "__TIME__);
 	info("HTTPD v."HTTPDVER", SBMP v."SBMP_VER", IoT SDK v."STR(ESP_SDK_VERSION));
 	printf(LOG_EOL);
-
 
 	// reset button etc
 	ioInit();

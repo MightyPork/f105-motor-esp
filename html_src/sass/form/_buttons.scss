@@ -55,7 +55,7 @@ input[type="reset"], .btn-red {
 	@include fancy-btn-colors($btn-red-f, $btn-red-b, $btn-red-fa, $btn-red-ba)
 }
 
-//&.blue   {@include fancy-btn-colors($btn-blue-f, $btn-blue-b, $btn-blue-fa, $btn-blue-ba)}
+&.btn-blue   {@include fancy-btn-colors($btn-blue-f, $btn-blue-b, $btn-blue-fa, $btn-blue-ba)}
 //&, &.orange {@include fancy-btn-colors($btn-orange-f, $btn-orange-b, $btn-orange-fa, $btn-orange-ba)}
 
 /*

@@ -207,6 +207,10 @@
 		@include ct-chart-line($ct-line-width);
 	}
 
+	.ct-with-area .ct-line {
+		stroke-width: 1px;
+	}
+
 	.ct-area {
 		@include ct-chart-area();
 	}

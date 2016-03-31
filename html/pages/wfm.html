@@ -15,8 +15,8 @@
 <body class="page-waveform">
 <div id="outer">
 <nav id="menu">
-	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current analyzer</div>
-	<a href="/">Home</a><a href="/wifi">WiFi config</a><a href="/waveform" class="selected">Waveform</a></nav>
+	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current Analyser</div>
+	<a href="/">Home</a><a href="/wifi">WiFi config</a><a href="/waveform" class="selected">Waveform</a><a href="/fft">FFT</a><a href="/about">About</a></nav>
 <div id="content">
 
 <h1>Waveform</h1>
@@ -41,7 +41,7 @@
 	<div class="stats invis">
 		<table>
 			<tr>
-				<th>#</th>
+				<th>Samples</th>
 				<td id="stat-count"></td>
 			</tr>
 			<tr>
@@ -57,11 +57,15 @@
 				<td id="stat-i-rms"></td>
 			</tr>
 		</table>
+		<div class="ar"><!-- auto reload -->
+			<input type="number" id="ar-time" step="0.5" value="1" min="0">&nbsp;s
+			<input type="button" id="ar-btn" class="btn-blue narrow" value="Auto">
+		</div>
 	</div>
 </div>
 
 <script>
-	$().ready(page_waveform.init());
+	$().ready(page_waveform.init('raw'));
 </script>
 
 </div>

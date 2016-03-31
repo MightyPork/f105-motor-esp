@@ -15,8 +15,8 @@
 <body class="page-home">
 <div id="outer">
 <nav id="menu">
-	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current analyzer</div>
-	<a href="/" class="selected">Home</a><a href="/wifi">WiFi config</a><a href="/waveform">Waveform</a></nav>
+	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current Analyser</div>
+	<a href="/" class="selected">Home</a><a href="/wifi">WiFi config</a><a href="/waveform">Waveform</a><a href="/fft">FFT</a><a href="/about">About</a></nav>
 <div id="content">
 
 <h1>System Status</h1>
@@ -24,7 +24,6 @@
 <div class="Box">
 	<h2>Runtime</h2>
 	<table>
-		<tbody>
 		<tr>
 			<th>Uptime:</th>
 			<td id="uptime">%uptime%</td>
@@ -33,7 +32,6 @@
 			<th>Free heap:</th>
 			<td id="heap">%heap%</td>
 		</tr>
-		</tbody>
 	</table>
 </div>
 

@@ -6,7 +6,6 @@ include "_start.php"; ?>
 <div class="Box">
 	<h2>Runtime</h2>
 	<table>
-		<tbody>
 		<tr>
 			<th>Uptime:</th>
 			<td id="uptime">%uptime%</td>
@@ -15,7 +14,6 @@ include "_start.php"; ?>
 			<th>Free heap:</th>
 			<td id="heap">%heap%</td>
 		</tr>
-		</tbody>
 	</table>
 </div>
 

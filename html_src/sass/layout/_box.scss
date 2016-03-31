@@ -3,7 +3,7 @@
 	max-width: 900px;
 
 	margin-top: dist(0);
-	padding: dist(-1);
+	padding: dist(-1) dist(0);
 
 	@include media($phone) {
 		margin-top: dist(-1);

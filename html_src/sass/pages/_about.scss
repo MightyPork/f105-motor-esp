@@ -1,0 +1,17 @@
+.page-about {
+	.Box {
+		padding-left:dist(0);
+		padding-right:dist(0);
+
+		a {font-weight: bold;}
+	}
+
+	#logo {
+		float:right;
+		height: 130px;
+	}
+
+	#logo2 {
+		max-width: 150px;
+	}
+}

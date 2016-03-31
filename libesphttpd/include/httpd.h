@@ -3,7 +3,7 @@
 
 #include <esp8266.h>
 
-#define HTTPDVER "0.4"
+#define HTTPDVER "0.4-based"
 
 #define HTTPD_CGI_MORE 0
 #define HTTPD_CGI_DONE 1

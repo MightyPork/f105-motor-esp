@@ -253,13 +253,13 @@ var Chartist = {
    * @memberof Chartist.Core
    * @type {Object}
    */
-  Chartist.escapingMap = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    '\'': '&#039;'
-  };
+  // Chartist.escapingMap = {
+  //   '&': '&amp;',
+  //   '<': '&lt;',
+  //   '>': '&gt;',
+  //   '"': '&quot;',
+  //   '\'': '&#039;'
+  // };
 
   /**
    * This function serializes arbitrary data to a string. In case of data that can't be easily converted to a string, this function will create a wrapper object and serialize the data using JSON.stringify. The outcoming string will always be escaped using Chartist.escapingMap.
@@ -278,9 +278,11 @@ var Chartist = {
       data = JSON.stringify({data: data});
     }
 
-    return Object.keys(Chartist.escapingMap).reduce(function(result, key) {
-      return Chartist.replaceAll(result, key, Chartist.escapingMap[key]);
-    }, data);
+    return _.escape(data);
+
+    // return Object.keys(Chartist.escapingMap).reduce(function(result, key) {
+    //   return Chartist.replaceAll(result, key, Chartist.escapingMap[key]);
+    // }, data);
   };
 
   /**
@@ -295,9 +297,10 @@ var Chartist = {
       return data;
     }
 
-    data = Object.keys(Chartist.escapingMap).reduce(function(result, key) {
-      return Chartist.replaceAll(result, Chartist.escapingMap[key], key);
-    }, data);
+    // data = Object.keys(Chartist.escapingMap).reduce(function(result, key) {
+    //   return Chartist.replaceAll(result, Chartist.escapingMap[key], key);
+    // }, data);
+    data = _.unescape(data);
 
     try {
       data = JSON.parse(data);
@@ -770,24 +773,24 @@ var Chartist = {
     return bounds;
   };
 
-  /**
-   * Calculate cartesian coordinates of polar coordinates
-   *
-   * @memberof Chartist.Core
-   * @param {Number} centerX X-axis coordinates of center point of circle segment
-   * @param {Number} centerY X-axis coordinates of center point of circle segment
-   * @param {Number} radius Radius of circle segment
-   * @param {Number} angleInDegrees Angle of circle segment in degrees
-   * @return {{x:Number, y:Number}} Coordinates of point on circumference
-   */
-  Chartist.polarToCartesian = function (centerX, centerY, radius, angleInDegrees) {
-    var angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
-
-    return {
-      x: centerX + (radius * Math.cos(angleInRadians)),
-      y: centerY + (radius * Math.sin(angleInRadians))
-    };
-  };
+  // /**
+  //  * Calculate cartesian coordinates of polar coordinates
+  //  *
+  //  * @memberof Chartist.Core
+  //  * @param {Number} centerX X-axis coordinates of center point of circle segment
+  //  * @param {Number} centerY X-axis coordinates of center point of circle segment
+  //  * @param {Number} radius Radius of circle segment
+  //  * @param {Number} angleInDegrees Angle of circle segment in degrees
+  //  * @return {{x:Number, y:Number}} Coordinates of point on circumference
+  //  */
+  // Chartist.polarToCartesian = function (centerX, centerY, radius, angleInDegrees) {
+  //   var angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+  //
+  //   return {
+  //     x: centerX + (radius * Math.cos(angleInRadians)),
+  //     y: centerY + (radius * Math.sin(angleInRadians))
+  //   };
+  // };
 
   /**
    * Initialize chart drawing rectangle (area where chart is drawn) x1,y1 = bottom left / x2,y2 = top right
@@ -907,8 +910,10 @@ var Chartist = {
     positionalData[axis.counterUnits.len] = axisOffset - 10;
 
 	var lblText = labels[index];
-	//round (!! will break for non-numeric)
-	lblText = Math.round(+lblText*100)/100;
+
+    if (_.isNumber(lblText)) {
+      lblText = Chartist.roundWithPrecision(lblText, 2);
+    }
 
     if(useForeignObject) {
       // We need to set width and height explicitly to px as span will not expand with width and height being

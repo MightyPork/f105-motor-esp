@@ -4,10 +4,10 @@ $menu = [
 	'home'        => [ '/',            'Home'               ],
 	'wifi'        => [ '/wifi',        'WiFi config'        ],
 	'waveform'    => [ '/waveform',    'Waveform'           ],
-// 	'fft'         => [ '/fft',         'FFT'                ],
+ 	'fft'         => [ '/fft',         'FFT'                ],
 // 	'spectrogram' => [ '/spectrogram', 'Spectrogram'        ],
 // 	'transient'   => [ '/transient',   'Power-on transient' ],
-// 	'about'       => [ '/about',       'Credits & About'    ],
+ 	'about'       => [ '/about',       'About'              ],
 ];
 
 $appname = 'Current analyzer';
@@ -37,7 +37,7 @@ $appname = 'Current analyzer';
 <body class="page-<?=$page?>">
 <div id="outer">
 <nav id="menu">
-	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current analyzer</div>
+	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current Analyser</div>
 	<?php
 	// generate the menu
 	foreach($menu as $k => $m) {

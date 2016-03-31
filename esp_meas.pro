@@ -60,7 +60,8 @@ SOURCES += \
     user/page_status.c \
     user/page_waveform.c \
     user/utils.c \
-    sbmp/library/payload_builder.c
+    sbmp/library/payload_builder.c \
+    user/page_about.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -142,7 +143,9 @@ HEADERS += \
     user/page_waveform.h \
     libesphttpd/include/espmissingprotos.h \
     user/utils.h \
-    sbmp/library/payload_builder.h
+    sbmp/library/payload_builder.h \
+    user/page_about.h \
+    user/fw_version.h
 
 DISTFILES += \
 	style.astylerc \
