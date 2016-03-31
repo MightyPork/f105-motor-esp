@@ -1,4 +1,6 @@
 /*!chibi 3.0.7, Copyright 2012-2016 Kyle Barrow, released under MIT license */
+
+// MODIFIED VERSION.
 (function () {
 	'use strict';
 
@@ -6,7 +8,6 @@
 		loadedfn = [],
 		domready = false,
 		pageloaded = false,
-		jsonpcount = 0,
 		d = document,
 		w = window;
 
@@ -598,103 +599,52 @@
 			return cb;
 		};
 		// Basic XHR 1, no file support. Shakes fist at IE
-		cb.ajax = function (url, method, callback, nocache, nojsonp) {
+		cb.ajax = function (url, method, callback) {
 			var xhr,
 				query = serializeData(nodes),
 				type = (method) ? method.toUpperCase() : 'GET',
-				hostsearch = new RegExp('http[s]?://(.*?)/', 'gi'),
-				domain = hostsearch.exec(url),
-				timestamp = '_ts=' + (+new Date()),
-				head = d.getElementsByTagName('head')[0],
-				jsonpcallback = 'chibi' + (+new Date()) + (jsonpcount += 1),
-				script;
+				timestamp = '_ts=' + (+new Date());
 
-			if (query && (type === 'GET' || type === 'DELETE')) {
+			if (query && (type === 'GET')) {
 				url += (url.indexOf('?') === -1) ? '?' + query : '&' + query;
 				query = null;
 			}
 
-			// JSONP if cross domain url
-			if (type === 'GET' && !nojsonp && domain && w.location.host !== domain[1]) {
+			xhr = new XMLHttpRequest(); // we dont support IE < 9
 
-				if (nocache) {
-					url += (url.indexOf('?') === -1) ? '?' + timestamp : '&' + timestamp;
-				}
+			if (xhr) {
+				// prevent caching
+				url += (url.indexOf('?') === -1) ? '?' + timestamp : '&' + timestamp;
 
-				// Replace possible encoded ?
-				url = url.replace('=%3F', '=?');
+				// Douglas Crockford: "Synchronous programming is disrespectful and should not be employed in applications which are used by people"
+				xhr.open(type, url, true);
 
-				// Replace jsonp ? with callback
-				if (callback && url.indexOf('=?') !== -1) {
-
-					url = url.replace('=?', '=' + jsonpcallback);
-
-					w[jsonpcallback] = function (data) {
-						try {
-							callback(data, 200);
-						} catch (e) {}
-
-						// Tidy up
-						w[jsonpcallback] = undefined;
-					};
-				}
-
-				// JSONP
-				script = document.createElement('script');
-				script.async = true;
-				script.src = url;
-
-				// Tidy up
-				script.onload = function () {
-					head.removeChild(script);
+				xhr.onreadystatechange = function () {
+					if (xhr.readyState === 4) {
+						if (callback) {
+							callback(xhr.responseText, xhr.status);
+						}
+					}
 				};
 
-				head.appendChild(script);
+				xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-			} else {
-
-				if (w.XMLHttpRequest) {
-					xhr = new XMLHttpRequest();
-				} else if (w.ActiveXObject) {
-					xhr = new ActiveXObject('Microsoft.XMLHTTP'); // IE < 9
+				if (type === 'POST' || type === 'PUT') {
+					xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 				}
 
-				if (xhr) {
-
-					if (nocache) {
-						url += (url.indexOf('?') === -1) ? '?' + timestamp : '&' + timestamp;
-					}
-
-					// Douglas Crockford: "Synchronous programming is disrespectful and should not be employed in applications which are used by people"
-					xhr.open(type, url, true);
-
-					xhr.onreadystatechange = function () {
-						if (xhr.readyState === 4) {
-							if (callback) {
-								callback(xhr.responseText, xhr.status);
-							}
-						}
-					};
-
-					xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-
-					if (type === 'POST' || type === 'PUT') {
-						xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-					}
-
-					xhr.send(query);
-
-				}
+				xhr.send(query);
 			}
+
 			return cb;
 		};
-		// Alias to cb.ajax(url, 'get', callback, nocache, nojsonp)
-		cb.get = function (url, callback, nocache, nojsonp) {
-			return cb.ajax(url, 'get', callback, nocache, nojsonp);
+		// Alias to cb.ajax(url, 'get', callback)
+		cb.get = function (url, callback) {
+			return cb.ajax(url, 'get', callback);
 		};
-		// Alias to cb.ajax(url, 'post', callback, nocache)
-		cb.post = function (url, callback, nocache) {
-			return cb.ajax(url, 'post', callback, nocache);
+		// Alias to cb.ajax(url, 'post', callback)
+		cb.post = function (url, callback) {
+			return cb.ajax(url, 'post', callback);
 		};
 
 		return cb;

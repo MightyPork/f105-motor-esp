@@ -5,8 +5,8 @@
 #include <httpd.h>
 #include "datalink.h"
 
-#define SAMPLING_TMEO 6000
-#define SAMP_READOUT_TMEO 100
+#define SAMPLING_TMEO 10000
+#define SAMP_READOUT_TMEO 500
 
 typedef struct {
 	uint32_t count;

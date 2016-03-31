@@ -1,5 +1,4 @@
-<?php $page = 'wifi';
-include "_start.php"; ?>
+<?php $page = 'wifi'; include "_start.php"; ?>
 
 <h1>Wireless Setup</h1>
 

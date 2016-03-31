@@ -160,14 +160,13 @@ var page_waveform = (function () {
 
 		readoutPending = true;
 
-		//http://192.168.1.13
-		var url = '/api/{fmt}.json?n={n}&fs={fs}'.format({
+		var url = _root+'/api/{fmt}.json?n={n}&fs={fs}'.format({
 			fmt: dataFormat,
 			n: $('#count').val(),
 			fs: $('#freq').val()
 		});
 
-		$().get(url, onRxData, true, true);
+		$().get(url, onRxData);
 
 		return true;
 	}

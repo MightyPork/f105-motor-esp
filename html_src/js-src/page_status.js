@@ -46,7 +46,7 @@ var page_status = (function() {
 	}
 
 	function requestUpdate() {
-		$().get('/api/status.json', onUpdate, true, true);
+		$().get(_root+'/api/status.json', onUpdate);
 	}
 
 	st.init = function() {

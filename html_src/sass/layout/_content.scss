@@ -1,11 +1,13 @@
 #content {
 	flex-grow: 1;
+	position: relative;
 
-	overflow-y: auto;
 	padding: dist(0);
 	@include media($phone) {
 		padding: dist(-1);
 	}
+
+	overflow-y: auto;
 
 	& > * {
 		margin-left: auto;
@@ -32,5 +34,24 @@
 		text-align: right;
 		width: $form-label-w;
 		color: $c-form-label-fg;
+	}
+}
+
+// Loader wheel in top right corner
+#loader {
+	position: absolute;
+	right: dist(1);
+	top: dist(1);
+
+	transition: opacity .2s;
+	opacity: 0;
+
+	@include media($phone) {
+		top: dist(0);
+		right: dist(0);
+	}
+
+	&.show {
+		opacity:1;
 	}
 }

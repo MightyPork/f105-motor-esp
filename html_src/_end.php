@@ -1,4 +1,4 @@
-</div>
-</div>
+</div><!-- content -->
+</div><!-- outer -->
 </body>
 </html>

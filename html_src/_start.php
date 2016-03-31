@@ -1,16 +1,23 @@
 <?php
 
-$menu = [
-	'home'        => [ '/',            'Home'               ],
-	'wifi'        => [ '/wifi',        'WiFi config'        ],
-	'waveform'    => [ '/waveform',    'Waveform'           ],
- 	'fft'         => [ '/fft',         'FFT'                ],
-// 	'spectrogram' => [ '/spectrogram', 'Spectrogram'        ],
-// 	'transient'   => [ '/transient',   'Power-on transient' ],
- 	'about'       => [ '/about',       'About'              ],
-];
+	$prod = defined('STDIN');
+	$root = $prod ? '' : 'http://192.168.1.13';
 
-$appname = 'Current analyzer';
+	$menu = [
+		'home'        => [ $prod ? '/' : '/page_status.php',            'Home'               ],
+		'wifi'        => [ $prod ? '/wifi' : '/page_wifi.php',          'WiFi config'        ],
+		'waveform'    => [ $prod ? '/waveform' : '/page_waveform.php',  'Waveform'           ],
+	    'fft'         => [ $prod ? '/fft' : '/page_fft.php',            'FFT'                ],
+	// 	'spectrogram' => [ '/spectrogram', 'Spectrogram'        ],
+	// 	'transient'   => [ '/transient',   'Power-on transient' ],
+	    'about'       => [ $prod ? '/about' : '/page_about.php',        'About'             ],
+	];
+
+	$appname = 'Current Analyser';
+
+	function e($s) {
+		return htmlspecialchars($s, ENT_HTML5|ENT_QUOTES);
+	}
 
 ?><!doctype html>
 <html>
@@ -19,32 +26,29 @@ $appname = 'Current analyzer';
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-	<title><?= htmlspecialchars($menu[$page][1]) ?> - <?= htmlspecialchars($appname) ?></title>
+	<title><?= e($menu[$page][1]) ?> - <?= e($appname) ?></title>
 
 	<link href="/css/app.css" rel="stylesheet">
-
-	<?php if(false): ?>
-		<!-- IE8 support (not tested) -->
-		<!--[if lt IE 9]>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-shim.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
-		<![endif]-->
-	<?php endif; ?>
-
 	<script src="/js/all.js"></script>
+	<script>
+		// server root (or URL) - used for local development with remote AJAX calls
+		// (this needs CORS working on the target - which I added to esp-httpd)
+		var _root = <?= json_encode($root) ?>;
+	</script>
 </head>
 <body class="page-<?=$page?>">
 <div id="outer">
 <nav id="menu">
-	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current Analyser</div>
+	<div id="brand" onclick="$('#menu').toggleClass('expanded')"><?= e($appname) ?></div>
 	<?php
 	// generate the menu
 	foreach($menu as $k => $m) {
 		$sel = ($page == $k) ? ' class="selected"' : '';
-		$text = htmlspecialchars($m[1]);
-		echo "<a href=\"$m[0]\"$sel>$text</a>";
+		$text = e($m[1]);
+		$url = e($m[0]);
+		echo "<a href=\"$url\"$sel>$text</a>";
 	}
 	?>
 </nav>
 <div id="content">
+	<img src="/img/loader.gif" alt="Loading…" id="loader">

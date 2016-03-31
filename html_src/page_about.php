@@ -4,7 +4,7 @@
 
 <div class="Box">
 	<img src="/img/cvut.svg" id="logo" class="mq-tablet-min">
-	<h2>Current Analyser</h2>
+	<h2><?= e($appname) ?></h2>
 
 	<img src="/img/cvut.svg" id="logo2" class="mq-phone">
 
