@@ -76,7 +76,7 @@ var page_wifi = (function () {
 
 	/** Ask the CGI what APs are visible (async) */
 	function scanAPs() {
-		$().get(_root+'/wifi/scan.cgi', onScan); // no cache, no jsonp
+		$().get(_root+'/wifi/scan', onScan); // no cache, no jsonp
 	}
 
 	function rescan(time) {

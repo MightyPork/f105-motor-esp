@@ -168,7 +168,7 @@ var page_waveform = (function () {
 		var n = $('#count').val();
 		var fs = $('#freq').val();
 
-		var url = _root+'/api/{fmt}.json?n={n}&fs={fs}'.format({
+		var url = _root+'/measure/{fmt}?n={n}&fs={fs}'.format({
 			fmt: dataFormat, // fft or raw
 			n: n,
 			fs: fs

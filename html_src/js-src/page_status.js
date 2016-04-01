@@ -8,14 +8,14 @@ var page_status = (function() {
 
 	st.trigReset = function() {
 		var modal_sel = '#reset-modal';
-		$().get(_root + '/reset.cgi', function(resp, status) {
+		$().get(_root + '/system/reset', function(resp, status) {
 			if (status == 200) {
 
 				modal.show(modal_sel);
 				updateInhibited = true;
 
 				var ping_i = setInterval(function() {
-					$().get(_root+'/ping.cgi', function(resp, code){
+					$().get(_root+'/system/ping', function(resp, code){
 						if (code == 200) {
 							// device is ready
 							modal.hide(modal_sel);
@@ -77,7 +77,7 @@ var page_status = (function() {
 	}
 
 	function requestUpdate() {
-		$().get(_root+'/api/status.json', onUpdate);
+		$().get(_root+'/system/status', onUpdate);
 	}
 
 	st.init = function() {

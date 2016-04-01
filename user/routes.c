@@ -37,45 +37,36 @@ static int FLASH_FN myPassFn(HttpdConnData *connData, int no, char *user, int us
 HttpdBuiltInUrl builtInUrls[] = {
 	ROUTE_CGI_ARG("*", cgiRedirectApClientToHostname, "esp8266.nonet"), // redirect func for the captive portal
 
-	// ! Templates in the JSON folder will have application/json content type !
-	// otherwise they're encoded the same like the HTML ones -> no heatshrink, no gzip
+	// --- System control ---
+	ROUTE_CGI("/system/reset", cgiResetDevice),
+	ROUTE_CGI("/system/ping", cgiPing),
+	ROUTE_TPL_FILE("/system/status", tplSystemStatus, "/json/status.tpl"),
+
+	// --- Measurement ---
+	ROUTE_TPL_FILE("/measure/raw", tplWaveformJSON, "/json/samples.tpl"),
+	ROUTE_TPL_FILE("/measure/fft", tplFourierJSON, "/json/samples.tpl"),
 
 	// --- UI pages ---
-	ROUTE_CGI("/reset.cgi", cgiResetDevice),
-	ROUTE_CGI("/ping.cgi", cgiPing),
-
 	// System Status page
-	ROUTE_TPL_FILE("/",        tplSystemStatus, "/pages/status.tpl"),
+	ROUTE_TPL_FILE("/",  tplSystemStatus, "/pages/status.tpl"),
 	ROUTE_TPL_FILE("/status",  tplSystemStatus, "/pages/status.tpl"),
-
-	ROUTE_TPL_FILE("/api/status.json", tplSystemStatus, "/json/status.tpl"),
-
-	// About
 	ROUTE_TPL_FILE("/about",  tplAbout, "/pages/about.tpl"),
-
-	// Waveform page
 	ROUTE_FILE("/waveform", "/pages/wfm.html"), // static file, html -> can use gzip
-	// FFT
 	ROUTE_FILE("/fft", "/pages/fft.html"), // static file, html -> can use gzip
 
-	ROUTE_TPL_FILE("/api/raw.json", tplWaveformJSON, "/json/samples.tpl"),
-	ROUTE_TPL_FILE("/api/fft.json", tplFourierJSON, "/json/samples.tpl"),
-
 	// --- WiFi config ---
-
 #if WIFI_PROTECT
-	ROUTE_AUTH("/wifi/*", myPassFn),
+	ROUTE_AUTH("/wifi*", myPassFn),
 #endif
-
+	ROUTE_REDIRECT("/wifi/", "/wifi"),
 	ROUTE_TPL_FILE("/wifi", tplWlan, "/pages/wifi.tpl"),
 
-	ROUTE_CGI("/wifi/scan.cgi", cgiWiFiScan),
-	ROUTE_CGI("/wifi/connect.cgi", cgiWiFiConnect),
-	ROUTE_CGI("/wifi/connstatus.cgi", cgiWiFiConnStatus),
-	ROUTE_CGI("/wifi/setmode.cgi", cgiWiFiSetMode),
+	ROUTE_CGI("/wifi/scan", cgiWiFiScan),
+	ROUTE_CGI("/wifi/connect", cgiWiFiConnect),
+	ROUTE_CGI("/wifi/connstatus", cgiWiFiConnStatus),
+	ROUTE_CGI("/wifi/setmode", cgiWiFiSetMode),
 
 	// --- FS ---
-
 	ROUTE_FS("*"), //Catch-all cgi function for the filesystem NOTE: unsafe, lets user read templates.
 
 	ROUTE_END()

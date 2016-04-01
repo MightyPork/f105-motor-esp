@@ -165,7 +165,7 @@ int ICACHE_FLASH_ATTR cgiWiFiScan(HttpdConnData *connData) {
 	}
 
 	httpdStartResponse(connData, 200);
-	httpdHeader(connData, "Content-Type", "text/json");
+	httpdHeader(connData, "Content-Type", "application/json");
 	httpdEndHeaders(connData);
 
 	if (cgiWifiAps.scanInProgress==1) {
@@ -251,7 +251,7 @@ int ICACHE_FLASH_ATTR cgiWiFiConnect(HttpdConnData *connData) {
 	httpdRedirect(connData, "/wifi");
 #else
 	os_timer_arm(&reassTimer, 500, 0);
-	httpdRedirect(connData, "connecting.html"); // TODO custom page. Also diff. b/w sta & ap.
+	httpdRedirect(connData, "/wifi/connecting.html"); // TODO custom page. Also diff. b/w sta & ap.
 #endif
 	return HTTPD_CGI_DONE;
 }
@@ -288,7 +288,7 @@ int ICACHE_FLASH_ATTR cgiWiFiConnStatus(HttpdConnData *connData) {
 	struct ip_info info;
 	int st=wifi_station_get_connect_status();
 	httpdStartResponse(connData, 200);
-	httpdHeader(connData, "Content-Type", "text/json");
+	httpdHeader(connData, "Content-Type", "application/json");
 	httpdEndHeaders(connData);
 	if (connTryStatus==CONNTRY_IDLE) {
 		len=sprintf(buff, "{\"status\":\"idle\"}");
@@ -332,9 +332,9 @@ int ICACHE_FLASH_ATTR tplWlan(HttpdConnData *connData, char *token, void **arg) 
 	} else if (strcmp(token, "WiFiapwarn")==0) {
 		x=wifi_get_opmode();
 		if (x==2) {
-			strcpy(buff, "<b>Can't scan in this mode.</b> Click <a href=\"/wifi/setmode.cgi?mode=3\">here</a> to go to STA+AP mode.");
+			strcpy(buff, "<b>Can't scan in this mode.</b> Click <a href=\"/wifi/setmode?mode=3\">here</a> to go to STA+AP mode.");
 		} else {
-			strcpy(buff, "Click <a href=\"/wifi/setmode.cgi?mode=2\">here</a> to go to stand-alone AP mode.");
+			strcpy(buff, "Click <a href=\"/wifi/setmode?mode=2\">here</a> to go to stand-alone AP mode.");
 		}
 	}
 	httpdSend(connData, buff, -1);
