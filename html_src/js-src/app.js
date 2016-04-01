@@ -21,4 +21,10 @@ $().ready(function () {
 	}, 1000);
 
 	modal.init();
+	notify.init();
 });
+
+
+function errorMsg(msg) {
+	notify.show(msg, 3000);
+}

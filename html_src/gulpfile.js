@@ -27,6 +27,7 @@ elixir(function (mix) {
 		'js-src/lib/lodash.custom.js',
 		'js-src/utils.js',
 		'js-src/modal.js',
+		'js-src/notif.js',
 		'js-src/app.js',
 		'js-src/page_wifi.js',
 		'js-src/page_waveform.js',

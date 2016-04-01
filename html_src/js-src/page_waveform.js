@@ -137,7 +137,7 @@ var page_waveform = (function () {
 		readoutPending = false;
 
 		if (status != 200) {
-			console.error("Request failed.");
+			errorMsg("Request failed.");
 
 			if (autoReload)
 				toggleAutoReload(); // turn it off.
@@ -145,7 +145,7 @@ var page_waveform = (function () {
 		} else {
 			var j = JSON.parse(resp);
 			if (!j.success) {
-				console.error("Sampling / readout failed.");
+				errorMsg("Sampling / readout failed.");
 
 				if (autoReload)
 					toggleAutoReload(); // turn it off.
@@ -165,13 +165,18 @@ var page_waveform = (function () {
 
 		readoutPending = true;
 
+		var n = $('#count').val();
+		var fs = $('#freq').val();
+
 		var url = _root+'/api/{fmt}.json?n={n}&fs={fs}'.format({
-			fmt: dataFormat,
-			n: $('#count').val(),
-			fs: $('#freq').val()
+			fmt: dataFormat, // fft or raw
+			n: n,
+			fs: fs
 		});
 
-		$().get(url, onRxData);
+		$().get(url, onRxData, {
+			timeout: (1000/fs)*n+1500
+		});
 
 		return true;
 	}

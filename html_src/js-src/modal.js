@@ -21,6 +21,7 @@ var modal = (function () {
 	modal.init = function () {
 		// close modal by click outside the dialog
 		$('.Modal').on('click', function () {
+			if ($(this).hasClass('no-close')) return; // this is a no-close modal
 			modal.hide(this);
 		});
 

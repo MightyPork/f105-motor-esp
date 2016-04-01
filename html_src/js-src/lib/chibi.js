@@ -599,11 +599,19 @@
 			return cb;
 		};
 		// Basic XHR 1, no file support. Shakes fist at IE
-		cb.ajax = function (url, method, callback) {
+		cb.ajax = function (url, method, callback, options) {
 			var xhr,
 				query = serializeData(nodes),
 				type = (method) ? method.toUpperCase() : 'GET',
 				timestamp = '_ts=' + (+new Date());
+
+			var opts = Chartist.extend({}, {
+				nocache: true,
+				timeout: 5000,
+				loader: true,
+			}, options);
+
+			console.log('ajax to = '+opts.timeout);
 
 			if (query && (type === 'GET')) {
 				url += (url.indexOf('?') === -1) ? '?' + query : '&' + query;
@@ -614,18 +622,23 @@
 
 			if (xhr) {
 				// prevent caching
-				url += (url.indexOf('?') === -1) ? '?' + timestamp : '&' + timestamp;
+				if (opts.nocache)
+					url += (url.indexOf('?') === -1) ? '?' + timestamp : '&' + timestamp;
 
-				$('#loader').addClass('show');
+				if (opts.loader)
+					$('#loader').addClass('show');
 
 				// Douglas Crockford: "Synchronous programming is disrespectful and should not be employed in applications which are used by people"
 				xhr.open(type, url, true);
 
-				xhr.timeout = 15000; // a default value. TODO way to set it for the caller
+				xhr.timeout = opts.timeout;
 
 				xhr.onreadystatechange = function () {
 					if (xhr.readyState === 4) {
-						$('#loader').removeClass('show');
+
+						if (opts.loader)
+							$('#loader').removeClass('show');
+
 						if (callback && xhr.status != 0) { // xhr.status 0 means "aborted"
 							callback(xhr.responseText, xhr.status);
 						}
@@ -634,7 +647,7 @@
 
 				xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-				if (type === 'POST' || type === 'PUT') {
+				if (type === 'POST') {
 					xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 				}
 
@@ -644,12 +657,12 @@
 			return cb;
 		};
 		// Alias to cb.ajax(url, 'get', callback)
-		cb.get = function (url, callback) {
-			return cb.ajax(url, 'get', callback);
+		cb.get = function (url, callback, opts) {
+			return cb.ajax(url, 'get', callback, opts);
 		};
 		// Alias to cb.ajax(url, 'post', callback)
-		cb.post = function (url, callback) {
-			return cb.ajax(url, 'post', callback);
+		cb.post = function (url, callback, opts) {
+			return cb.ajax(url, 'post', callback, opts);
 		};
 
 		return cb;

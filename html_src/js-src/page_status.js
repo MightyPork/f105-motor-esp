@@ -1,14 +1,43 @@
 var page_status = (function() {
 	var st = {};
+	st.j = {};
+
+	var updateTime = 10000;
+
+	var updateInhibited = false;
+
+	st.trigReset = function() {
+		var modal_sel = '#reset-modal';
+		$().get(_root + '/reset.cgi', function(resp, status) {
+			if (status == 200) {
+
+				modal.show(modal_sel);
+				updateInhibited = true;
+
+				var ping_i = setInterval(function() {
+					$().get(_root+'/ping.cgi', function(resp, code){
+						if (code == 200) {
+							// device is ready
+							modal.hide(modal_sel);
+							requestUpdate();
+							clearInterval(ping_i);
+							updateInhibited = false;
+						}
+					}, {timeout: 500});
+				}, 1000);
+			}
+		});
+	};
 
 	function onUpdate(resp, status) {
 		if (status != 200) {
 			// bad response
-			console.error('Update failed.');
+			errorMsg('Update failed.');
 		} else {
 			try {
 				// OK
 				var j = JSON.parse(resp);
+				st.j = j; // store for global access
 
 				$('.sta-only').toggle(j.sta);
 				$('.ap-only').toggle(j.ap);
@@ -38,11 +67,13 @@ var page_status = (function() {
 				}
 				// chip ID & macs don't change
 			} catch(e) {
-				console.error(e);
+				errorMsg(e);
 			}
 		}
 
-		setTimeout(requestUpdate, 10000);
+		if (!updateInhibited) {
+			setTimeout(requestUpdate, updateTime);
+		}
 	}
 
 	function requestUpdate() {
@@ -51,7 +82,6 @@ var page_status = (function() {
 
 	st.init = function() {
 		requestUpdate();
-		setTimeout(requestUpdate, 10000);
 	};
 
 	return st;
