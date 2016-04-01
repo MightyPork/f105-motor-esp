@@ -20,6 +20,17 @@ $().ready(function () {
 		});
 	}, 1000);
 
+	$('input[type=number]').on('mousewheel', function(e) {
+		var val = +$(this).val();
+		var step = +($(this).attr('step') || 1);
+		if(e.wheelDelta > 0) {
+			val += step;
+		} else {
+			val -= step;
+		}
+		$(this).val(val);
+	});
+
 	modal.init();
 	notify.init();
 });

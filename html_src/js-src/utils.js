@@ -7,6 +7,10 @@ function numfmt(x, places) {
 	return Math.round(x*pow) / pow;
 }
 
+function estimateLoadTime(fs, n) {
+	return (1000/fs)*n+1500;
+}
+
 /**
  * Perform a substitution in the given string.
  *

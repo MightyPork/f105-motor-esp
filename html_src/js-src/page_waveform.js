@@ -168,15 +168,8 @@ var page_waveform = (function () {
 		var n = $('#count').val();
 		var fs = $('#freq').val();
 
-		var url = _root+'/measure/{fmt}?n={n}&fs={fs}'.format({
-			fmt: dataFormat, // fft or raw
-			n: n,
-			fs: fs
-		});
-
-		$().get(url, onRxData, {
-			timeout: (1000/fs)*n+1500
-		});
+		var url = _root+'/measure/'+dataFormat+'?n='+n+'&fs='+fs;
+		$().get(url, onRxData, estimateLoadTime(fs,n));
 
 		return true;
 	}
@@ -222,18 +215,6 @@ var page_waveform = (function () {
 
 			e.preventDefault();
 			return false;
-		});
-
-		// --- scroll the input box ---
-		$('input[type=number]').on('mousewheel', function(e) {
-			var val = +$(this).val();
-			var step = +($(this).attr('step') || 1);
-			if(e.wheelDelta > 0) {
-				val += step;
-			} else {
-				val -= step;
-			}
-			$(this).val(val);
 		});
 
 		// auto-reload button

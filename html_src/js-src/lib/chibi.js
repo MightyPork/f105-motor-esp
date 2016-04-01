@@ -63,7 +63,9 @@
 
 	// Convert to camel case
 	function cssCamel(property) {
-		return property.replace(/-\w/g, function (result) {return result.charAt(1).toUpperCase(); });
+		return property.replace(/-\w/g, function (result) {
+			return result.charAt(1).toUpperCase();
+		});
 	}
 
 	// Get computed style
@@ -82,7 +84,8 @@
 	function setCss(elm, property, value) {
 		try {
 			elm.style[cssCamel(property)] = value;
-		} catch (e) {}
+		} catch (e) {
+		}
 	}
 
 	// Show CSS
@@ -117,38 +120,38 @@
 
 						if (!subelm.disabled) {
 							switch (subelm.type) {
-							// Ignore buttons, unsupported XHR 1 form fields
-							case 'button':
-							case 'image':
-							case 'file':
-							case 'submit':
-							case 'reset':
-								break;
+								// Ignore buttons, unsupported XHR 1 form fields
+								case 'button':
+								case 'image':
+								case 'file':
+								case 'submit':
+								case 'reset':
+									break;
 
-							case 'select-one':
-								if (subelm.length > 0) {
-									querystring += '&' + queryPair(subelm.name, subelm.value);
-								}
-								break;
-
-							case 'select-multiple':
-								for (j = 0; j < subelm.length; j += 1) {
-									if (subelm[j].selected) {
-										querystring += '&' + queryPair(subelm.name, subelm[j].value);
+								case 'select-one':
+									if (subelm.length > 0) {
+										querystring += '&' + queryPair(subelm.name, subelm.value);
 									}
-								}
-								break;
+									break;
 
-							case 'checkbox':
-							case 'radio':
-								if (subelm.checked) {
+								case 'select-multiple':
+									for (j = 0; j < subelm.length; j += 1) {
+										if (subelm[j].selected) {
+											querystring += '&' + queryPair(subelm.name, subelm[j].value);
+										}
+									}
+									break;
+
+								case 'checkbox':
+								case 'radio':
+									if (subelm.checked) {
+										querystring += '&' + queryPair(subelm.name, subelm.value);
+									}
+									break;
+
+								// Everything else including shinny new HTML5 input types
+								default:
 									querystring += '&' + queryPair(subelm.name, subelm.value);
-								}
-								break;
-
-							// Everything else including shinny new HTML5 input types
-							default:
-								querystring += '&' + queryPair(subelm.name, subelm.value);
 							}
 						}
 					}
@@ -205,7 +208,9 @@
 						} else if (position === 'prepend') {
 							elm.insertBefore(tmpnode, elm.firstChild);
 						}
-					} catch (e) {break; }
+					} catch (e) {
+						break;
+					}
 				}
 			}, nodes);
 		}
@@ -347,7 +352,7 @@
 		// Toggle node display
 		cb.toggle = function (state) {
 			if (typeof state != 'undefined') { // ADDED
-				if(state)
+				if (state)
 					cb.show();
 				else
 					cb.hide();
@@ -370,7 +375,8 @@
 				// Catch error in unlikely case elm has been removed
 				try {
 					elm.parentNode.removeChild(elm);
-				} catch (e) {}
+				} catch (e) {
+				}
 			}, nodes);
 			return chibi();
 		};
@@ -397,7 +403,7 @@
 		cb.getClass = function () {
 			if (nodes[0] && nodes[0].className.length > 0) {
 				// Weak IE trim support
-				return nodes[0].className.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '').replace(/\s+/,' ');
+				return nodes[0].className.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '').replace(/\s+/, ' ');
 			}
 		};
 		// Set (replaces) classes
@@ -501,7 +507,7 @@
 		// Get/Set HTML data property
 		cb.data = function (key, value) {
 			if (key) {
-				return cb.attr('data-'+key, value);
+				return cb.attr('data-' + key, value);
 			}
 		};
 		// Get/Set form element values
@@ -510,26 +516,26 @@
 			if (value || value === '') {
 				nodeLoop(function (elm) {
 					switch (elm.nodeName) {
-					case 'SELECT':
-						if (typeof value === 'string' || typeof value === 'number') {
-							value = [value];
-						}
-						for (i = 0; i < elm.length; i += 1) {
-							// Multiple select
-							for (j = 0; j < value.length; j += 1) {
-								elm[i].selected = '';
-								if (elm[i].value === value[j]) {
-									elm[i].selected = 'selected';
-									break;
+						case 'SELECT':
+							if (typeof value === 'string' || typeof value === 'number') {
+								value = [value];
+							}
+							for (i = 0; i < elm.length; i += 1) {
+								// Multiple select
+								for (j = 0; j < value.length; j += 1) {
+									elm[i].selected = '';
+									if (elm[i].value === value[j]) {
+										elm[i].selected = 'selected';
+										break;
+									}
 								}
 							}
-						}
-						break;
-					case 'INPUT':
-					case 'TEXTAREA':
-					case 'BUTTON':
-						elm.value = value;
-						break;
+							break;
+						case 'INPUT':
+						case 'TEXTAREA':
+						case 'BUTTON':
+							elm.value = value;
+							break;
 					}
 				}, nodes);
 
@@ -537,18 +543,18 @@
 			}
 			if (nodes[0]) {
 				switch (nodes[0].nodeName) {
-				case 'SELECT':
-					values = [];
-					for (i = 0; i < nodes[0].length; i += 1) {
-						if (nodes[0][i].selected) {
-							values.push(nodes[0][i].value);
+					case 'SELECT':
+						values = [];
+						for (i = 0; i < nodes[0].length; i += 1) {
+							if (nodes[0][i].selected) {
+								values.push(nodes[0][i].value);
+							}
 						}
-					}
-					return (values.length > 1) ? values : values[0];
-				case 'INPUT':
-				case 'TEXTAREA':
-				case 'BUTTON':
-					return nodes[0].value;
+						return (values.length > 1) ? values : values[0];
+					case 'INPUT':
+					case 'TEXTAREA':
+					case 'BUTTON':
+						return nodes[0].value;
 				}
 			}
 		};
@@ -576,7 +582,9 @@
 					elm.addEventListener(event, fn, false);
 				} else if (d.attachEvent) {
 					// <= IE 8 loses scope so need to apply, we add this to object so we can detach later (can't detach anonymous functions)
-					elm[event + fn] =  function () { return fn.apply(elm, arguments); };
+					elm[event + fn] = function () {
+						return fn.apply(elm, arguments);
+					};
 					elm.attachEvent('on' + event, elm[event + fn]);
 				}
 			}, nodes);
@@ -599,11 +607,14 @@
 			return cb;
 		};
 		// Basic XHR 1, no file support. Shakes fist at IE
-		cb.ajax = function (url, method, callback, options) {
+		cb.ajax = function (url, method, callback, options) { // if options is a number, it's timeout in ms
 			var xhr,
 				query = serializeData(nodes),
 				type = (method) ? method.toUpperCase() : 'GET',
-				timestamp = '_ts=' + (+new Date());
+				timestamp = '_ts=' + (+new Date()),
+				abortTmeo;
+
+			if (_.isNumber(options)) options = {timeout: options};
 
 			var opts = Chartist.extend({}, {
 				nocache: true,
@@ -611,7 +622,7 @@
 				loader: true,
 			}, options);
 
-			console.log('ajax to = '+opts.timeout);
+			console.log('ajax to = ' + opts.timeout);
 
 			if (query && (type === 'GET')) {
 				url += (url.indexOf('?') === -1) ? '?' + query : '&' + query;
@@ -633,6 +644,12 @@
 
 				xhr.timeout = opts.timeout;
 
+				abortTmeo = setTimeout(function () {
+					errorMsg("XHR timed out.");
+					xhr.abort();
+					if (opts.loader) $('#loader').removeClass('show');
+				}, opts.timeout + 10); // a bit later, but still.;
+
 				xhr.onreadystatechange = function () {
 					if (xhr.readyState === 4) {
 
@@ -642,6 +659,8 @@
 						if (callback && xhr.status != 0) { // xhr.status 0 means "aborted"
 							callback(xhr.responseText, xhr.status);
 						}
+
+						clearTimeout(abortTmeo);
 					}
 				};
 
@@ -654,7 +673,7 @@
 				xhr.send(query);
 			}
 
-			return cb;
+			return xhr;
 		};
 		// Alias to cb.ajax(url, 'get', callback)
 		cb.get = function (url, callback, opts) {

@@ -8,7 +8,7 @@
 		'wifi'        => [ $prod ? '/wifi' : '/page_wifi.php',          'WiFi config'        ],
 		'waveform'    => [ $prod ? '/waveform' : '/page_waveform.php',  'Waveform'           ],
 	    'fft'         => [ $prod ? '/fft' : '/page_fft.php',            'FFT'                ],
-	// 	'spectrogram' => [ '/spectrogram', 'Spectrogram'        ],
+	 	'spectrogram' => [ $prod ? '/spectrogram' : '/page_spectrogram.php', 'Spectrogram'   ],
 	// 	'transient'   => [ '/transient',   'Power-on transient' ],
 	    'about'       => [ $prod ? '/about' : '/page_about.php',        'About'              ],
 	];

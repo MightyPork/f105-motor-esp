@@ -31,6 +31,7 @@ elixir(function (mix) {
 		'js-src/app.js',
 		'js-src/page_wifi.js',
 		'js-src/page_waveform.js',
+		'js-src/page_spectrogram.js',
 		'js-src/page_status.js',
 	], 'js/all.js');
 });
