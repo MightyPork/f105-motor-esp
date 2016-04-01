@@ -16,7 +16,7 @@
 
 .Dialog {
 	margin: dist(-1);
-	padding: dist(0) dist(-1);
+	padding: dist(0);
 	overflow: hidden;
 
 	max-width: 100%;
@@ -30,4 +30,12 @@
 	box-shadow: 0 0 2px 0 #434349, 0 0 6px 0 black;
 
 	border-radius: 6px;
+
+	h1,h2 {
+		margin-top:0;
+	}
+
+	p:last-child {
+		margin-bottom: 0;
+	}
 }

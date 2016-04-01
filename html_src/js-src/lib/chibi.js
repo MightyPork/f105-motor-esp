@@ -616,12 +616,17 @@
 				// prevent caching
 				url += (url.indexOf('?') === -1) ? '?' + timestamp : '&' + timestamp;
 
+				$('#loader').addClass('show');
+
 				// Douglas Crockford: "Synchronous programming is disrespectful and should not be employed in applications which are used by people"
 				xhr.open(type, url, true);
 
+				xhr.timeout = 15000; // a default value. TODO way to set it for the caller
+
 				xhr.onreadystatechange = function () {
 					if (xhr.readyState === 4) {
-						if (callback) {
+						$('#loader').removeClass('show');
+						if (callback && xhr.status != 0) { // xhr.status 0 means "aborted"
 							callback(xhr.responseText, xhr.status);
 						}
 					}

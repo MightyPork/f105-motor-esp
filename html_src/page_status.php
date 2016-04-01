@@ -13,6 +13,10 @@
 			<th>Free heap:</th>
 			<td id="heap">%heap%</td>
 		</tr>
+		<tr>
+			<th></th>
+			<td><a onclick="trigReset()" class="button btn-red">SW reset</a></td>
+		</tr>
 	</table>
 </div>
 
@@ -79,8 +83,25 @@
 	</table>
 </div>
 
+<div class="Modal hidden" id="reset-modal">
+	<div class="Dialog center">
+		<h2>The device has been reset.</h2>
+		<p>If you're connected to the AP, you'll have to re-connect.</p>
+		<p>Please wait a few seconds, then refresh the page.</p>
+		<p><a onclick="location.reload()" class="button btn-blue">Refresh</a></p>
+	</div>
+</div>
+
 <script>
 	$().ready(page_status.init);
+
+	function trigReset() {
+		$().get(_root+'/reset.cgi', function(resp, status) {
+			if (status == 200) {
+				modal.show('#reset-modal');
+			}
+		});
+	}
 </script>
 
 <?php include "_end.php"; ?>

@@ -14,6 +14,7 @@
 typedef struct {
 	uint16_t total_count;
 	uint16_t done_count;
+	uint32_t freq;
 	bool success;
 } tplReadSamplesJSON_state;
 
@@ -73,6 +74,8 @@ static int FLASH_FN tplSamplesJSON(MEAS_FORMAT fmt, HttpdConnData *connData, cha
 		st->total_count = count;
 		st->done_count = 0;
 
+		st->freq = freq;
+
 		// --- REQUEST THE DATA ---
 		// This actually asks the STM32 over SBMP to start the ADC DMA,
 		// and we'll wait for the data to arrive.
@@ -97,7 +100,9 @@ static int FLASH_FN tplSamplesJSON(MEAS_FORMAT fmt, HttpdConnData *connData, cha
 		uint16_t chunk_len = 0;
 
 		// 10 secs or 100 ms - longer wait for intial data.
-		for (int i = 0; i < (st->done_count == 0 ? SAMPLING_TMEO*100: SAMP_READOUT_TMEO*100); i++) {
+
+		int timeout = (st->done_count == 0 ? (int)meas_estimate_duration(st->total_count, st->freq): SAMP_READOUT_TMEO);
+		for (int i = 0; i < timeout*100; i++) {
 			uart_poll();
 			if (meas_chunk_ready() || meas_is_closed()) break; // We have some data! --- or transaction aborted by peer :(
 			os_delay_us(10); // 1 ms

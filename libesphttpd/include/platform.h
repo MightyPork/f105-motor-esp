@@ -2,7 +2,6 @@
 #define PLATFORM_H
 
 #include <osapi.h>
-#include "espmissingprotos.h"
 
 
 #ifdef FREERTOS

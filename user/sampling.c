@@ -37,6 +37,11 @@ bool FLASH_FN meas_is_closed(void)
 	return !rd.pending;
 }
 
+uint32_t FLASH_FN meas_estimate_duration(uint32_t count, uint32_t freq)
+{
+	return (uint32_t)((count*1000.0f) / freq) + 1000;
+}
+
 
 // --- timeout ---
 
@@ -227,7 +232,7 @@ bool FLASH_FN meas_request_data(MEAS_FORMAT format, uint16_t count, uint32_t fre
 	memset(&rd.stats, 0, sizeof(MeasStats)); // clear the stats obj
 
 	// start the abort timer - timeout
-	setReadoutTmeoTimer(SAMPLING_TMEO);
+	setReadoutTmeoTimer((int)meas_estimate_duration(count, freq));
 
 	// start a message
 	uint16_t sesn = 0;

@@ -13,6 +13,8 @@
 #include "page_status.h"
 #include "page_waveform.h"
 #include "page_about.h"
+#include "cgi_reset.h"
+#include "cgi_ping.h"
 
 #define WIFI_PROTECT 0
 
@@ -39,6 +41,8 @@ HttpdBuiltInUrl builtInUrls[] = {
 	// otherwise they're encoded the same like the HTML ones -> no heatshrink, no gzip
 
 	// --- UI pages ---
+	ROUTE_CGI("/reset.cgi", cgiResetDevice),
+	ROUTE_CGI("/ping.cgi", cgiPing),
 
 	// System Status page
 	ROUTE_TPL_FILE("/",        tplSystemStatus, "/pages/status.tpl"),

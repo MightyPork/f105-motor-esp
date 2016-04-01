@@ -5,7 +5,6 @@
 #include <httpd.h>
 #include "datalink.h"
 
-#define SAMPLING_TMEO 10000
 #define SAMP_READOUT_TMEO 500
 
 typedef struct {
@@ -34,6 +33,9 @@ typedef enum {
  *
  * Waiting should have a timeout, if data not received, return error status to client.
  */
+
+/** Estimate time needed for sampling (with some space) */
+uint32_t meas_estimate_duration(uint32_t count,uint32_t freq);
 
 /** Request data from the sampling module. Count - number of samples. */
 bool meas_request_data(MEAS_FORMAT format, uint16_t count, uint32_t freq); // TODO specify what kind of data - currently direct samples.

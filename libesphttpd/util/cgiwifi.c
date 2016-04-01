@@ -20,6 +20,24 @@ Cgi/template routines for the /wifi url.
 //Enable this to disallow any changes in AP settings
 //#define DEMO_MODE
 
+
+
+static ETSTimer resetTmr;
+
+void FLASH_FN resetTmrCb(void *arg)
+{
+	system_restart();
+}
+
+static void FLASH_FN reset_later(int ms)
+{
+	os_timer_disarm(&resetTmr);
+	os_timer_setfn(&resetTmr, resetTmrCb, NULL);
+	os_timer_arm(&resetTmr, ms, false);
+}
+
+
+
 //WiFi access point data
 typedef struct {
 	char ssid[32];
@@ -170,7 +188,7 @@ static struct station_config stconf;
 
 //This routine is ran some time after a connection attempt to an access point. If
 //the connect succeeds, this gets the module in STA-only mode.
-static void ICACHE_FLASH_ATTR resetTimerCb(void *arg) {
+static void ICACHE_FLASH_ATTR staResetTimerCb(void *arg) {
 	int x=wifi_station_get_connect_status();
 	if (x==STATION_GOT_IP) {
 		//Go to STA mode. This needs a reset, so do that.
@@ -200,7 +218,7 @@ static void ICACHE_FLASH_ATTR reassTimerCb(void *arg) {
 	if (x!=1) {
 		//Schedule disconnect/connect
 		os_timer_disarm(&resetTimer);
-		os_timer_setfn(&resetTimer, resetTimerCb, NULL);
+		os_timer_setfn(&resetTimer, staResetTimerCb, NULL);
 		os_timer_arm(&resetTimer, 15000, 0); //time out after 15 secs of trying to connect
 	}
 }
@@ -254,7 +272,10 @@ int ICACHE_FLASH_ATTR cgiWiFiSetMode(HttpdConnData *connData) {
 		info("cgiWifiSetMode: %s", buff);
 #ifndef DEMO_MODE
 		wifi_set_opmode(atoi(buff));
-		system_restart(); // FIXME we should do this in a timer task, so the browser gets a response.
+
+		reset_later(100);
+
+		//system_restart(); // FIXME we should do this in a timer task, so the browser gets a response.
 #endif
 	}
 	httpdRedirect(connData, "/wifi");
@@ -279,7 +300,7 @@ int ICACHE_FLASH_ATTR cgiWiFiConnStatus(HttpdConnData *connData) {
 				(info.ip.addr>>16)&0xff, (info.ip.addr>>24)&0xff);
 			//Reset into AP-only mode sooner.
 			os_timer_disarm(&resetTimer);
-			os_timer_setfn(&resetTimer, resetTimerCb, NULL);
+			os_timer_setfn(&resetTimer, staResetTimerCb, NULL);
 			os_timer_arm(&resetTimer, 1000, 0);
 		} else {
 			len=sprintf(buff, "{\"status\":\"working\"}");

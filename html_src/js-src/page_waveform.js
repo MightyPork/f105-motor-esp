@@ -137,22 +137,27 @@ var page_waveform = (function () {
 		readoutPending = false;
 
 		if (status != 200) {
-			if (status != 0) { // 0 = aborted
-				alert("Request failed.");
+			console.error("Request failed.");
+
+			if (autoReload)
+				toggleAutoReload(); // turn it off.
+
+		} else {
+			var j = JSON.parse(resp);
+			if (!j.success) {
+				console.error("Sampling / readout failed.");
+
+				if (autoReload)
+					toggleAutoReload(); // turn it off.
+
+				return;
 			}
-			return;
+
+			buildChart(j);
+
+			if (autoReload)
+				arTimeout = setTimeout(requestReload, autoReloadTime);
 		}
-
-		var j = JSON.parse(resp);
-		if (!j.success) {
-			alert("Sampling failed.");
-			return;
-		}
-
-		if (autoReload)
-			arTimeout = setTimeout(requestReload, autoReloadTime);
-
-		buildChart(j);
 	}
 
 	function requestReload() {
@@ -169,6 +174,22 @@ var page_waveform = (function () {
 		$().get(url, onRxData);
 
 		return true;
+	}
+
+	function toggleAutoReload() {
+		autoReloadTime = +$('#ar-time').val() * 1000; // ms
+
+		autoReload = !autoReload;
+		if (autoReload) {
+			requestReload();
+		} else {
+			clearTimeout(arTimeout);
+		}
+
+		$('#ar-btn')
+			.toggleClass('btn-blue')
+			.toggleClass('btn-red')
+			.val(autoReload ? 'Stop' : 'Auto');
 	}
 
 	wfm.init = function (format) {
@@ -211,21 +232,7 @@ var page_waveform = (function () {
 		});
 
 		// auto-reload button
-		$('#ar-btn').on('click', function() {
-			autoReloadTime = +$('#ar-time').val() * 1000; // ms
-
-			autoReload = !autoReload;
-			if (autoReload) {
-				requestReload();
-			} else {
-				clearTimeout(arTimeout);
-			}
-
-			$('#ar-btn')
-				.toggleClass('btn-blue')
-				.toggleClass('btn-red')
-				.val(autoReload ? 'Stop' : 'Auto');
-		});
+		$('#ar-btn').on('click', toggleAutoReload);
 	};
 
 	return wfm;

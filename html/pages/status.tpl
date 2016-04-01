@@ -5,12 +5,15 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-	<title>Home - Current analyzer</title>
+	<title>Home - Current Analyser</title>
 
 	<link href="/css/app.css" rel="stylesheet">
-
-	
 	<script src="/js/all.js"></script>
+	<script>
+		// server root (or URL) - used for local development with remote AJAX calls
+		// (this needs CORS working on the target - which I added to esp-httpd)
+		var _root = "";
+	</script>
 </head>
 <body class="page-home">
 <div id="outer">
@@ -18,6 +21,7 @@
 	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current Analyser</div>
 	<a href="/" class="selected">Home</a><a href="/wifi">WiFi config</a><a href="/waveform">Waveform</a><a href="/fft">FFT</a><a href="/about">About</a></nav>
 <div id="content">
+	<img src="/img/loader.gif" alt="Loading…" id="loader">
 
 <h1>System Status</h1>
 
@@ -31,6 +35,10 @@
 		<tr>
 			<th>Free heap:</th>
 			<td id="heap">%heap%</td>
+		</tr>
+		<tr>
+			<th></th>
+			<td><a onclick="trigReset()" class="button btn-red">SW reset</a></td>
 		</tr>
 	</table>
 </div>
@@ -98,11 +106,28 @@
 	</table>
 </div>
 
+<div class="Modal hidden" id="reset-modal">
+	<div class="Dialog center">
+		<h2>The device has been reset.</h2>
+		<p>If you're connected to the AP, you'll have to re-connect.</p>
+		<p>Please wait a few seconds, then refresh the page.</p>
+		<p><a onclick="location.reload()" class="button btn-blue">Refresh</a></p>
+	</div>
+</div>
+
 <script>
 	$().ready(page_status.init);
+
+	function trigReset() {
+		$().get(_root+'/reset.cgi', function(resp, status) {
+			if (status == 200) {
+				modal.show('#reset-modal');
+			}
+		});
+	}
 </script>
 
-</div>
-</div>
+</div><!-- content -->
+</div><!-- outer -->
 </body>
 </html>

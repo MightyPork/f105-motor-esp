@@ -61,7 +61,9 @@ SOURCES += \
     user/page_waveform.c \
     user/utils.c \
     sbmp/library/payload_builder.c \
-    user/page_about.c
+    user/page_about.c \
+    user/cgi_reset.c \
+    user/cgi_ping.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -145,7 +147,9 @@ HEADERS += \
     user/utils.h \
     sbmp/library/payload_builder.h \
     user/page_about.h \
-    user/fw_version.h
+    user/fw_version.h \
+    user/cgi_reset.h \
+    user/cgi_ping.h
 
 DISTFILES += \
 	style.astylerc \
