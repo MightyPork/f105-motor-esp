@@ -2,6 +2,11 @@ function bool(x) {
 	return (x === 1 || x === '1' || x === true || x === 'true');
 }
 
+function numfmt(x, places) {
+	var pow = Math.pow(10, places);
+	return Math.round(x*pow) / pow;
+}
+
 /**
  * Perform a substitution in the given string.
  *

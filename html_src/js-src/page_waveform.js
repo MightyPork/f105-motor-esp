@@ -33,9 +33,9 @@ var page_waveform = (function () {
 		// Sidebar
 
 		$('#stat-count').html(j.stats.count);
-		$('#stat-f-s').html(j.stats.freq);
-		$('#stat-i-peak').html(peak);
-		$('#stat-i-rms').html(j.stats.rms);
+		$('#stat-f-s').html(numfmt(j.stats.freq, 2));
+		$('#stat-i-peak').html(numfmt(peak, 2));
+		$('#stat-i-rms').html(numfmt(j.stats.rms, 2));
 		$('.stats').removeClass('invis');
 
 		// --- chart ---
