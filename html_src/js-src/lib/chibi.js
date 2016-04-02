@@ -633,7 +633,7 @@
 			if (xhr) {
 				// prevent caching
 				if (opts.nocache) {
-					var ts = (+(+new Date())).toString(36);
+					var ts = (+(new Date())).toString(36);
 					url += ((url.indexOf('?') === -1) ? '?' : '&') + '_=' + ts;
 				}
 

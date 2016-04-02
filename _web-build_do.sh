@@ -28,3 +28,4 @@ php "$SRCDIR/page_about.php" > "$BLDDIR/pages/about.tpl"
 php "$SRCDIR/page_wifi.php" > "$BLDDIR/pages/wifi.tpl"
 php "$SRCDIR/page_waveform.php" > "$BLDDIR/pages/wfm.html" # no substitutions, .html allows to gzip it.
 php "$SRCDIR/page_fft.php" > "$BLDDIR/pages/fft.html" # same
+php "$SRCDIR/page_spectrogram.php" > "$BLDDIR/pages/sgm.html" # same

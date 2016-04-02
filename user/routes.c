@@ -53,6 +53,7 @@ HttpdBuiltInUrl builtInUrls[] = {
 	ROUTE_TPL_FILE("/about",  tplAbout, "/pages/about.tpl"),
 	ROUTE_FILE("/waveform", "/pages/wfm.html"), // static file, html -> can use gzip
 	ROUTE_FILE("/fft", "/pages/fft.html"), // static file, html -> can use gzip
+	ROUTE_FILE("/spectrogram", "/pages/sgm.html"), // static file, html -> can use gzip
 
 	// --- WiFi config ---
 #if WIFI_PROTECT
