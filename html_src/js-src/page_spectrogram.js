@@ -27,6 +27,7 @@ var page_spectrogram = (function () {
 
 	var lastLoadMs;
 	var lastMarkMs;
+	var lastMark10s;
 
 	var colormap = [
 		/* [val, r, g, b] */
@@ -126,13 +127,19 @@ var page_spectrogram = (function () {
 		if (msElapsed(lastMarkMs) >= 950) {
 			lastMarkMs = msNow();
 
+			var long = false;
+			if (msElapsed(lastMark10s) > 9500) {
+				long = true;
+				lastMark10s = msNow();
+			}
+
 			ctx.strokeStyle = 'white';
 			ctx.beginPath();
-			ctx.moveTo(plot.x+plot.w-.5, plot.y+plot.h+.5);
-			ctx.lineTo(plot.x+plot.w-.5, plot.y+plot.h+4);
+			ctx.moveTo(plot.x+plot.w-.5, plot.y+plot.h+1);
+			ctx.lineTo(plot.x+plot.w-.5, plot.y+plot.h+1+(long?6:2));
 			ctx.stroke();
 		} else {
-			ctx.clearRect(plot.x+plot.w-2, plot.y+plot.h+1,2,4);
+			ctx.clearRect(plot.x+plot.w-1, plot.y+plot.h+1,2,10);
 		}
 	}
 
@@ -318,6 +325,7 @@ var page_spectrogram = (function () {
 		drawLegend();
 		drawAxis();
 		lastMarkMs = msNow()-10000;
+		lastMark10s = msNow()-10000;
 
 		// update tile size on bin count selection
 		$('#count').on('change', function() {
