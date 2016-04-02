@@ -23,12 +23,18 @@ $().ready(function () {
 	$('input[type=number]').on('mousewheel', function(e) {
 		var val = +$(this).val();
 		var step = +($(this).attr('step') || 1);
+		var min = $(this).attr('min');
+		var max = $(this).attr('max');
 		if(e.wheelDelta > 0) {
 			val += step;
 		} else {
 			val -= step;
 		}
+		if (!_.isUndefined(min)) val = Math.max(val, min);
+		if (!_.isUndefined(max)) val = Math.min(val, max);
 		$(this).val(val);
+
+		e.preventDefault();
 	});
 
 	modal.init();
@@ -36,6 +42,6 @@ $().ready(function () {
 });
 
 
-function errorMsg(msg) {
-	notify.show(msg, 3000);
+function errorMsg(msg, time) {
+	notify.show(msg, time || 3000);
 }

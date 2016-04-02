@@ -513,7 +513,7 @@
 		// Get/Set form element values
 		cb.val = function (value) {
 			var values, i, j;
-			if (value || value === '') {
+			if (!_.isUndefined(value)) { // FIXED A BUG HERE
 				nodeLoop(function (elm) {
 					switch (elm.nodeName) {
 						case 'SELECT':
@@ -608,11 +608,10 @@
 		};
 		// Basic XHR 1, no file support. Shakes fist at IE
 		cb.ajax = function (url, method, callback, options) { // if options is a number, it's timeout in ms
-			var xhr,
-				query = serializeData(nodes),
-				type = (method) ? method.toUpperCase() : 'GET',
-				timestamp = '_ts=' + (+new Date()),
-				abortTmeo;
+			var xhr;
+			var	query = serializeData(nodes);
+			var	type = (method) ? method.toUpperCase() : 'GET';
+			var	abortTmeo;
 
 			if (_.isNumber(options)) options = {timeout: options};
 
@@ -622,7 +621,7 @@
 				loader: true,
 			}, options);
 
-			console.log('ajax to = ' + opts.timeout);
+			//console.log('ajax to = ' + opts.timeout);
 
 			if (query && (type === 'GET')) {
 				url += (url.indexOf('?') === -1) ? '?' + query : '&' + query;
@@ -633,8 +632,10 @@
 
 			if (xhr) {
 				// prevent caching
-				if (opts.nocache)
-					url += (url.indexOf('?') === -1) ? '?' + timestamp : '&' + timestamp;
+				if (opts.nocache) {
+					var ts = (+(+new Date())).toString(36);
+					url += ((url.indexOf('?') === -1) ? '?' : '&') + '_=' + ts;
+				}
 
 				if (opts.loader)
 					$('#loader').addClass('show');

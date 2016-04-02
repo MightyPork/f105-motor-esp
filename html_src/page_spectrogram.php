@@ -4,8 +4,23 @@
 
 <div class="Box center" id="samp-ctrl">
 	<div>
-		<label for="freq">Rate <span class="mq-tablet-max" style="font-weight:normal;">(Hz)</span></label>
-		<input id="freq" type="number" value="4096">
+		<label for="count">Bins</label>
+		<label for="count" class="select-wrap">
+			<select name="count" id="count">
+				<option value="16">8
+				<option value="32">16
+				<option value="64">32
+				<option value="128">64
+				<option value="256">128
+				<option value="512">256
+				<option value="1024" selected>512
+<!--				<option value="2048" selected>1024-->
+			</select>
+		</label>
+	</div>
+	<div>
+		<label for="freq">f<sub>bw</sub> <span class="mq-normal-min nb">=</span><span class="mq-tablet-max nb">(Hz)</span></label>
+		<input id="freq" type="number" value="2048">
 		<span class="mq-normal-min">Hz</span>
 	</div>
 	<div>

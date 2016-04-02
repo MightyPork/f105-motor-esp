@@ -9,7 +9,14 @@ var page_waveform = (function () {
 	var autoReloadTime = 1;
 	var arTimeout = -1;
 
+	var lastLoadMs;
+
 	var zoomSavedX, zoomSavedY;
+
+	var opts = {
+		count: 0, // sample count
+		freq: 0 // sampling freq
+	};
 
 	function buildChart(j) {
 		// Build the chart
@@ -137,7 +144,7 @@ var page_waveform = (function () {
 		readoutPending = false;
 
 		if (status != 200) {
-			errorMsg("Request failed.");
+			errorMsg("Request failed.", 1000);
 
 			if (autoReload)
 				toggleAutoReload(); // turn it off.
@@ -145,7 +152,7 @@ var page_waveform = (function () {
 		} else {
 			var j = JSON.parse(resp);
 			if (!j.success) {
-				errorMsg("Sampling / readout failed.");
+				errorMsg("Sampling failed.", 1000);
 
 				if (autoReload)
 					toggleAutoReload(); // turn it off.
@@ -156,18 +163,23 @@ var page_waveform = (function () {
 			buildChart(j);
 
 			if (autoReload)
-				arTimeout = setTimeout(requestReload, autoReloadTime);
+				arTimeout = setTimeout(requestReload, Math.max(0, autoReloadTime - msElapsed(lastLoadMs)));
 		}
+	}
+
+	function readInputs() {
+		opts.count = $('#count').val();
+		opts.freq = $('#freq').val() * (dataFormat == 'fft' ? 2 : 1); // bw 2x -> f_s
 	}
 
 	function requestReload() {
 		if (readoutPending) return false;
 
 		readoutPending = true;
+		lastLoadMs = msNow();
 
-		var n = $('#count').val();
-		var fs = $('#freq').val();
-
+		var n = opts.count;
+		var fs = opts.freq;
 		var url = _root+'/measure/'+dataFormat+'?n='+n+'&fs='+fs;
 		$().get(url, onRxData, estimateLoadTime(fs,n));
 
@@ -175,7 +187,9 @@ var page_waveform = (function () {
 	}
 
 	function toggleAutoReload() {
-		autoReloadTime = +$('#ar-time').val() * 1000; // ms
+		autoReloadTime = +$('#ar-time').val(); // ms
+
+		readInputs();
 
 		autoReload = !autoReload;
 		if (autoReload) {
@@ -194,13 +208,16 @@ var page_waveform = (function () {
 		// --- Load data ---
 		dataFormat = format;
 
-		// initial
-//		requestReload();
+		function onLoadClick() {
+			readInputs();
+			requestReload();
+		}
 
-		$('#load').on('click', requestReload);
+		$('#load').on('click', onLoadClick);
+
 		$('#count,#freq').on('keyup', function (e) {
 			if (e.which == 13) {
-				requestReload();
+				onLoadClick();
 			}
 		});
 

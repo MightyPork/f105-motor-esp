@@ -11,6 +11,14 @@ function estimateLoadTime(fs, n) {
 	return (1000/fs)*n+1500;
 }
 
+function msNow() {
+	return +(new Date);
+}
+
+function msElapsed(start) {
+	return msNow() - start;
+}
+
 /**
  * Perform a substitution in the given string.
  *

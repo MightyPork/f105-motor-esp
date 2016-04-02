@@ -31,8 +31,8 @@
 		<input id="count" type="number" value="500">
 	</div>
 	<div>
-		<label for="freq">Rate <span class="mq-tablet-max" style="font-weight:normal;">(Hz)</span></label>
-		<input id="freq" type="number" value="4000">
+		<label for="freq">f<sub>s</sub> <span class="mq-normal-min nb">=</span><span class="mq-tablet-max nb">(Hz)</span></label>
+		<input id="freq" type="number" value="2048">
 		<span class="mq-normal-min">Hz</span>
 	</div>
 	<div>
@@ -62,7 +62,7 @@
 			</tr>
 		</table>
 		<div class="ar"><!-- auto reload -->
-			<input type="number" id="ar-time" step="0.5" value="1" min="0">&nbsp;s
+			<input type="number" id="ar-time" step="100" value="1000" min="0">&nbsp;ms
 			<input type="button" id="ar-btn" class="btn-blue narrow" value="Auto">
 		</div>
 	</div>

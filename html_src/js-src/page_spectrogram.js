@@ -13,14 +13,20 @@ var page_spectrogram = (function () {
 		dy: 1
 	};
 
+	var opts = {
+		interval: 0,
+		sampCount: 0,
+		binCount: 0,
+		freq:0
+	};
+
 	var interval = 1000;
 	var running = false;
 	var readTimeout; // timer
 	var readoutPending;
 	var readXhr;
 
-	var sampCount = 1024;
-	var binCount = sampCount/2;
+	var lastLoadMs;
 
 	var colormap = {
 		r: [
@@ -83,9 +89,10 @@ var page_spectrogram = (function () {
 	function drawSg(col) {
 		shiftSg();
 
-		for (var i = 0; i < binCount; i++) {
+		var bc = opts.sampCount/2;
+		for (var i = 0; i < bc; i++) {
 			// resolve color from the value
-			var y = binCount - i;
+			var y = bc - i - 1;
 			var clr;
 
 			if (i > col.length) {
@@ -109,17 +116,17 @@ var page_spectrogram = (function () {
 					// display
 					drawSg(j.samples);
 				} else {
-					errorMsg("Sampling failed.");
+					errorMsg("Sampling failed.", 1000);
 				}
 			} catch(e) {
 				errorMsg(e);
 			}
 		} else {
-			errorMsg("Request failed.");
+			errorMsg("Request failed.", 1000);
 		}
 
 		if (running)
-			readTimeout = setTimeout(requestData, interval); // TODO should actually compute time remaining, this adds interval to the request time.
+			readTimeout = setTimeout(requestData, Math.max(0, opts.interval - msElapsed(lastLoadMs))); // TODO should actually compute time remaining, this adds interval to the request time.
 	}
 
 	function requestData() {
@@ -128,11 +135,13 @@ var page_spectrogram = (function () {
 			readXhr.abort();
 		}
 		readoutPending = true;
+		lastLoadMs = msNow();
 
-		var fs = $('#freq').val();
-		var url = _root+'/measure/fft?n='+sampCount+'&fs='+fs;
+		var fs = opts.freq;
+		var n = opts.sampCount;
+		var url = _root+'/measure/fft?n='+n+'&fs='+fs;
 
-		readXhr = $().get(url, onRxData, estimateLoadTime(fs,sampCount));
+		readXhr = $().get(url, onRxData, estimateLoadTime(fs,n));
 
 		return true;
 	}
@@ -145,7 +154,10 @@ var page_spectrogram = (function () {
 		ctx.fillRect(plot.x, plot.y, plot.w, plot.h);
 
 		$('#go-btn').on('click', function() {
-			interval = +$('#interval').val(); // ms
+			opts.interval = +$('#interval').val(); // ms
+			opts.freq = $('#freq').val()*2;
+			opts.sampCount = $('#count').val();
+			plot.dx = plot.dy = plot.h/(opts.sampCount/2);
 
 			running = !running;
 			if (running) {

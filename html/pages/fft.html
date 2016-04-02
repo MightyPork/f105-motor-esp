@@ -30,11 +30,11 @@
 		<label for="count">Bins</label>
 		<label for="count" class="select-wrap">
 			<select name="count" id="count">
-<!--				<option value="16">8-->
-<!--				<option value="32">16-->
-<!--				<option value="64">32-->
-<!--				<option value="128">64-->
-<!--				<option value="256">128-->
+				<option value="16">8
+				<option value="32">16
+				<option value="64">32
+				<option value="128">64
+				<option value="256">128
 				<option value="512">256
 				<option value="1024">512
 				<option value="2048" selected>1024
@@ -42,8 +42,8 @@
 		</label>
 	</div>
 	<div>
-		<label for="freq">Rate <span class="mq-tablet-max" style="font-weight:normal;">(Hz)</span></label>
-		<input id="freq" type="number" value="4096">
+		<label for="freq">f<sub>bw</sub> <span class="mq-normal-min nb">=</span><span class="mq-tablet-max nb">(Hz)</span></label>
+		<input id="freq" type="number" value="2048">
 		<span class="mq-normal-min">Hz</span>
 	</div>
 	<div>
@@ -73,7 +73,7 @@
 			</tr>
 		</table>
 		<div class="ar"><!-- auto reload -->
-			<input type="number" id="ar-time" step="0.5" value="1" min="0">&nbsp;s
+			<input type="number" id="ar-time" step="100" value="1000" min="0">&nbsp;ms
 			<input type="button" id="ar-btn" class="btn-blue narrow" value="Auto">
 		</div>
 	</div>
