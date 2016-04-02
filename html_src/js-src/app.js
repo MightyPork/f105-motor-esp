@@ -34,6 +34,14 @@ $().ready(function () {
 		if (!_.isUndefined(max)) val = Math.min(val, max);
 		$(this).val(val);
 
+		if ("createEvent" in document) {
+			var evt = document.createEvent("HTMLEvents");
+			evt.initEvent("change", false, true);
+			$(this)[0].dispatchEvent(evt);
+		} else {
+			$(this)[0].fireEvent("onchange");
+		}
+
 		e.preventDefault();
 	});
 

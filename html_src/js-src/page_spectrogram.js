@@ -28,61 +28,87 @@ var page_spectrogram = (function () {
 
 	var lastLoadMs;
 
-	var colormap = {
-		r: [
-			{x: 0,  b: 0},
-			{x: .7, b: 0},
-			{x: 1,  b: 1},
-		],
-		g: [
-			{x: 0,  b: 0},
-			{x: .3, b: 0},
-			{x: .7, b: 1},
-			{x: 1,  b: 1},
-		],
-		b: [
-			{x: 0,   b: 0},
-			{x: .02, b: .3},
-			{x: .3,  b: 1},
-			{x: 1,   b: 1},
-		]
-	};
+	var colormap = [
+		[0.00, 0, 0, 0],
+		[0.10, 41, 17, 41],
+		[0.25, 34, 17, 78],
+		[0.6, 17, 30, 105],
+		[1.0, 17, 57, 126],
+		[1.2, 17, 84, 128],
+		[1.3, 17, 111, 115],
+		[1.4, 17, 134, 96],
+		[1.5, 17, 155, 71],
+		[1.6, 68, 194, 17],
+		[1.75, 111, 209, 17],
+		[1.84, 180, 213, 17],
+		[1.90, 223, 217, 86],
+		[1.97, 248, 222, 176],
+		[1.99, 255, 237, 222],
+		[2.00, 255, 255, 255],
 
-	function cmResolv(db, tab) {
-		var startX,endX,startC,endC;
 
-		db /=6;
-		if (db > 1) db = 1;
-		if (db < 0) db = 0;
+		// [0.00, 0, 0, 0],
+		// [0.12, 41, 17, 41],
+		// [0.25, 34, 17, 78],
+		// [0.38, 17, 30, 105],
+		// [0.50, 17, 57, 126],
+		// [0.62, 17, 84, 128],
+		// [0.75, 17, 111, 115],
+		// [0.88, 17, 134, 96],
+		// [1.00, 17, 155, 71],
+		// [1.12, 68, 194, 17],
+		// [1.25, 111, 209, 17],
+		// [1.38, 180, 213, 17],
+		// [1.50, 223, 217, 86],
+		// [1.62, 248, 222, 176],
+		// [1.75, 255, 237, 222],
+		// [2.00, 255, 255, 255],
+	];
 
-		for (var i = 0; i < tab.length; i++) {
-			var p = tab[i];
-			if (db >= p.x) {
-				startX = p.x;
-				startC = p.b;
+	function cmResolv(val) {
+		var x1, x2, c1, c2;
+
+		val = Math.log10(1+val);
+
+		if (val > 2) val = 2;
+		if (val < 0) val = 0;
+
+		_.each(colormap, function(c) {
+			var point = c[0];
+			if (val >= point) {
+				x1 = point;
+				c1 = c;
 			}
 
-			if (db <= p.x) {
-				endX = p.x;
-				endC = p.b;
+			if (val <= point) {
+				x2 = point;
+				c2 = c;
+				return false; // exit iteration
 			}
-		}
+		});
 
-		return Math.round((startC + (endC - startC)*((db - startX)/(endX - startX)))*255);
+		var rate = ((val - x1)/(x2 - x1));
+		if (x1 == x2) rate=0;
+
+		return [
+			Math.round((c1[1] + (c2[1] - c1[1])*rate)),
+			Math.round((c1[2] + (c2[2] - c1[2])*rate)),
+			Math.round((c1[3] + (c2[3] - c1[3])*rate)),
+		];
 	}
 
 	function val2color(x) {
-		var xx = x;//20 * Math.log(x);
+		var c = cmResolv(x);
 
-		var r = cmResolv(xx, colormap.r);
-		var g = cmResolv(xx, colormap.g);
-		var b = cmResolv(xx, colormap.b);
-
-		return 'rgb('+r+','+g+','+b+')';
+		return 'rgb('+c[0]+','+c[1]+','+c[2]+')';
 	}
 
 	function shiftSg() {
 		var imageData = ctx.getImageData(plot.x+plot.dx, plot.y, plot.w-plot.dx, plot.h);
+
+		ctx.fillStyle = 'black';
+		ctx.fillRect(plot.x, plot.y, plot.w, plot.h);
+
 		ctx.putImageData(imageData, plot.x, plot.y);
 	}
 
@@ -92,8 +118,11 @@ var page_spectrogram = (function () {
 		var bc = opts.sampCount/2;
 		for (var i = 0; i < bc; i++) {
 			// resolve color from the value
-			var y = bc - i - 1;
 			var clr;
+
+			if (i*plot.dy > plot.h) {
+				break;
+			}
 
 			if (i > col.length) {
 				clr = '#000';
@@ -102,7 +131,7 @@ var page_spectrogram = (function () {
 			}
 			ctx.fillStyle = clr;
 
-			ctx.fillRect(plot.x+plot.w-plot.dx, plot.y+y*plot.dy, plot.dx, plot.dy);
+			ctx.fillRect(plot.x+plot.w-plot.dx, plot.y+plot.h-(i+1)*plot.dy, plot.dx, plot.dy);
 		}
 	}
 
@@ -150,17 +179,34 @@ var page_spectrogram = (function () {
 		var canvas = $('#sg')[0];
 		ctx = canvas.getContext('2d');
 
+		// CLS
 		ctx.fillStyle = '#000';
 		ctx.fillRect(plot.x, plot.y, plot.w, plot.h);
 
-		$('#go-btn').on('click', function() {
-			opts.interval = +$('#interval').val(); // ms
-			opts.freq = $('#freq').val()*2;
-			opts.sampCount = $('#count').val();
-			plot.dx = plot.dy = plot.h/(opts.sampCount/2);
+		// update tile size on bin count selection
+		$('#count').on('change', function() {
+			var count = +$('#count').val();
+			var tile = Math.max(1, plot.h/(count/2));
 
+			$('#tile-x').val(tile);
+			$('#tile-y').val(tile);
+		});
+
+		// chain Y with X
+		$('#tile-y').on('change', function() {
+			$('#tile-x').val($(this).val());
+		});
+
+		$('#go-btn').on('click', function() {
 			running = !running;
 			if (running) {
+				opts.interval = +$('#interval').val(); // ms
+				opts.freq = +$('#freq').val()*2;
+				opts.sampCount = +$('#count').val();
+
+				plot.dx = +$('#tile-x').val();
+				plot.dy = +$('#tile-y').val();
+
 				requestData();
 			} else {
 				clearTimeout(readTimeout);
@@ -171,6 +217,12 @@ var page_spectrogram = (function () {
 				.toggleClass('btn-red')
 				.html(running ? 'Stop' : 'Start');
 		});
+
+		for (var i = 0; i < 99; i++) {
+			ctx.fillStyle = val2color(i);
+			console.log(ctx.fillStyle);
+			ctx.fillRect(i*5,0,5,100);
+		}
 	};
 
 	return sg;

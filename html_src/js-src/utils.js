@@ -19,6 +19,10 @@ function msElapsed(start) {
 	return msNow() - start;
 }
 
+Math.log10 = Math.log10 || function(x) {
+	return Math.log(x) / Math.LN10;
+};
+
 /**
  * Perform a substitution in the given string.
  *

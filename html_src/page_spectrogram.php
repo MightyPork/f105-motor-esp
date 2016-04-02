@@ -14,9 +14,15 @@
 				<option value="256">128
 				<option value="512">256
 				<option value="1024" selected>512
-<!--				<option value="2048" selected>1024-->
+				<option value="2048">1024
 			</select>
 		</label>
+	</div>
+	<div id="tile-cfg">
+		<label for="tile-x">Tile</label>
+		<input id="tile-x" type="number" min=1 step=1 value=1>
+		×
+		<input id="tile-y" type="number" min=1 step=1 value=1>
 	</div>
 	<div>
 		<label for="freq">f<sub>bw</sub> <span class="mq-normal-min nb">=</span><span class="mq-tablet-max nb">(Hz)</span></label>
@@ -24,7 +30,7 @@
 		<span class="mq-normal-min">Hz</span>
 	</div>
 	<div>
-		<label for="interval">Interval <span class="mq-tablet-max" style="font-weight:normal;">(ms)</span></label>
+		<label for="interval">t<sub>s</sub>  <span class="mq-normal-min nb">=</span><span class="mq-tablet-max" style="font-weight:normal;">(ms)</span></label>
 		<input id="interval" type="number" value="100" step=100 min=0>
 		<span class="mq-normal-min">ms</span>
 	</div>
