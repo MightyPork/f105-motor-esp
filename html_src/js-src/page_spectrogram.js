@@ -5,9 +5,9 @@ var page_spectrogram = (function () {
 
 	// drawing area
 	var plot = {
-		x:0,
-		y:0,
-		w:860,
+		x:50,
+		y:10,
+		w:740,//860 total
 		h:512,
 		dx: 1, // bin
 		dy: 1
@@ -16,7 +16,6 @@ var page_spectrogram = (function () {
 	var opts = {
 		interval: 0,
 		sampCount: 0,
-		binCount: 0,
 		freq:0
 	};
 
@@ -27,8 +26,10 @@ var page_spectrogram = (function () {
 	var readXhr;
 
 	var lastLoadMs;
+	var lastMarkMs;
 
 	var colormap = [
+		/* [val, r, g, b] */
 		[0.00, 0, 0, 0],
 		[0.10, 41, 17, 41],
 		[0.25, 34, 17, 78],
@@ -45,27 +46,9 @@ var page_spectrogram = (function () {
 		[1.97, 248, 222, 176],
 		[1.99, 255, 237, 222],
 		[2.00, 255, 255, 255],
-
-
-		// [0.00, 0, 0, 0],
-		// [0.12, 41, 17, 41],
-		// [0.25, 34, 17, 78],
-		// [0.38, 17, 30, 105],
-		// [0.50, 17, 57, 126],
-		// [0.62, 17, 84, 128],
-		// [0.75, 17, 111, 115],
-		// [0.88, 17, 134, 96],
-		// [1.00, 17, 155, 71],
-		// [1.12, 68, 194, 17],
-		// [1.25, 111, 209, 17],
-		// [1.38, 180, 213, 17],
-		// [1.50, 223, 217, 86],
-		// [1.62, 248, 222, 176],
-		// [1.75, 255, 237, 222],
-		// [2.00, 255, 255, 255],
 	];
 
-	function cmResolv(val) {
+	function val2color(val) {
 		var x1, x2, c1, c2;
 
 		val = Math.log10(1+val);
@@ -73,7 +56,8 @@ var page_spectrogram = (function () {
 		if (val > 2) val = 2;
 		if (val < 0) val = 0;
 
-		_.each(colormap, function(c) {
+		for (var i = 0; i < colormap.length; i++) {
+			var c = colormap[i];
 			var point = c[0];
 			if (val >= point) {
 				x1 = point;
@@ -83,28 +67,21 @@ var page_spectrogram = (function () {
 			if (val <= point) {
 				x2 = point;
 				c2 = c;
-				return false; // exit iteration
+				break;
 			}
-		});
+		}
 
 		var rate = ((val - x1)/(x2 - x1));
 		if (x1 == x2) rate=0;
 
-		return [
-			Math.round((c1[1] + (c2[1] - c1[1])*rate)),
-			Math.round((c1[2] + (c2[2] - c1[2])*rate)),
-			Math.round((c1[3] + (c2[3] - c1[3])*rate)),
-		];
-	}
-
-	function val2color(x) {
-		var c = cmResolv(x);
-
-		return 'rgb('+c[0]+','+c[1]+','+c[2]+')';
+		var r =	Math.round((c1[1] + (c2[1] - c1[1])*rate));
+		var g =	Math.round((c1[2] + (c2[2] - c1[2])*rate));
+		var b =	Math.round((c1[3] + (c2[3] - c1[3])*rate));
+		return 'rgb('+r+','+g+','+b+')';
 	}
 
 	function shiftSg() {
-		var imageData = ctx.getImageData(plot.x+plot.dx, plot.y, plot.w-plot.dx, plot.h);
+		var imageData = ctx.getImageData(plot.x+plot.dx, plot.y, plot.w-plot.dx, plot.h+6);
 
 		ctx.fillStyle = 'black';
 		ctx.fillRect(plot.x, plot.y, plot.w, plot.h);
@@ -131,7 +108,31 @@ var page_spectrogram = (function () {
 			}
 			ctx.fillStyle = clr;
 
-			ctx.fillRect(plot.x+plot.w-plot.dx, plot.y+plot.h-(i+1)*plot.dy, plot.dx, plot.dy);
+			var tx = plot.x+plot.w-plot.dx;
+			var ty = plot.y+plot.h-(i+1)*plot.dy;
+			var tw = plot.dx;
+			var th = plot.dy;
+
+			if (ty<plot.y) {
+				th -= plot.y-ty;
+				ty = plot.y;
+			}
+
+			ctx.fillRect(tx, ty, tw, th);
+		}
+
+		// mark every 10 s
+		console.log('remain',msElapsed(lastMarkMs));
+		if (msElapsed(lastMarkMs) >= 950) {
+			lastMarkMs = msNow();
+
+			ctx.strokeStyle = 'white';
+			ctx.beginPath();
+			ctx.moveTo(plot.x+plot.w-.5, plot.y+plot.h+.5);
+			ctx.lineTo(plot.x+plot.w-.5, plot.y+plot.h+4);
+			ctx.stroke();
+		} else {
+			ctx.clearRect(plot.x+plot.w-2, plot.y+plot.h+1,2,4);
 		}
 	}
 
@@ -175,13 +176,148 @@ var page_spectrogram = (function () {
 		return true;
 	}
 
+	function drawLegend() {
+		var gap = 8;
+		var barW = 10;
+		var barH = plot.h-12;
+		var barY = plot.y+6;
+		var barX = plot.x - gap - barW;
+		var vStep = (100 / barH);
+		for (var i = 0; i < barH; i++) {
+			var c1 = val2color(i * vStep);
+			var c2 = val2color((i + 1) * vStep);
+
+			var y = Math.floor(barY + barH - (i + 1));
+
+			var gradient = ctx.createLinearGradient(0, y + 1, 0, y);
+			gradient.addColorStop(0, c1);
+			gradient.addColorStop(1, c2);
+			ctx.fillStyle = gradient;
+
+			ctx.fillRect(barX, y, barW, 1);
+		}
+
+		// border
+		ctx.strokeStyle = '#000';
+		ctx.strokeRect(barX-.5, barY-.5, barW+1, barH+1);
+
+		vStep = (100 / barH);
+		ctx.font = '12px sans-serif';
+		ctx.fillStyle = 'white';
+		ctx.textAlign = 'right';
+		for (var i = 0; i <= plot.h; i+=barH/10) {
+			ctx.fillText(Math.round(i*vStep)+"", plot.x - gap - barW - gap, barY+barH-i+3);
+		}
+	}
+
+	function drawAxis() {
+		var gap = 8;
+		var rX0 = plot.x+plot.w;
+		var rX = rX0+gap;
+		var rY = plot.y;
+		var rH = plot.h;
+		var rW = 70;
+		ctx.clearRect(rX0+.5, rY-10, rW, rH+20);
+
+		var perBin = (opts.freq/2) / (opts.sampCount/2);
+
+		var totalBins = (plot.h / plot.dy);
+		var totalHz = totalBins*perBin;
+
+		console.log("perbin=",perBin,"totalBins=",totalBins,"totalHz=",totalHz);
+
+		var step;
+
+		var steps = [
+			[200, 10],
+			[1000, 50],
+			[3000, 250],
+			[5000, 500],
+			[10000, 1000],
+			[25000, 2500],
+			[50000, 5000],
+			[100000, 10000],
+			[500000, 50000],
+			[1000000, 100000],
+			[1/0, 250000],
+		];
+		for(var i = 0; i <= steps.length; i++) {
+			if (totalHz <= steps[i][0]) {
+				step = steps[i][1];
+				break;
+			}
+		}
+
+		step = step/perBin;
+
+		// every step-th bin has a label
+		ctx.font = '12px sans-serif';
+		ctx.fillStyle = 'white';
+		ctx.strokeStyle = 'white';
+		ctx.textAlign = 'left';
+
+		var kilos = totalHz >= 10000;
+
+		// labels and dashes
+		for(var i = 0; i <= totalBins+step; i+= step) {
+			if (i >= totalBins) {
+				var dist = i - totalBins;
+				if (dist > step/2) break;// make sure not too close
+				i = totalBins;
+			}
+
+			var hz = i*(totalHz/totalBins);
+			if (hz>=1000000) hz = numfmt(hz/1e6,2)+'M';
+			else if (hz>=1000) hz = numfmt(hz/1e3,2)+'k';
+			else hz = numfmt(hz,1);
+
+			var yy = Math.round(rY+rH-(plot.dy*i));
+			ctx.fillText(hz, rX, yy+4);
+
+			ctx.beginPath();
+			ctx.moveTo(rX0, yy+.5);
+			ctx.lineTo(rX0+gap/2, yy+.5);
+			ctx.stroke();
+
+			if (i >= totalBins) break;
+		}
+
+		// Hz label
+		ctx.font = '16px sans-serif';
+		ctx.save();
+		ctx.translate(rX0+50, plot.y+plot.h/2);
+		ctx.rotate(Math.PI/2);
+		ctx.textAlign = "center";
+		ctx.fillText("Frequency - [Hz]", 0, 0);
+		ctx.restore();
+	}
+
+	function readOpts() {
+		opts.interval = +$('#interval').val(); // ms
+		opts.freq = +$('#freq').val()*2;
+		opts.sampCount = +$('#count').val();
+
+		plot.dx = +$('#tile-x').val();
+		plot.dy = +$('#tile-y').val();
+	}
+
+	function clearSgArea() {
+		ctx.fillStyle = '#000';
+		ctx.fillRect(plot.x, plot.y, plot.w, plot.h);
+		ctx.strokeStyle = 'white';
+		ctx.strokeRect(plot.x-.5, plot.y-.5, plot.w+1, plot.h+1);
+	}
+
 	sg.init = function () {
 		var canvas = $('#sg')[0];
 		ctx = canvas.getContext('2d');
 
 		// CLS
-		ctx.fillStyle = '#000';
-		ctx.fillRect(plot.x, plot.y, plot.w, plot.h);
+		clearSgArea();
+		readOpts();
+		drawLegend();
+		drawAxis();
+		lastMarkMs = msNow()-10000;
 
 		// update tile size on bin count selection
 		$('#count').on('change', function() {
@@ -200,12 +336,8 @@ var page_spectrogram = (function () {
 		$('#go-btn').on('click', function() {
 			running = !running;
 			if (running) {
-				opts.interval = +$('#interval').val(); // ms
-				opts.freq = +$('#freq').val()*2;
-				opts.sampCount = +$('#count').val();
-
-				plot.dx = +$('#tile-x').val();
-				plot.dy = +$('#tile-y').val();
+				readOpts();
+				drawAxis();
 
 				requestData();
 			} else {
@@ -217,12 +349,6 @@ var page_spectrogram = (function () {
 				.toggleClass('btn-red')
 				.html(running ? 'Stop' : 'Start');
 		});
-
-		for (var i = 0; i < 99; i++) {
-			ctx.fillStyle = val2color(i);
-			console.log(ctx.fillStyle);
-			ctx.fillRect(i*5,0,5,100);
-		}
 	};
 
 	return sg;
