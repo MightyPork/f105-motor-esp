@@ -29,7 +29,7 @@
 
 <div class="Modal hidden" id="psk-modal">
 	<div class="Dialog">
-		<form action="/wifi/connect.cgi" method="post" id="conn-form">
+		<form action="/wifi/connect" method="post" id="conn-form">
 			<input type="hidden" id="conn-essid" name="essid"><!--
 			--><label for="psk">Password:</label><!--
 			--><input type="password" id="conn-passwd" name="passwd"><!--
