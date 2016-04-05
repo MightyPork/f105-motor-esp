@@ -3,6 +3,7 @@
 
 #include "datalink.h"
 #include "sampling.h"
+#include "serial.h"
 
 // The buffer is big enough for 256 data bytes - 4*64
 
@@ -10,8 +11,6 @@
 // NOTE: If too large, strange errors can occur (problem with the underlying UART FIFO at high speed)
 // the FIFO has 128 bytes, and should accomodate ideally the whole frame.
 #define CHUNK_LEN 100
-
-static void setReadoutTmeoTimer(int ms);
 
 
 // Only one readout can happen at a time.
@@ -24,11 +23,10 @@ static struct {
 	uint8_t received_chunk[CHUNK_LEN];  /*!< Copy of the latest received chunk of data */
 	uint16_t received_chunk_size;       /*!< Size of the chunk in latest_chunk_copy */
 
-	// the readout state
-	uint8_t retry_count;
+	uint32_t est_sampling_time; /*!< Estimated time in millis before data is captured and readout starts */
+
 	uint32_t pos;
 	uint32_t total;
-	ETSTimer abortTimer;
 
 	MEAS_FORMAT format; /*!< Requested data format */
 
@@ -42,67 +40,65 @@ bool FLASH_FN meas_is_closed(void)
 	return !rd.pending;
 }
 
+
 uint32_t FLASH_FN meas_estimate_duration(uint32_t count, uint32_t freq)
 {
-	return (uint32_t)((count*1000.0f) / freq) + SAMP_RD_TMEO_TOTAL;
+	return (uint32_t)((count*1000.0f) / freq) + SAMP_RD_TMEO;
 }
 
-
-// --- timeout ---
-
-static void FLASH_FN abortTimerCb(void *arg)
+/** Wait for one chunk, with possible retries */
+bool FLASH_FN meas_wait_for_chunk(void)
 {
-	(void)arg;
+	for (int retry_count = 0; retry_count < SAMP_RD_RETRY_COUNT; retry_count++) {
+		uint32_t timeout = (rd.waiting_for_measure ? rd.est_sampling_time: SAMP_RD_TMEO);
+//		dbg("Chunk read total timeout = %d ms", timeout);
 
-	if (rd.waiting_for_measure) {
-		error("Sampling aborted due to timeout.");
+		for (uint32_t i = 0; i < timeout*100; i++) {
+			uart_poll(); // can stop measure & start first chunk, if rx offer
 
-		// try to abort the readout
-		sbmp_bulk_abort(dlnk_ep, rd.sesn);
+			// check for closed connection - aborted by peer?
+			if (meas_is_closed()) {
+				error("Session closed by peer, readout failed.");
+				return false; // assume already cleaned up
+			}
 
-		// release resources and stop
-		meas_close();
-	} else {
-		warn("Data chunk not rx in time");
+			if (meas_chunk_ready()) {
+				// yay!!
+				return true;
+			}
 
-		// data chunk not received in time (may be lost ?)
-		if (rd.retry_count < SAMP_RD_RETRY_COUNT) {
-			rd.retry_count++;
+			os_delay_us(10);
+			system_soft_wdt_feed(); // Feed the dog, or it'll bite.
+		}
 
-			dbg("Requesting again (try %d of %d).", rd.retry_count, SAMP_RD_RETRY_COUNT);
-			setReadoutTmeoTimer(SAMP_RD_TMEO); // re-start the timer
-			sbmp_bulk_request(dlnk_ep, rd.pos, CHUNK_LEN, rd.sesn);
+		// Data still not Rx
+		if (rd.waiting_for_measure) {
+
+			// only one try in this case
+			error("Sampling aborted due to timeout (no data offered)");
+			sbmp_bulk_abort(dlnk_ep, rd.sesn); // send abort msg
+			meas_close(); // close
+			return false;
+
 		} else {
-			error("Retry count exhausted!");
-			meas_close();
+			warn("Data chunk not rx in time.");
+			dbg("Requesting again (try %d of %d).", retry_count+1, SAMP_RD_RETRY_COUNT);
+
+			sbmp_bulk_request(dlnk_ep, rd.pos, CHUNK_LEN, rd.sesn);
 		}
 	}
+
+	error("Retry count exhausted!");
+	sbmp_bulk_abort(dlnk_ep, rd.sesn);
+	meas_close();
+	return false;
 }
-
-static void FLASH_FN setReadoutTmeoTimer(int ms)
-{
-//	dbg("Set read timeout %d", ms);
-	os_timer_disarm(&rd.abortTimer);
-	os_timer_setfn(&rd.abortTimer, abortTimerCb, NULL);
-	os_timer_arm(&rd.abortTimer, ms, 0);
-}
-
-static void FLASH_FN stopReadoutTmeoTimer(void)
-{
-//	dbg("Stop read timeout");
-	os_timer_disarm(&rd.abortTimer);
-}
-
-// -------------
-
-
 
 /** request next chunk */
 void FLASH_FN meas_request_next_chunk(void)
 {
 	if (!rd.pending) return;
 	rd.chunk_ready = false; // invalidate the current chunk, so waiting for chunk is possible.
-	rd.retry_count = 0; // reset retry counter
 	sbmp_bulk_request(dlnk_ep, rd.pos, CHUNK_LEN, rd.sesn);
 }
 
@@ -111,8 +107,6 @@ bool FLASH_FN meas_chunk_ready(void)
 {
 	return rd.pending && rd.chunk_ready;
 }
-
-
 
 /**
  * @brief Get received chunk. NULL if none.
@@ -147,7 +141,6 @@ void FLASH_FN meas_close(void)
 	if (!rd.pending) return; // ignore this call
 
 	sbmp_ep_remove_listener(dlnk_ep, rd.sesn);
-	stopReadoutTmeoTimer();
 	rd.pending = false;
 
 	info("Transfer closed.");
@@ -167,8 +160,6 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 	PayloadParser pp;
 	switch (dg->type) {
 		case DG_BULK_OFFER:// Data ready notification
-			stopReadoutTmeoTimer();
-
 			// data is ready to be read
 			pp = pp_start(dg->payload, dg->length);
 
@@ -185,30 +176,23 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 			// --- user data end ---
 
 			if (rd.format == FFT) {
-				// TODO read extra FFT stats
+				// TODO read extra FFT stats ??
 			}
 
-			// renew the timeout
-			setReadoutTmeoTimer(SAMP_RD_TMEO);
+			info("Offered %d bytes of data, starting readout.", rd.total);
 
 			// request first chunk
-			rd.retry_count = 0;
 			sbmp_bulk_request(ep, rd.pos, CHUNK_LEN, dg->session);
 			break;
 
 		case DG_BULK_DATA: // data received
-			stopReadoutTmeoTimer();
-
 			// Process the received data
 			memcpy(rd.received_chunk, dg->payload, dg->length);
 			rd.chunk_ready = true;
 			rd.received_chunk_size = dg->length;
-			rd.retry_count = 0;
 
 			// move the pointer for next request
 			rd.pos += dg->length;
-
-			setReadoutTmeoTimer(SAMP_RD_TMEO); // timeout to retrieve the data & ask for more
 
 			// --- Now we wait for the CGI func to retrieve the chunk and send it to the browser. ---
 
@@ -257,11 +241,9 @@ bool FLASH_FN meas_request_data(MEAS_FORMAT format, uint16_t count, uint32_t fre
 	rd.total = 0;
 	rd.pending = true;
 	rd.format = format;
-	rd.retry_count = 0;
 	memset(&rd.stats, 0, sizeof(MeasStats)); // clear the stats obj
 
-	// start the abort timer - timeout
-	setReadoutTmeoTimer((int)meas_estimate_duration(count, freq));
+	rd.est_sampling_time = meas_estimate_duration(count, freq);
 
 	// start a message
 	uint16_t sesn = 0;
@@ -290,7 +272,7 @@ bool FLASH_FN meas_request_data(MEAS_FORMAT format, uint16_t count, uint32_t fre
 	return true;
 
 fail:
-	stopReadoutTmeoTimer();
+	rd.waiting_for_measure = false;
 	rd.pending = false;
 	return false;
 }

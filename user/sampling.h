@@ -69,5 +69,7 @@ bool meas_is_last_chunk(void);
 /** Terminate the readout. */
 void meas_close(void);
 
+/** Wait for one chunk, with possible retries. True = chunk ready, false = failed. */
+bool meas_wait_for_chunk(void);
 
 #endif // SAMPLING_H

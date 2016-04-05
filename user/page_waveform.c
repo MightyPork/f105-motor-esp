@@ -101,22 +101,13 @@ static int FLASH_FN tplSamplesJSON(MEAS_FORMAT fmt, HttpdConnData *connData, cha
 
 		// 10 secs or 100 ms - longer wait for intial data.
 
-		int timeout = (st->done_count == 0 ? (int)meas_estimate_duration(st->total_count, st->freq): SAMP_RD_TMEO_TOTAL);
-		dbg("Chunk read total timeout = %d ms", timeout);
-		for (int i = 0; i < timeout*100; i++) {
-			uart_poll();
-			if (meas_chunk_ready() || meas_is_closed()) break; // We have some data! --- or transaction aborted by peer :(
-			os_delay_us(10);
-			system_soft_wdt_feed(); // Feed the dog, or it'll bite.
-		}
-		chunk = meas_get_chunk(&chunk_len);
-
-		if (chunk == NULL) {
-			// abort, proceed to the next field.
-			meas_close();
+		if (!meas_wait_for_chunk()) {
+			// meas session was already closed.
 			st->success = false;
 			return HTTPD_CGI_DONE;
 		}
+
+		chunk = meas_get_chunk(&chunk_len);
 
 		PayloadParser pp = pp_start(chunk, chunk_len);
 
