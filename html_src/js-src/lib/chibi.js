@@ -628,6 +628,8 @@
 				query = null;
 			}
 
+			// FIXME the XHR sometimes seemingly silently fails
+
 			xhr = new XMLHttpRequest(); // we dont support IE < 9
 
 			if (xhr) {

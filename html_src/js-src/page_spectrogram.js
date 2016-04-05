@@ -82,10 +82,11 @@ var page_spectrogram = (function () {
 	}
 
 	function shiftSg() {
-		var imageData = ctx.getImageData(plot.x+plot.dx, plot.y, plot.w-plot.dx, plot.h+6);
+		var imageData = ctx.getImageData(plot.x+plot.dx, plot.y, plot.w-plot.dx, plot.h+10);
 
 		ctx.fillStyle = 'black';
 		ctx.fillRect(plot.x, plot.y, plot.w, plot.h);
+		ctx.clearRect(plot.x, plot.y+plot.h+1, plot.w, 10); // clear the second marks box
 
 		ctx.putImageData(imageData, plot.x, plot.y);
 	}
@@ -123,7 +124,7 @@ var page_spectrogram = (function () {
 		}
 
 		// mark every 10 s
-		console.log('remain',msElapsed(lastMarkMs));
+		//console.log('remain',msElapsed(lastMarkMs));
 		if (msElapsed(lastMarkMs) >= 950) {
 			lastMarkMs = msNow();
 
@@ -138,8 +139,6 @@ var page_spectrogram = (function () {
 			ctx.moveTo(plot.x+plot.w-.5, plot.y+plot.h+1);
 			ctx.lineTo(plot.x+plot.w-.5, plot.y+plot.h+1+(long?6:2));
 			ctx.stroke();
-		} else {
-			ctx.clearRect(plot.x+plot.w-1, plot.y+plot.h+1,2,10);
 		}
 	}
 
@@ -231,29 +230,25 @@ var page_spectrogram = (function () {
 		var totalBins = (plot.h / plot.dy);
 		var totalHz = totalBins*perBin;
 
-		console.log("perbin=",perBin,"totalBins=",totalBins,"totalHz=",totalHz);
+		//console.log("perbin=",perBin,"totalBins=",totalBins,"totalHz=",totalHz);
 
 		var step;
 
-		var steps = [
-			[200, 10],
-			[1000, 50],
-			[3000, 250],
-			[5000, 500],
-			[10000, 1000],
-			[25000, 2500],
-			[50000, 5000],
-			[100000, 10000],
-			[500000, 50000],
-			[1000000, 100000],
-			[1/0, 250000],
-		];
-		for(var i = 0; i <= steps.length; i++) {
-			if (totalHz <= steps[i][0]) {
-				step = steps[i][1];
-				break;
+		// get the best step size
+		var steps = [10, 25, 50];
+		var multiplier = 1;
+		var suc = false;
+		do {
+			for (var i = 0; i < steps.length; i++) {
+				if ((totalHz / (steps[i] * multiplier)) <= 21) {
+					step = (steps[i] * multiplier);
+					suc = true;
+					break;
+				}
 			}
-		}
+			if (suc) break;
+			multiplier *= 10;
+		} while (true);
 
 		step = step/perBin;
 
@@ -262,8 +257,6 @@ var page_spectrogram = (function () {
 		ctx.fillStyle = 'white';
 		ctx.strokeStyle = 'white';
 		ctx.textAlign = 'left';
-
-		var kilos = totalHz >= 10000;
 
 		// labels and dashes
 		for(var i = 0; i <= totalBins+step; i+= step) {
@@ -332,13 +325,13 @@ var page_spectrogram = (function () {
 			var count = +$('#count').val();
 			var tile = Math.max(1, plot.h/(count/2));
 
-			$('#tile-x').val(tile);
+			$('#tile-x').val(Math.max(4, tile)); // use width 4 for smaller by default (rolls more nicely)
 			$('#tile-y').val(tile);
 		});
 
 		// chain Y with X
 		$('#tile-y').on('change', function() {
-			$('#tile-x').val($(this).val());
+			$('#tile-x').val(Math.max(4,$(this).val()));
 		});
 
 		$('#go-btn').on('click', function() {

@@ -42,8 +42,14 @@ static int FLASH_FN tplSamplesJSON(MEAS_FORMAT fmt, HttpdConnData *connData, cha
 	tplReadSamplesJSON_state *st = *arg;
 
 	if (token == NULL) {
-		// end of template, cleanup
+		// end of template, or connection closed.
 		if (st != NULL) free(st);
+
+		// make sure resources are freed
+		if (!meas_is_closed()) {
+			meas_close();
+		}
+
 		return HTTPD_CGI_DONE; // cleanup
 	}
 

@@ -226,8 +226,7 @@ bool FLASH_FN meas_request_data(MEAS_FORMAT format, uint16_t count, uint32_t fre
 	info("Requesting data capture - %d samples @ %d Hz, fmt %d.", count, freq, format);
 
 	if (rd.pending) {
-		error("Acquire request already in progress.");
-		return false;
+		warn("Acquire request already in progress; shouldn't happen, IGNORING");
 	}
 
 	if (sbmp_ep_handshake_status(dlnk_ep) != SBMP_HSK_SUCCESS) {

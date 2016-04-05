@@ -13,6 +13,8 @@ var page_waveform = (function () {
 
 	var zoomSavedX, zoomSavedY;
 
+	var readXhr; // read xhr
+
 	var opts = {
 		count: 0, // sample count
 		freq: 0 // sampling freq
@@ -145,26 +147,17 @@ var page_waveform = (function () {
 
 		if (status != 200) {
 			errorMsg("Request failed.", 1000);
-
-			if (autoReload)
-				toggleAutoReload(); // turn it off.
-
 		} else {
 			var j = JSON.parse(resp);
 			if (!j.success) {
 				errorMsg("Sampling failed.", 1000);
-
-				if (autoReload)
-					toggleAutoReload(); // turn it off.
-
-				return;
+			} else {
+				buildChart(j);
 			}
-
-			buildChart(j);
-
-			if (autoReload)
-				arTimeout = setTimeout(requestReload, Math.max(0, autoReloadTime - msElapsed(lastLoadMs)));
 		}
+
+		if (autoReload)
+			arTimeout = setTimeout(requestReload, Math.max(0, autoReloadTime - msElapsed(lastLoadMs)));
 	}
 
 	function readInputs() {
@@ -173,7 +166,10 @@ var page_waveform = (function () {
 	}
 
 	function requestReload() {
-		if (readoutPending) return false;
+		if (readoutPending) {
+			errorMsg("Request already pending - aborting.");
+			readXhr.abort();
+		}
 
 		readoutPending = true;
 		lastLoadMs = msNow();
@@ -181,7 +177,7 @@ var page_waveform = (function () {
 		var n = opts.count;
 		var fs = opts.freq;
 		var url = _root+'/measure/'+dataFormat+'?n='+n+'&fs='+fs;
-		$().get(url, onRxData, estimateLoadTime(fs,n));
+		readXhr = $().get(url, onRxData, estimateLoadTime(fs,n));
 
 		return true;
 	}
