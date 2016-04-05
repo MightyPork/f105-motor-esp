@@ -5,7 +5,10 @@
 #include <httpd.h>
 #include "datalink.h"
 
-#define SAMP_READOUT_TMEO 500
+// ms
+#define SAMP_RD_TMEO 300
+#define SAMP_RD_RETRY_COUNT 3
+#define SAMP_RD_TMEO_TOTAL (SAMP_RD_TMEO*SAMP_RD_RETRY_COUNT+200)
 
 typedef struct {
 	uint32_t count;

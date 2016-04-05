@@ -11,9 +11,13 @@
 // the FIFO has 128 bytes, and should accomodate ideally the whole frame.
 #define CHUNK_LEN 100
 
+static void setReadoutTmeoTimer(int ms);
+
+
 // Only one readout can happen at a time.
 
 static struct {
+	bool waiting_for_measure; /*!< Still waiting for first data packet */
 	bool pending;      /*!< Flag that data is currently being read */
 	uint16_t sesn;     /*!< SBMP session of the readout sequence */
 	bool chunk_ready;  /*!< Chunk was received and is ready for reading */
@@ -21,6 +25,7 @@ static struct {
 	uint16_t received_chunk_size;       /*!< Size of the chunk in latest_chunk_copy */
 
 	// the readout state
+	uint8_t retry_count;
 	uint32_t pos;
 	uint32_t total;
 	ETSTimer abortTimer;
@@ -39,7 +44,7 @@ bool FLASH_FN meas_is_closed(void)
 
 uint32_t FLASH_FN meas_estimate_duration(uint32_t count, uint32_t freq)
 {
-	return (uint32_t)((count*1000.0f) / freq) + 1000;
+	return (uint32_t)((count*1000.0f) / freq) + SAMP_RD_TMEO_TOTAL;
 }
 
 
@@ -48,13 +53,30 @@ uint32_t FLASH_FN meas_estimate_duration(uint32_t count, uint32_t freq)
 static void FLASH_FN abortTimerCb(void *arg)
 {
 	(void)arg;
-	warn("Sampling aborted due to timeout.");
 
-	// try to abort the readout
-	sbmp_bulk_abort(dlnk_ep, rd.sesn);
+	if (rd.waiting_for_measure) {
+		error("Sampling aborted due to timeout.");
 
-	// release resources and stop
-	meas_close();
+		// try to abort the readout
+		sbmp_bulk_abort(dlnk_ep, rd.sesn);
+
+		// release resources and stop
+		meas_close();
+	} else {
+		warn("Data chunk not rx in time");
+
+		// data chunk not received in time (may be lost ?)
+		if (rd.retry_count < SAMP_RD_RETRY_COUNT) {
+			rd.retry_count++;
+
+			dbg("Requesting again (try %d of %d).", rd.retry_count, SAMP_RD_RETRY_COUNT);
+			setReadoutTmeoTimer(SAMP_RD_TMEO); // re-start the timer
+			sbmp_bulk_request(dlnk_ep, rd.pos, CHUNK_LEN, rd.sesn);
+		} else {
+			error("Retry count exhausted!");
+			meas_close();
+		}
+	}
 }
 
 static void FLASH_FN setReadoutTmeoTimer(int ms)
@@ -80,6 +102,7 @@ void FLASH_FN meas_request_next_chunk(void)
 {
 	if (!rd.pending) return;
 	rd.chunk_ready = false; // invalidate the current chunk, so waiting for chunk is possible.
+	rd.retry_count = 0; // reset retry counter
 	sbmp_bulk_request(dlnk_ep, rd.pos, CHUNK_LEN, rd.sesn);
 }
 
@@ -88,6 +111,8 @@ bool FLASH_FN meas_chunk_ready(void)
 {
 	return rd.pending && rd.chunk_ready;
 }
+
+
 
 /**
  * @brief Get received chunk. NULL if none.
@@ -149,6 +174,7 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 
 			rd.pos = 0;
 			rd.total = pp_u32(&pp);
+			rd.waiting_for_measure = false; // "pending" flag remains set
 
 			// --- here start the user data (common) ---
 			rd.stats.count = pp_u32(&pp);
@@ -163,9 +189,10 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 			}
 
 			// renew the timeout
-			setReadoutTmeoTimer(SAMP_READOUT_TMEO);
+			setReadoutTmeoTimer(SAMP_RD_TMEO);
 
 			// request first chunk
+			rd.retry_count = 0;
 			sbmp_bulk_request(ep, rd.pos, CHUNK_LEN, dg->session);
 			break;
 
@@ -176,11 +203,12 @@ static void FLASH_FN request_data_sesn_listener(SBMP_Endpoint *ep, SBMP_Datagram
 			memcpy(rd.received_chunk, dg->payload, dg->length);
 			rd.chunk_ready = true;
 			rd.received_chunk_size = dg->length;
+			rd.retry_count = 0;
 
 			// move the pointer for next request
 			rd.pos += dg->length;
 
-			setReadoutTmeoTimer(SAMP_READOUT_TMEO); // timeout to retrieve the data & ask for more
+			setReadoutTmeoTimer(SAMP_RD_TMEO); // timeout to retrieve the data & ask for more
 
 			// --- Now we wait for the CGI func to retrieve the chunk and send it to the browser. ---
 
@@ -229,6 +257,7 @@ bool FLASH_FN meas_request_data(MEAS_FORMAT format, uint16_t count, uint32_t fre
 	rd.total = 0;
 	rd.pending = true;
 	rd.format = format;
+	rd.retry_count = 0;
 	memset(&rd.stats, 0, sizeof(MeasStats)); // clear the stats obj
 
 	// start the abort timer - timeout
@@ -248,6 +277,7 @@ bool FLASH_FN meas_request_data(MEAS_FORMAT format, uint16_t count, uint32_t fre
 	}
 
 	rd.sesn = sesn;
+	rd.waiting_for_measure = true; // waiting for acquisition module to start sending data
 
 	// request N values
 	sbmp_ep_send_u16(dlnk_ep, count);
