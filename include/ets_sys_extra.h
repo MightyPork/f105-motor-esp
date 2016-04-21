@@ -13,5 +13,5 @@ extern void system_soft_wdt_feed();
 extern int ets_str2macaddr(void *, void *);
 extern void ets_update_cpu_frequency(int freqmhz);
 extern int os_printf_plus(const char *format, ...)  __attribute__ ((format (printf, 1, 2)));
-extern uint8 wifi_get_opmode(void);
+//extern uint8 wifi_get_opmode(void);
 extern void ets_bzero(void *s, size_t n);
