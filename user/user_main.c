@@ -37,8 +37,6 @@ static void ICACHE_FLASH_ATTR prSecondTimerCb(void *arg)
 	static u8 cnt = 0;
 	static u32 last = 0;
 
-	static u8 cnt2 = 0;
-
 	if (++cnt == 3) {
 		cnt = 0;
 		u32 heap = system_get_free_heap_size();
