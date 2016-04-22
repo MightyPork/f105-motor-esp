@@ -222,10 +222,10 @@ static void FLASH_FN sent_callback(void * arg)
 	request_args * req = (request_args *)conn->reserve;
 
 	if (req->post_data == NULL) {
-		//dbg("All sent");
+		dbg("All sent");
 	} else {
 		// The headers were sent, now send the contents.
-		//dbg("Sending request body");
+		dbg("Sending request body");
 		if (req->secure) {
 #ifdef USE_SECURE
 			espconn_secure_sent(conn, (uint8_t *)req->post_data, strlen(req->post_data));
