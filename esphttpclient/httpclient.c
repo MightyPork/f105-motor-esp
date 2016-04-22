@@ -25,6 +25,8 @@ typedef struct {
 	int buffer_size;
 	bool secure;
 	httpclient_cb user_callback;
+	int timeout;
+	os_timer_t timeout_timer;
 } request_args;
 
 static char *FLASH_FN esp_strdup(const char *str)
@@ -224,7 +226,7 @@ static void FLASH_FN sent_callback(void * arg)
 	} else {
 		// The headers were sent, now send the contents.
 		//dbg("Sending request body");
-		if (req->secure){
+		if (req->secure) {
 #ifdef USE_SECURE
 			espconn_secure_sent(conn, (uint8_t *)req->post_data, strlen(req->post_data));
 #endif
@@ -253,6 +255,11 @@ static void FLASH_FN connect_callback(void * arg)
 		sprintf(post_headers, "Content-Length: %d\r\n", strlen(req->post_data));
 	}
 
+	if (req->headers == NULL) { /* Avoid NULL pointer, it may cause exception */
+		req->headers = (char *)malloc(sizeof(char));
+		req->headers[0] = '\0';
+	}
+
 	char buf[69 + strlen(method) + strlen(req->path) + strlen(req->hostname) + strlen(req->headers) + strlen(post_headers)];
 
 	int len = sprintf(buf,
@@ -273,8 +280,27 @@ static void FLASH_FN connect_callback(void * arg)
 	} else {
 		espconn_sent(conn, (uint8_t *)buf, len);
 	}
-	free(req->headers);
-	req->headers = NULL;
+
+	if (req->headers != NULL) {
+		free(req->headers);
+		req->headers = NULL;
+	}
+}
+
+/**
+ * @brief Free all that could be allocated in a request, including the struct itself.
+ * @param req : req to free
+ */
+static void free_req(request_args *req)
+{
+	if (!req) return;
+
+	if (req->buffer) free(req->buffer);
+	if (req->hostname) free(req->hostname);
+	if (req->path) free(req->path);
+	if (req->post_data) free(req->post_data);
+	if (req->headers) free(req->headers);
+	free(req);
 }
 
 static void FLASH_FN disconnect_callback(void * arg)
@@ -288,9 +314,13 @@ static void FLASH_FN disconnect_callback(void * arg)
 
 	if (conn->reserve != NULL) {
 		request_args * req = (request_args *)conn->reserve;
-		int http_status = -1;
+		int http_status = HTTP_STATUS_GENERIC_ERROR;
 		int body_size = 0;
 		char *body = "";
+
+		/* Turn off timeout timer */
+		os_timer_disarm(&(req->timeout_timer));
+
 		if (req->buffer == NULL) {
 			error("Buffer shouldn't be NULL");
 		} else if (req->buffer[0] != '\0') {
@@ -320,10 +350,7 @@ static void FLASH_FN disconnect_callback(void * arg)
 			req->user_callback(body, http_status, req->buffer, body_size);
 		}
 
-		free(req->buffer);
-		free(req->hostname);
-		free(req->path);
-		free(req);
+		free_req(req);
 	}
 	espconn_delete(conn);
 	if (conn->proto.tcp != NULL) {
@@ -336,6 +363,36 @@ static void FLASH_FN error_callback(void *arg, sint8 errType)
 {
 	error("Disconnected with error, type %d", errType);
 	disconnect_callback(arg);
+}
+
+static void FLASH_FN http_timeout_callback(void *arg)
+{
+	error("Connection timeout\n");
+	struct espconn * conn = (struct espconn *) arg;
+
+	if (conn == NULL) {
+		return;
+	}
+
+	request_args *req = (request_args*) conn->reserve;
+	if (req) {
+		/* Call disconnect */
+		if (req->secure) {
+#ifdef USE_SECURE
+			espconn_secure_disconnect(conn);
+#endif
+		} else {
+			espconn_disconnect(conn);
+		}
+
+		free_req(req);
+	}
+
+	// experimental - better cleanup
+	if (conn->proto.tcp != NULL) {
+		free(conn->proto.tcp);
+	}
+	free(conn);
 }
 
 static void FLASH_FN dns_callback(const char *hostname, ip_addr_t *addr, void *arg)
@@ -365,6 +422,11 @@ static void FLASH_FN dns_callback(const char *hostname, ip_addr_t *addr, void *a
 		espconn_regist_disconcb(conn, disconnect_callback);
 		espconn_regist_reconcb(conn, error_callback);
 
+		/* Set connection timeout timer */
+		os_timer_disarm(&(req->timeout_timer));
+		os_timer_setfn(&(req->timeout_timer), (os_timer_func_t *) http_timeout_callback, conn);
+		os_timer_arm(&(req->timeout_timer), req->timeout, false);
+
 		if (req->secure) {
 #ifdef USE_SECURE
 			espconn_secure_set_size(ESPCONN_CLIENT, 5120); // set SSL buffer size
@@ -391,6 +453,7 @@ void FLASH_FN http_raw_request(const char *hostname, int port, bool secure, cons
 	req->buffer = (char *)malloc(1);
 	req->buffer[0] = '\0'; // Empty string.
 	req->user_callback = user_callback;
+	req->timeout = HTTP_REQUEST_TIMEOUT_MS;
 
 	ip_addr_t addr;
 	err_t error = espconn_gethostbyname((struct espconn *)req, // It seems we don't need a real espconn pointer here.
@@ -478,7 +541,7 @@ void FLASH_FN http_get(const char *url, const char *headers, httpclient_cb user_
 
 void FLASH_FN http_callback_example(char *response_body, int http_status, char *response_headers, int body_size)
 {
-	dbg("[HTTPCLIENT] http_status=%d", http_status);
+	dbg("http_status=%d", http_status);
 	if (http_status != HTTP_STATUS_GENERIC_ERROR) {
 		dbg("strlen(headers)=%d", (int)strlen(response_headers));
 		dbg("body_size=%d", body_size);

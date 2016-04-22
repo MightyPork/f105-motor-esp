@@ -50,9 +50,7 @@ static void ICACHE_FLASH_ATTR prSecondTimerCb(void *arg)
 		cnt2 = 0;
 
 		dbg("=> Simple GET");
-		error("=> Simple GET");
-		warn("=> Simple GET");
-		info("=> Simple GET");
+		//http_get("http://data.ondrovo.com/f/hello.txt", "", http_callback_example);
 		http_get("http://data.ondrovo.com/f/hello.txt", "", http_callback_example);
 	}
 

@@ -15,6 +15,8 @@
 #define HTTP_STATUS_GENERIC_ERROR  -1   // In case of TCP or DNS error the callback is called with this status.
 #define BUFFER_SIZE_MAX            5000 // Size of http responses that will cause an error.
 
+#define HTTP_REQUEST_TIMEOUT_MS 10000
+
 /* Define this if ssl is needed. Also link the ssl lib */
 //#define USE_SECURE
 
