@@ -23,6 +23,8 @@
 #include "routes.h"
 #include "fw_version.h"
 
+#include "httpclient.h"
+
 extern HttpdBuiltInUrl builtInUrls[];
 
 static ETSTimer prSecondTimer;
@@ -35,12 +37,25 @@ static void ICACHE_FLASH_ATTR prSecondTimerCb(void *arg)
 	static u8 cnt = 0;
 	static u32 last = 0;
 
+	static u8 cnt2 = 0;
+
 	if (++cnt == 3) {
 		cnt = 0;
 		u32 heap = system_get_free_heap_size();
 		dbg("Heap: %u (~ %d)", heap, (heap-last));
 		last = heap;
 	}
+
+	if (++cnt2 == 15) {
+		cnt2 = 0;
+
+		dbg("=> Simple GET");
+		error("=> Simple GET");
+		warn("=> Simple GET");
+		info("=> Simple GET");
+		http_get("http://data.ondrovo.com/f/hello.txt", "", http_callback_example);
+	}
+
 
 	// we will also try to set up a SBMP connection
 	if (sbmp_ep_handshake_status(dlnk_ep) != SBMP_HSK_SUCCESS) {

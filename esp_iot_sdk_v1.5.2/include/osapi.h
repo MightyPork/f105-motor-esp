@@ -32,6 +32,7 @@
 #define os_timer_setfn ets_timer_setfn
 
 #define os_sprintf  ets_sprintf
+#define os_snprintf ets_snprintf
 
 #ifdef USE_OPTIMIZE_PRINTF
 #define os_printf(fmt, ...) do {	\

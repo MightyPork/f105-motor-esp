@@ -9,6 +9,7 @@ INCLUDEPATH = . \
 	esp_iot_sdk_v1.5.2/include \
 	include \
 	user \
+	esphttpclient \
 	libesphttpd/include \
 	libesphttpd/espfs \
 	libesphttpd/core \
@@ -56,14 +57,16 @@ SOURCES += \
 	sbmp/library/payload_parser.c \
 	user/sampling.c \
 	user/ftoa.c \
-    user/routes.c \
-    user/page_status.c \
-    user/page_waveform.c \
-    user/utils.c \
-    sbmp/library/payload_builder.c \
-    user/page_about.c \
-    user/cgi_reset.c \
-    user/cgi_ping.c
+	user/routes.c \
+	user/page_status.c \
+	user/page_waveform.c \
+	user/utils.c \
+	sbmp/library/payload_builder.c \
+	user/page_about.c \
+	user/cgi_reset.c \
+	user/cgi_ping.c \
+	esphttpclient/test/httpclient_test.c \
+	esphttpclient/httpclient.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -140,16 +143,18 @@ HEADERS += \
 	user/sbmp_config.h \
 	sbmp/library/sbmp_config.example.h \
 	user/ftoa.h \
-    user/routes.h \
-    user/page_status.h \
-    user/page_waveform.h \
-    libesphttpd/include/espmissingprotos.h \
-    user/utils.h \
-    sbmp/library/payload_builder.h \
-    user/page_about.h \
-    user/fw_version.h \
-    user/cgi_reset.h \
-    user/cgi_ping.h
+	user/routes.h \
+	user/page_status.h \
+	user/page_waveform.h \
+	libesphttpd/include/espmissingprotos.h \
+	user/utils.h \
+	sbmp/library/payload_builder.h \
+	user/page_about.h \
+	user/fw_version.h \
+	user/cgi_reset.h \
+	user/cgi_ping.h \
+	esphttpclient/espmissingincludes.h \
+	esphttpclient/httpclient.h
 
 DISTFILES += \
 	style.astylerc \

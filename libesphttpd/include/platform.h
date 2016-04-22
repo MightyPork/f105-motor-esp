@@ -22,6 +22,7 @@ typedef RtosConnType* ConnTypePtr;
 
 #define streq(a, b) (strcmp(a, b) == 0)
 #define strneq(a, b, n) (strncmp(a, b, n) == 0)
+#define strstarts(a, b) (strncmp(a, b, (int)strlen(b)) == 0)
 
 #define malloc(x) os_malloc(x)
 #define free(x) os_free(x)
