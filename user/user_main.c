@@ -46,15 +46,6 @@ static void ICACHE_FLASH_ATTR prSecondTimerCb(void *arg)
 		last = heap;
 	}
 
-	if (++cnt2 == 15) {
-		cnt2 = 0;
-
-		dbg("=> Simple GET");
-		//http_get("http://data.ondrovo.com/f/hello.txt", "", http_callback_example);
-		http_get("http://data.ondrovo.com/f/hello.txt", "", http_callback_example);
-	}
-
-
 	// we will also try to set up a SBMP connection
 	if (sbmp_ep_handshake_status(dlnk_ep) != SBMP_HSK_SUCCESS) {
 		sbmp_ep_start_handshake(dlnk_ep);
