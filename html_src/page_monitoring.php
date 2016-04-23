@@ -16,7 +16,7 @@
 			<th>Actual&nbsp;distance:</th>
 			<td>
 				<span id="reporting" class="Valfield">N/A</span>
-				<a onclick="page_mon.toggleReporting()" class="button btn-blue">Measure</a>
+				<a onclick="page_mon.compareNow()" class="button btn-blue">Measure</a>
 			</td>
 		</tr>
 	</table>

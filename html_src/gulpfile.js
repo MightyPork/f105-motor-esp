@@ -33,5 +33,6 @@ elixir(function (mix) {
 		'js-src/page_waveform.js',
 		'js-src/page_spectrogram.js',
 		'js-src/page_status.js',
+		'js-src/page_mon.js',
 	], 'js/all.js');
 });
