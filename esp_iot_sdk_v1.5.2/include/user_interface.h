@@ -1594,7 +1594,7 @@ bool wifi_set_event_handler_cb(wifi_event_handler_cb_t cb);
 
 typedef enum wps_type {
 	WPS_TYPE_DISABLE = 0,
-	WPS_TYPE_PBC,
+	WPS_TYPE_PBC, // Only this is supported
 	WPS_TYPE_PIN,
 	WPS_TYPE_DISPLAY,
 	WPS_TYPE_MAX,

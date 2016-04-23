@@ -215,7 +215,7 @@ static void ICACHE_FLASH_ATTR reassTimerCb(void *arg) {
 	wifi_station_connect();
 	x=wifi_get_opmode();
 	connTryStatus=CONNTRY_WORKING;
-	if (x!=1) {
+	if (x != STATION_MODE) {
 		//Schedule disconnect/connect
 		os_timer_disarm(&resetTimer);
 		os_timer_setfn(&resetTimer, staResetTimerCb, NULL);

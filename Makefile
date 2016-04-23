@@ -59,7 +59,7 @@ MODULES		= user sbmp/library esphttpclient
 EXTRA_INCDIR	= include libesphttpd/include sbmp/library user esphttpclient
 
 # libraries used in this project, mainly provided by the SDK
-LIBS		= c gcc hal phy pp net80211 wpa main lwip crypto 
+LIBS		= c gcc hal phy pp net80211 wpa main lwip crypto
 #ssl
 
 #Add in esphttpd lib
