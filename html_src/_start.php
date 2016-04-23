@@ -4,11 +4,12 @@
 	$root = $prod ? '' : 'http://192.168.1.13';
 
 	$menu = [
-		'home'        => [ $prod ? '/status' : '/page_status.php',      'Home'               ],
-		'wifi'        => [ $prod ? '/wifi' : '/page_wifi.php',          'WiFi config'        ],
-		'waveform'    => [ $prod ? '/waveform' : '/page_waveform.php',  'Waveform'           ],
-	    'fft'         => [ $prod ? '/fft' : '/page_fft.php',            'FFT'                ],
-	 	'spectrogram' => [ $prod ? '/spectrogram' : '/page_spectrogram.php', 'Spectrogram'   ],
+		'home'        => [ $prod ? '/status' : '/page_status.php',          'Home'          ],
+		'wifi'        => [ $prod ? '/wifi' : '/page_wifi.php',              'WiFi config'   ],
+		'waveform'    => [ $prod ? '/waveform' : '/page_waveform.php',      'Waveform'      ],
+	    'fft'         => [ $prod ? '/fft' : '/page_fft.php',                'FFT'           ],
+	 	'spectrogram' => [ $prod ? '/spectrogram' : '/page_spectrogram.php','Spectrogram'   ],
+		'monitoring'  => [ $prod ? '/monitoring' : '/page_monitoring.php',  'Monitoring'    ],
 	// 	'transient'   => [ '/transient',   'Power-on transient' ],
 	    'about'       => [ $prod ? '/about' : '/page_about.php',        'About'              ],
 	];

@@ -28,4 +28,9 @@
 	&.medium {
 		max-width: 1200px;
 	}
+
+	.Valfield {
+		display: inline-block;
+		min-width: 10em;
+	}
 }
