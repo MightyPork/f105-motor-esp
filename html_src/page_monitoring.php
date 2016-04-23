@@ -1,6 +1,6 @@
 <?php $page = 'monitoring'; include "_start.php"; ?>
 
-<h1>Monitoring & Reporting</h1>
+<h1>Monitoring &amp; Reporting</h1>
 
 <div class="Box">
 	<h2>Status</h2>
@@ -8,7 +8,7 @@
 		<tr>
 			<th>Reference:</th>
 			<td>
-				<span id="hasref" class="Valfield">%hasref%</span>
+				<span id="hasref" class="Valfield">%refStored%</span>
 				<a onclick="page_mon.captureRef()" class="button btn-green">Capture</a>
 			</td>
 		</tr>
@@ -29,7 +29,7 @@
 		<tr>
 			<th><label for="rep-on">Reporting:</label></th>
 			<td>
-				<input type="checkbox" id="rep-on" name="rep-on"><!--
+				<input type="checkbox" id="rep-on" name="rep-on" %repEnableCheck%><!--
 				-->&nbsp;<label for="rep-on">enabled</label>
 			</td>
 		</tr>
@@ -43,20 +43,20 @@
 		<tr>
 			<th>Service:</th>
 			<td>
-				<input type="radio" name="rep-service" value="xively" id="rep-svc-xv">&nbsp;<label for="rep-svc-xv">Xively</label>&nbsp;
-				<input type="radio" name="rep-service" value="thingspeak" id="rep-svc-ts">&nbsp;<label for="rep-svc-ts">ThingSpeak</label>
+				<input type="radio" name="rep-service" value="xively" id="rep-svc-xv" %repSvcCheckXv%>&nbsp;<label for="rep-svc-xv">Xively</label>&nbsp;
+				<input type="radio" name="rep-service" value="thingspeak" id="rep-svc-ts" %repSvcCheckTs%>&nbsp;<label for="rep-svc-ts">ThingSpeak</label>
 			</td>
 		</tr>
 		<tr>
 			<th><label for="rep-feed">Feed/Channel:</label></th>
 			<td>
-				<input type="text" name="rep-feed" id="rep-feed">
+				<input type="text" name="rep-feed" id="rep-feed" value="%repFeed%">
 			</td>
 		</tr>
 		<tr>
 			<th><label for="rep-key">API key:</label></th>
 			<td>
-				<input type="text" name="rep-key" id="rep-key">
+				<input type="text" name="rep-key" id="rep-key" value="%repKey%">
 			</td>
 		</tr>
 		<tr>
