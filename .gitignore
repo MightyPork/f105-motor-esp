@@ -18,3 +18,7 @@ build/
 .idea
 
 *.pro.user
+
+*.o
+*.d
+*.map
