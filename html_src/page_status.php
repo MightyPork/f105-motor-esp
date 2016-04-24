@@ -15,7 +15,7 @@
 		</tr>
 		<tr>
 			<th></th>
-			<td><a onclick="page_status.trigReset()" class="button btn-red">SW reset</a></td>
+			<td><a onclick="page_status.trigReset()" class="button btn-red">Restart system</a></td>
 		</tr>
 	</table>
 </div>

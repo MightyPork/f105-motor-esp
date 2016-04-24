@@ -6,6 +6,6 @@
 
 // this is used by the UI to check if server is already restarted and working again.
 
-int cgiPing(HttpdConnData *connData);
+httpd_cgi_state cgiPing(HttpdConnData *connData);
 
 #endif // CGI_PING_H

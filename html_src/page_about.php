@@ -16,11 +16,6 @@
 <div class="Box">
 	<h2>Firmware</h2>
 
-	<p>
-		The ESP8266 firmware is based on the amazing <a href="https://github.com/Spritetm/esphttpd" target="blank">esp-httpd</a>
-		library by Jeroen Domburg.
-	</p>
-
 	<table>
 		<tr>
 			<th>Firmware</th>
@@ -38,7 +33,13 @@
 			<th>IoT SDK</th>
 			<td>v%vers_sdk%</td>
 		</tr>
+		<!-- Read & show version of the stm32 firmware -->
 	</table>
+
+	<p>
+		The webserver is built using the great <a href="https://github.com/Spritetm/esphttpd" target="blank">esp-httpd</a>
+		library by Jeroen Domburg.
+	</p>
 </div>
 
 <?php include "_end.php"; ?>

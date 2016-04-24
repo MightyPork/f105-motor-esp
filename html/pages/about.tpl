@@ -19,7 +19,7 @@
 <div id="outer">
 <nav id="menu">
 	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current Analyser</div>
-	<a href="/status">Home</a><a href="/wifi">WiFi config</a><a href="/waveform">Waveform</a><a href="/fft">FFT</a><a href="/spectrogram">Spectrogram</a><a href="/about" class="selected">About</a></nav>
+	<a href="/status">Home</a><a href="/wifi">WiFi config</a><a href="/waveform">Waveform</a><a href="/fft">FFT</a><a href="/spectrogram">Spectrogram</a><a href="/monitoring">Monitoring</a><a href="/about" class="selected">About</a></nav>
 <div id="content">
 	<img src="/img/loader.gif" alt="Loading…" id="loader">
 
@@ -39,11 +39,6 @@
 <div class="Box">
 	<h2>Firmware</h2>
 
-	<p>
-		The ESP8266 firmware is based on the amazing <a href="https://github.com/Spritetm/esphttpd" target="blank">esp-httpd</a>
-		library by Jeroen Domburg.
-	</p>
-
 	<table>
 		<tr>
 			<th>Firmware</th>
@@ -61,7 +56,13 @@
 			<th>IoT SDK</th>
 			<td>v%vers_sdk%</td>
 		</tr>
+		<!-- Read & show version of the stm32 firmware -->
 	</table>
+
+	<p>
+		The webserver is built using the great <a href="https://github.com/Spritetm/esphttpd" target="blank">esp-httpd</a>
+		library by Jeroen Domburg.
+	</p>
 </div>
 
 

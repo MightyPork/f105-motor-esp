@@ -1,6 +1,6 @@
 #include "cgi_ping.h"
 
-int FLASH_FN cgiPing(HttpdConnData *connData)
+httpd_cgi_state FLASH_FN cgiPing(HttpdConnData *connData)
 {
 	if (connData->conn==NULL) {
 		//Connection aborted. Clean up.
@@ -8,6 +8,7 @@ int FLASH_FN cgiPing(HttpdConnData *connData)
 	}
 
 	httpdStartResponse(connData, 200);
+	httpdHeader(connData, "Content-Type", "text/plain");
 	httpdEndHeaders(connData);
 
 	httpdSend(connData, "pong\n", -1);

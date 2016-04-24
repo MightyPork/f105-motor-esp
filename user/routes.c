@@ -13,6 +13,7 @@
 #include "page_status.h"
 #include "page_waveform.h"
 #include "page_about.h"
+#include "page_monitoring.h"
 #include "cgi_reset.h"
 #include "cgi_ping.h"
 
@@ -46,11 +47,17 @@ HttpdBuiltInUrl builtInUrls[] = {
 	ROUTE_TPL_FILE("/measure/raw", tplWaveformJSON, "/json/samples.tpl"),
 	ROUTE_TPL_FILE("/measure/fft", tplFourierJSON, "/json/samples.tpl"),
 
+	ROUTE_CGI("/mon/compare", cgiMonCompare),
+	ROUTE_CGI("/mon/status", cgiMonStatus),
+	ROUTE_CGI("/mon/setref", cgiMonSetRef),
+	ROUTE_CGI("/mon/config", cgiMonitoringCfg), // redirects to /monitoring
+
 	// --- UI pages ---
 	// System Status page
 	ROUTE_TPL_FILE("/",  tplSystemStatus, "/pages/status.tpl"),
 	ROUTE_TPL_FILE("/status",  tplSystemStatus, "/pages/status.tpl"),
 	ROUTE_TPL_FILE("/about",  tplAbout, "/pages/about.tpl"),
+	ROUTE_TPL_FILE("/monitoring",  tplMonitoring, "/pages/monitoring.tpl"),
 	ROUTE_FILE("/waveform", "/pages/wfm.html"), // static file, html -> can use gzip
 	ROUTE_FILE("/fft", "/pages/fft.html"), // static file, html -> can use gzip
 	ROUTE_FILE("/spectrogram", "/pages/sgm.html"), // static file, html -> can use gzip

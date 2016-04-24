@@ -3,8 +3,8 @@
 
 #include <httpd.h>
 
-int tplWaveformJSON(HttpdConnData *connData, char *token, void **arg);
+httpd_cgi_state tplWaveformJSON(HttpdConnData *connData, char *token, void **arg);
 
-int tplFourierJSON(HttpdConnData *connData, char *token, void **arg);
+httpd_cgi_state tplFourierJSON(HttpdConnData *connData, char *token, void **arg);
 
 #endif // PAGE_WAVEFORM_H

@@ -7,7 +7,7 @@ static void FLASH_FN tmrCb(void *arg)
 	system_restart();
 }
 
-int FLASH_FN cgiResetDevice(HttpdConnData *connData)
+httpd_cgi_state FLASH_FN cgiResetDevice(HttpdConnData *connData)
 {
 	if (connData->conn==NULL) {
 		//Connection aborted. Clean up.
@@ -15,6 +15,7 @@ int FLASH_FN cgiResetDevice(HttpdConnData *connData)
 	}
 
 	httpdStartResponse(connData, 200);
+	httpdHeader(connData, "Content-Type", "text/plain");
 	httpdEndHeaders(connData);
 
 	os_timer_disarm(&tmr);

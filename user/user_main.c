@@ -23,14 +23,14 @@
 #include "routes.h"
 #include "fw_version.h"
 
-#include "httpclient.h"
+#include "reporting.h"
 
 extern HttpdBuiltInUrl builtInUrls[];
 
 static ETSTimer prSecondTimer;
 
 /** Timer called each second */
-static void ICACHE_FLASH_ATTR prSecondTimerCb(void *arg)
+static void FLASH_FN prSecondTimerCb(void *arg)
 {
 	(void)arg;
 
@@ -111,6 +111,9 @@ void user_init(void)
 	/* --- Initialize the webserver --- */
 
 	httpdInit(builtInUrls, 80);
+
+	// start reporting timer
+	reporting_cfg_load();
 
 	printf(LOG_EOL);
 	info("Ready");

@@ -3,6 +3,6 @@
 
 #include <httpd.h>
 
-int tplAbout(HttpdConnData *connData, char *token, void **arg);
+httpd_cgi_state tplAbout(HttpdConnData *connData, char *token, void **arg);
 
 #endif // PAGE_ABOUT_H

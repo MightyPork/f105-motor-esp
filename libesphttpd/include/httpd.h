@@ -5,26 +5,35 @@
 
 #define HTTPDVER "0.4-based"
 
-#define HTTPD_CGI_MORE 0
-#define HTTPD_CGI_DONE 1
-#define HTTPD_CGI_NOTFOUND 2
-#define HTTPD_CGI_AUTHENTICATED 3
+typedef enum {
+	HTTPD_CGI_MORE = 0,
+	HTTPD_CGI_DONE = 1,
+	HTTPD_CGI_NOTFOUND = 2,
+	HTTPD_CGI_AUTHENTICATED = 3,
+} httpd_cgi_state;
 
-#define HTTPD_METHOD_GET 1
-#define HTTPD_METHOD_POST 2
-#define HTTPD_METHOD_OPTIONS 3
+typedef enum {
+	HTTP_GET = 1,
+	HTTP_POST = 2,
+	HTTP_OPTIONS = 3,
+	HTTP_PUT = 4,
+	HTTP_DELETE = 5,
+	HTTP_PATCH = 6,
+	HTTP_HEAD = 7,
+} http_method;
+
 
 typedef struct HttpdPriv HttpdPriv;
 typedef struct HttpdConnData HttpdConnData;
 typedef struct HttpdPostData HttpdPostData;
 
-typedef int (* cgiSendCallback)(HttpdConnData *connData);
-typedef int (* cgiRecvHandler)(HttpdConnData *connData, char *data, int len);
+typedef httpd_cgi_state (* cgiSendCallback)(HttpdConnData *connData);
+typedef httpd_cgi_state (* cgiRecvHandler)(HttpdConnData *connData, char *data, int len);
 
 //A struct describing a http connection. This gets passed to cgi functions.
 struct HttpdConnData {
 	ConnTypePtr conn;		// The TCP connection. Exact type depends on the platform.
-	char requestType;		// One of the HTTPD_METHOD_* values
+	http_method requestType; // method type
 	char *url;				// The URL requested, without hostname or GET arguments
 	char *getArgs;			// The GET arguments for this request, if any.
 
@@ -87,11 +96,12 @@ typedef struct {
 
 #define ROUTE_END() {NULL, NULL, NULL, NULL}
 
+const char *http_method_str(http_method m);
 
+httpd_cgi_state cgiRedirect(HttpdConnData *connData);
+httpd_cgi_state cgiRedirectToHostname(HttpdConnData *connData);
+httpd_cgi_state cgiRedirectApClientToHostname(HttpdConnData *connData);
 
-int cgiRedirect(HttpdConnData *connData);
-int cgiRedirectToHostname(HttpdConnData *connData);
-int cgiRedirectApClientToHostname(HttpdConnData *connData);
 void httpdRedirect(HttpdConnData *conn, char *newUrl);
 int httpdUrlDecode(char *val, int valLen, char *ret, int retLen);
 int httpdFindArg(char *line, char *arg, char *buff, int buffLen);

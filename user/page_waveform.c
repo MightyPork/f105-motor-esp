@@ -19,22 +19,22 @@ typedef struct {
 } tplReadSamplesJSON_state;
 
 
-static int FLASH_FN tplSamplesJSON(MEAS_FORMAT fmt, HttpdConnData *connData, char *token, void **arg);
+static httpd_cgi_state FLASH_FN tplSamplesJSON(MEAS_FORMAT fmt, HttpdConnData *connData, char *token, void **arg);
 
 
-int FLASH_FN tplWaveformJSON(HttpdConnData *connData, char *token, void **arg)
+httpd_cgi_state FLASH_FN tplWaveformJSON(HttpdConnData *connData, char *token, void **arg)
 {
 	return tplSamplesJSON(RAW, connData, token, arg);
 }
 
 
-int FLASH_FN tplFourierJSON(HttpdConnData *connData, char *token, void **arg)
+httpd_cgi_state FLASH_FN tplFourierJSON(HttpdConnData *connData, char *token, void **arg)
 {
 	return tplSamplesJSON(FFT, connData, token, arg);
 }
 
 
-static int FLASH_FN tplSamplesJSON(MEAS_FORMAT fmt, HttpdConnData *connData, char *token, void **arg)
+static httpd_cgi_state FLASH_FN tplSamplesJSON(MEAS_FORMAT fmt, HttpdConnData *connData, char *token, void **arg)
 {
 	char buff[128];
 	int len;

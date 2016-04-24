@@ -19,7 +19,7 @@
 <div id="outer">
 <nav id="menu">
 	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current Analyser</div>
-	<a href="/status" class="selected">Home</a><a href="/wifi">WiFi config</a><a href="/waveform">Waveform</a><a href="/fft">FFT</a><a href="/spectrogram">Spectrogram</a><a href="/about">About</a></nav>
+	<a href="/status" class="selected">Home</a><a href="/wifi">WiFi config</a><a href="/waveform">Waveform</a><a href="/fft">FFT</a><a href="/spectrogram">Spectrogram</a><a href="/monitoring">Monitoring</a><a href="/about">About</a></nav>
 <div id="content">
 	<img src="/img/loader.gif" alt="Loading…" id="loader">
 
@@ -38,7 +38,7 @@
 		</tr>
 		<tr>
 			<th></th>
-			<td><a onclick="page_status.trigReset()" class="button btn-red">SW reset</a></td>
+			<td><a onclick="page_status.trigReset()" class="button btn-red">Restart system</a></td>
 		</tr>
 	</table>
 </div>

@@ -10,6 +10,7 @@
 // FIXME: sprintf->snprintf everywhere.
 
 #include <esp8266.h>
+#include <httpd.h>
 
 #include "httpclient.h"
 #include <limits.h>
@@ -27,6 +28,7 @@ typedef struct {
 	httpclient_cb user_callback;
 	int timeout;
 	os_timer_t timeout_timer;
+	http_method method;
 } request_args;
 
 static char *FLASH_FN esp_strdup(const char *str)
@@ -241,19 +243,23 @@ static void FLASH_FN sent_callback(void * arg)
 static void FLASH_FN connect_callback(void * arg)
 {
 	info("Connected!");
-	struct espconn * conn = (struct espconn *)arg;
-	request_args * req = (request_args *)conn->reserve;
+	struct espconn *conn = (struct espconn *)arg;
+	request_args *req = (request_args *)conn->reserve;
 
 	espconn_regist_recvcb(conn, receive_callback);
 	espconn_regist_sentcb(conn, sent_callback);
 
-	const char *method = "GET";
 	char post_headers[32] = "";
 
 	if (req->post_data != NULL) { // If there is data this is a POST request.
-		method = "POST";
 		sprintf(post_headers, "Content-Length: %d\r\n", strlen(req->post_data));
+
+		if (req->method == HTTP_GET) {
+			req->method = HTTP_POST;
+		}
 	}
+
+	const char* method = http_method_str(req->method);
 
 	if (req->headers == NULL) { /* Avoid NULL pointer, it may cause exception */
 		req->headers = (char *)malloc(sizeof(char));
@@ -438,22 +444,82 @@ static void FLASH_FN dns_callback(const char *hostname, ip_addr_t *addr, void *a
 	}
 }
 
-void FLASH_FN http_raw_request(const char *hostname, int port, bool secure, const char *path, const char *post_data, const char *headers, httpclient_cb user_callback)
+bool FLASH_FN http_request(
+		const char *url,
+		http_method method,
+		const char *body,
+		const char *headers,
+		httpclient_cb user_callback)
 {
+	// --- prepare port, secure... ---
+
+	// FIXME: handle HTTP auth with http://user:pass@host/
+
+	char hostname[128] = "";
+	int port = 80;
+	bool secure = false;
+
+	if (strstarts(url, "http://"))
+		url += strlen("http://"); // Get rid of the protocol.
+	else if (strstarts(url, "https://")) {
+		port = 443;
+		secure = true;
+		url += strlen("https://"); // Get rid of the protocol.
+	} else {
+		error("Invalid URL protocol: %s", url);
+		return false;
+	}
+
+	char *path = strchr(url, '/');
+	if (path == NULL) {
+		path = strchr(url, '\0'); // Pointer to end of string.
+	}
+
+	char *colon = strchr(url, ':');
+	if (colon > path) {
+		colon = NULL; // Limit the search to characters before the path.
+	}
+
+	if (colon == NULL) { // The port is not present.
+		memcpy(hostname, url, (size_t)(path - url));
+		hostname[path - url] = '\0';
+	} else {
+		port = atoi(colon + 1);
+		if (port == 0) {
+			error("Port error %s\n", url);
+			return false;
+		}
+
+		memcpy(hostname, url, (size_t)(colon - url));
+		hostname[colon - url] = '\0';
+	}
+
+	if (path[0] == '\0') { // Empty path is not allowed.
+		path = "/";
+	}
+
+	// ---
+
 	info("HTTP request: %s:%d%s", hostname, port, path);
 
 	request_args * req = (request_args *)malloc(sizeof(request_args));
 	req->hostname = esp_strdup(hostname);
 	req->path = esp_strdup(path);
+
+	// remove #anchor
+	char *hash = strchr(req->path, '#');
+	if (hash != NULL) *hash = '\0'; // remove the hash part
+
 	req->port = port;
 	req->secure = secure;
 	req->headers = esp_strdup(headers);
-	req->post_data = esp_strdup(post_data);
+	req->post_data = esp_strdup(body);
 	req->buffer_size = 1;
 	req->buffer = (char *)malloc(1);
 	req->buffer[0] = '\0'; // Empty string.
 	req->user_callback = user_callback;
 	req->timeout = HTTP_REQUEST_TIMEOUT_MS;
+	req->method = method;
 
 	ip_addr_t addr;
 	err_t error = espconn_gethostbyname((struct espconn *)req, // It seems we don't need a real espconn pointer here.
@@ -472,79 +538,54 @@ void FLASH_FN http_raw_request(const char *hostname, int port, bool secure, cons
 		}
 		dns_callback(hostname, NULL, req); // Handle all DNS errors the same way.
 	}
+
+	return true;
 }
 
-/*
- * Parse an URL of the form http://host:port/path
- * <host> can be a hostname or an IP address
- * <port> is optional
- */
-void FLASH_FN http_post(const char *url, const char *post_data, const char *headers, httpclient_cb user_callback)
+
+bool FLASH_FN http_post(const char *url, const char *body, const char *headers, httpclient_cb user_callback)
 {
-	// FIXME: handle HTTP auth with http://user:pass@host/
-	// FIXME: get rid of the #anchor part if present.
-
-	char hostname[128] = "";
-	int port = 80;
-	bool secure = false;
-
-	bool is_http  = strstarts(url, "http://");
-	bool is_https = strstarts(url, "https://");
-
-	if (is_http)
-		url += strlen("http://"); // Get rid of the protocol.
-	else if (is_https) {
-		port = 443;
-		secure = true;
-		url += strlen("https://"); // Get rid of the protocol.
-	} else {
-		error("URL is not HTTP or HTTPS %s", url);
-		return;
-	}
-
-	char *path = strchr(url, '/');
-	if (path == NULL) {
-		path = strchr(url, '\0'); // Pointer to end of string.
-	}
-
-	char *colon = strchr(url, ':');
-	if (colon > path) {
-		colon = NULL; // Limit the search to characters before the path.
-	}
-
-	if (colon == NULL) { // The port is not present.
-		memcpy(hostname, url, path - url);
-		hostname[path - url] = '\0';
-	} else {
-		port = atoi(colon + 1);
-		if (port == 0) {
-			error("Port error %s\n", url);
-			return;
-		}
-
-		memcpy(hostname, url, colon - url);
-		hostname[colon - url] = '\0';
-	}
-
-
-	if (path[0] == '\0') { // Empty path is not allowed.
-		path = "/";
-	}
-
-	http_raw_request(hostname, port, secure, path, post_data, headers, user_callback);
+	return http_request(url, HTTP_POST, body, headers, user_callback);
 }
 
-void FLASH_FN http_get(const char *url, const char *headers, httpclient_cb user_callback)
+
+bool http_get(const char *url, const char *headers, httpclient_cb user_callback)
 {
-	http_post(url, NULL, headers, user_callback);
+	return http_request(url, HTTP_GET, NULL, headers, user_callback);
 }
+
+
+bool http_put(const char *url, const char *body, const char *headers, httpclient_cb user_callback)
+{
+	return http_request(url, HTTP_PUT, body, headers, user_callback);
+}
+
 
 void FLASH_FN http_callback_example(char *response_body, int http_status, char *response_headers, int body_size)
 {
-	dbg("http_status=%d", http_status);
+	dbg("Response: code %d", http_status);
 	if (http_status != HTTP_STATUS_GENERIC_ERROR) {
-		dbg("strlen(headers)=%d", (int)strlen(response_headers));
-		dbg("body_size=%d", body_size);
-		dbg("body=%s<EOF>", response_body); // FIXME: this does not handle binary data.
+		dbg("len(headers) = %d, len(body) = %d", (int)strlen(response_headers), body_size);
+		dbg("body: %s<EOF>", response_body); // FIXME: this does not handle binary data.
+	}
+}
+
+
+
+void FLASH_FN http_callback_showstatus(char *response_body, int code, char *response_headers, int body_size)
+{
+	(void)response_body;
+	(void)response_headers;
+	(void)body_size;
+
+	if (code == 200) {
+		info("Response OK (200)");
+	} else if (code >= 400) {
+		error("Response ERROR (%d)", code);
+		dbg("Body: %s<EOF>",response_body);
+	} else {
+		// ???
+		warn("Response %d", code);
+		dbg("Body: %s<EOF>",response_body);
 	}
 }
