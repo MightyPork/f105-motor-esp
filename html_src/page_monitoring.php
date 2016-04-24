@@ -15,7 +15,7 @@
 		<tr>
 			<th>Actual&nbsp;distance:</th>
 			<td>
-				<span id="reporting" class="Valfield">N/A</span>
+				<span id="refdist" class="Valfield">N/A</span>
 				<a onclick="page_mon.compareNow()" class="button btn-blue">Measure</a>
 			</td>
 		</tr>
@@ -36,8 +36,8 @@
 		<tr>
 			<th><label for="rep-interval">Interval:</label></th>
 			<td>
-				<input type="number" id="rep-interval" style="max-width: 10em" value="%repInterval%">
-				seconds
+				<input type="number" id="rep-interval" style="max-width: 10em" value="%repInterval%"><!--
+				-->&nbsp;seconds
 			</td>
 		</tr>
 		<tr>
@@ -49,21 +49,15 @@
 		</tr>
 		<tr>
 			<th><label for="rep-feed">Feed/Channel:</label></th>
-			<td>
-				<input type="text" name="rep-feed" id="rep-feed" value="%repFeed%">
-			</td>
+			<td><input type="text" name="rep-feed" id="rep-feed" value="%repFeed%"></td>
 		</tr>
 		<tr>
 			<th><label for="rep-key">API key:</label></th>
-			<td>
-				<input type="text" name="rep-key" id="rep-key" value="%repKey%">
-			</td>
+			<td><input type="text" name="rep-key" id="rep-key" value="%repKey%"></td>
 		</tr>
 		<tr>
 			<th>&nbsp;</th>
-			<td>
-				<input type="submit" value="Save changes">
-			</td>
+			<td><input type="submit" value="Save changes"></td>
 		</tr>
 	</table>
 	</form>
