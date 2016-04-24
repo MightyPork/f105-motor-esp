@@ -123,7 +123,7 @@ static void FLASH_FN do_send_report(void)
 	char hdrs_buf[100];
 
 	switch (rpt_conf.service) {
-		case RPT_XIVELY:;
+		case RPT_XIVELY:
 			bb += sprintf(bb, "deviation,");
 			bb += my_ftoa(bb, rpt_result.deviation, 2);
 			bb += sprintf(bb, "\nI_rms,");
@@ -141,7 +141,14 @@ static void FLASH_FN do_send_report(void)
 			break;
 
 		case RPT_THINGSPEAK:
-			warn("------- TODO: REPORT TO THINGSPEAK -------");
+			bb += sprintf(bb, "key=%s", rpt_conf.key);
+			bb += sprintf(bb, "&field1=");
+			bb += my_ftoa(bb, rpt_result.deviation, 2);
+			bb += sprintf(bb, "&field2=");
+			bb += my_ftoa(bb, rpt_result.i_rms, 2);
+
+			http_post("http://api.thingspeak.com/update", buf, NULL, http_callback_showstatus);
+
 			break;
 	}
 }

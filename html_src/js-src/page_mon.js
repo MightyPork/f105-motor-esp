@@ -49,7 +49,22 @@ var page_mon = (function() {
 		});
 	};
 
+	function updateXvOnly() {
+		// is xively
+		var isXv = $('#rep-svc-xv')[0].checked;
+
+		if (isXv) {
+			$('.xv-only').removeClass('hidden');
+		} else {
+			$('.xv-only').addClass('hidden');
+		}
+	}
+
 	mon.init = function() {
+		updateXvOnly();
+
+		$('#rep-svc-xv,#rep-svc-ts').on('change', updateXvOnly);
+
 		setInterval(function() {
 			$().get(_root + '/mon/status', function(resp, status) {
 				if (status == 200) {
@@ -60,7 +75,7 @@ var page_mon = (function() {
 							$('#actual-dev').html(numfmt(j.deviation, 2));
 							$('#actual-rms').html(numfmt(j.rms, 2));
 						} else {
-							throw 'Capture failed.';
+							console.error('Capture failed.');
 						}
 					} catch(e) {
 						errorMsg(e);

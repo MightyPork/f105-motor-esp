@@ -51,12 +51,12 @@
 			</td>
 		</tr>
 		<tr>
-			<th><label for="rep-feed">Feed/Channel:</label></th>
-			<td><input type="text" name="feed" id="rep-feed" value="%repFeed%"></td>
-		</tr>
-		<tr>
 			<th><label for="rep-key">API key:</label></th>
 			<td><input type="text" name="key" id="rep-key" value="%repKey%"></td>
+		</tr>
+		<tr class="xv-only">
+			<th><label for="rep-feed">Feed ID:</label></th>
+			<td><input type="text" name="feed" id="rep-feed" value="%repFeed%"></td>
 		</tr>
 		<tr>
 			<th>&nbsp;</th>
