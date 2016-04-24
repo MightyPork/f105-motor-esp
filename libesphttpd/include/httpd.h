@@ -13,14 +13,15 @@ typedef enum {
 } httpd_cgi_state;
 
 typedef enum {
-	HTTPD_METHOD_GET = 1,
-	HTTPD_METHOD_POST = 2,
-	HTTPD_METHOD_OPTIONS = 3,
-	HTTPD_METHOD_PUT = 4,
-	HTTPD_METHOD_DELETE = 5,
-	HTTPD_METHOD_PATCH = 6,
-	HTTPD_METHOD_HEAD = 7,
+	HTTP_GET = 1,
+	HTTP_POST = 2,
+	HTTP_OPTIONS = 3,
+	HTTP_PUT = 4,
+	HTTP_DELETE = 5,
+	HTTP_PATCH = 6,
+	HTTP_HEAD = 7,
 } http_method;
+
 
 typedef struct HttpdPriv HttpdPriv;
 typedef struct HttpdConnData HttpdConnData;
@@ -95,7 +96,7 @@ typedef struct {
 
 #define ROUTE_END() {NULL, NULL, NULL, NULL}
 
-
+const char *http_method_str(http_method m);
 
 httpd_cgi_state cgiRedirect(HttpdConnData *connData);
 httpd_cgi_state cgiRedirectToHostname(HttpdConnData *connData);

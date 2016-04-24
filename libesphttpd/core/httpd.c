@@ -115,6 +115,20 @@ const char ICACHE_FLASH_ATTR *httpdGetMimetype(const char *filepath) {
 	return mimeTypes[i].mimetype;
 }
 
+const char* ICACHE_FLASH_ATTR http_method_str(http_method m)
+{
+	switch (m) {
+		default:
+		case HTTP_GET: return "GET";
+		case HTTP_POST: return "POST";
+		case HTTP_OPTIONS: return "OPTIONS";
+		case HTTP_PUT: return "PUT";
+		case HTTP_DELETE: return "DELETE";
+		case HTTP_PATCH: return "PATCH";
+		case HTTP_HEAD: return "HEAD";
+	}
+}
+
 //Looks up the connData info for a specific connection
 static HttpdConnData ICACHE_FLASH_ATTR *httpdFindConnData(ConnTypePtr conn, const char *remIp, int remPort) {
 	for (int i=0; i<HTTPD_MAX_CONNECTIONS; i++) {
@@ -521,7 +535,7 @@ static void ICACHE_FLASH_ATTR httpdProcessRequest(HttpdConnData *conn) {
 		return; //Shouldn't happen
 	}
 
-	if (conn->requestType == HTTPD_METHOD_OPTIONS /*&& conn->priv->chunkHdr[0] != 0*/) {
+	if (conn->requestType == HTTP_OPTIONS /*&& conn->priv->chunkHdr[0] != 0*/) {
 		// we have a CORS preflight
 		httpdStartResponse(conn, 200);
 		httpdHeader(conn, "Access-Control-Allow-Headers", conn->priv->corsToken);
@@ -589,16 +603,16 @@ static void ICACHE_FLASH_ATTR httpdParseHeader(char *h, HttpdConnData *conn) {
 	char firstLine=0;
 
 	if (strstarts(h, "GET ")) {
-		conn->requestType = HTTPD_METHOD_GET;
+		conn->requestType = HTTP_GET;
 		firstLine=1;
 	} else if (strstarts(h, "POST ")) {
-		conn->requestType = HTTPD_METHOD_POST;
+		conn->requestType = HTTP_POST;
 		firstLine=1;
 	} else if (strstarts(h, "PUT ")) {
-		conn->requestType = HTTPD_METHOD_PUT;
+		conn->requestType = HTTP_PUT;
 		firstLine=1;
 	} else if (strstarts(h, "OPTIONS ")) {
-		conn->requestType = HTTPD_METHOD_OPTIONS;
+		conn->requestType = HTTP_OPTIONS;
 		firstLine=1;
 	} else if (strstarts(h, "Host:")) {
 		i=5;

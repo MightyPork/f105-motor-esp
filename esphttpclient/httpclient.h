@@ -11,6 +11,7 @@
 #define HTTPCLIENT_H
 
 #include <esp8266.h>
+#include <httpd.h>
 
 #define HTTP_STATUS_GENERIC_ERROR  -1   // In case of TCP or DNS error the callback is called with this status.
 #define BUFFER_SIZE_MAX            5000 // Size of http responses that will cause an error.
@@ -27,34 +28,39 @@
  * A successful request corresponds to an HTTP status code of 200 (OK).
  * More info at http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
  */
-typedef void (* httpclient_cb)(char * response_body, int http_status, char * response_headers, int body_size);
+typedef void (* httpclient_cb)(char *response_body, int http_status, char *response_headers, int body_size);
 
 /**
- * Download a web page from its URL.
+ * @brief Download a web page from its URL.
+ *
  * Try:
  * http_get("http://wtfismyip.com/text", http_callback_example);
  */
-void http_get(const char * url, const char *headers, httpclient_cb user_callback);
+bool http_get(const char * url, const char *headers, httpclient_cb user_callback);
 
 /**
- * Post data to a web form.
+ * @brief Post data to a web form.
+ *
  * The data should be encoded as application/x-www-form-urlencoded.
+ *
  * Try:
  * http_post("http://httpbin.org/post", "first_word=hello&second_word=world", http_callback_example);
  */
-void http_post(const char *url, const char *post_data, const char *headers, httpclient_cb user_callback);
+bool http_post(const char *url, const char *post_data, const char *headers, httpclient_cb user_callback);
+
+/** Like POST, but with the PUT method. */
+bool http_put(const char *url, const char *body, const char *headers, httpclient_cb user_callback);
 
 /**
- * Call this function to skip URL parsing if the arguments are already in separate variables.
+ * @brief Send a HTTP request
+ * @param url      : protocol://host[:port][/path]
+ * @param method   : get, post, ...
+ * @param body     : request body. If GET & body != NULL, method changes to POST.
+ * @param headers  : additional headers string. Must end with \r\n
+ * @param user_callback : callback for parsing the response
+ * @return success (in sending)
  */
-void http_raw_request(
-		const char * hostname,
-		int port,
-		bool secure,
-		const char *path,
-		const char *post_data,
-		const char *headers,
-		httpclient_cb user_callback);
+bool http_request(const char *url, http_method method, const char *body, const char *headers, httpclient_cb user_callback);
 
 /**
  * Output on the UART.

@@ -2,6 +2,7 @@
 #include "datalink.h"
 #include "serial.h"
 #include "httpclient.h"
+#include "ftoa.h"
 
 #define RPT_CONF_MAGIC 0x24C595D5
 
@@ -114,9 +115,28 @@ static void FLASH_FN compare_ref_cb(SBMP_Endpoint *ep, SBMP_Datagram *dg, void *
 static void FLASH_FN do_send_report(void)
 {
 	info("Sending report...");
+
+	char buf[100];
+	char *bb = buf;
+
+	char url_buf[200];
+	char hdrs_buf[100];
+
 	switch (rpt_conf.service) {
-		case RPT_XIVELY:
-			warn("------- TODO: REPORT TO XIVELY -------");
+		case RPT_XIVELY:;
+			bb += sprintf(bb, "deviation,");
+			bb += my_ftoa(bb, rpt_result.deviation, 2);
+			bb += sprintf(bb, "\nI_rms,");
+			bb += my_ftoa(bb, rpt_result.i_rms, 2);
+
+			// URL
+			sprintf(url_buf, "http://api.xively.com/v2/feeds/%s.csv", rpt_conf.feed);
+
+			// Key
+			sprintf(hdrs_buf, "X-ApiKey: %s\r\n", rpt_conf.key);
+
+			http_put(url_buf, buf, hdrs_buf, http_callback_example);
+
 			break;
 
 		case RPT_THINGSPEAK:
