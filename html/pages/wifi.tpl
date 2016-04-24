@@ -19,7 +19,7 @@
 <div id="outer">
 <nav id="menu">
 	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current Analyser</div>
-	<a href="/status">Home</a><a href="/wifi" class="selected">WiFi config</a><a href="/waveform">Waveform</a><a href="/fft">FFT</a><a href="/spectrogram">Spectrogram</a><a href="/about">About</a></nav>
+	<a href="/status">Home</a><a href="/wifi" class="selected">WiFi config</a><a href="/waveform">Waveform</a><a href="/fft">FFT</a><a href="/spectrogram">Spectrogram</a><a href="/monitoring">Monitoring</a><a href="/about">About</a></nav>
 <div id="content">
 	<img src="/img/loader.gif" alt="Loading…" id="loader">
 

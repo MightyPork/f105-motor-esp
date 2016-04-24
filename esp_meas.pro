@@ -66,7 +66,9 @@ SOURCES += \
 	user/cgi_reset.c \
 	user/cgi_ping.c \
 	esphttpclient/test/httpclient_test.c \
-	esphttpclient/httpclient.c
+	esphttpclient/httpclient.c \
+    user/page_monitoring.c \
+    user/reporting.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -154,7 +156,9 @@ HEADERS += \
 	user/cgi_reset.h \
 	user/cgi_ping.h \
 	esphttpclient/espmissingincludes.h \
-	esphttpclient/httpclient.h
+	esphttpclient/httpclient.h \
+    user/page_monitoring.h \
+    user/reporting.h
 
 DISTFILES += \
 	style.astylerc \
