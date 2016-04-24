@@ -157,6 +157,15 @@ bool FLASH_FN capture_and_report(bool do_report)
 		return false;
 	}
 
+	if (do_report) {
+		// don't report in AP mode
+		WIFI_MODE mode = wifi_get_opmode();
+		if (mode != STATION_MODE && mode != STATIONAP_MODE) {
+			warn("Not in station mode, cannot report.");
+			do_report = false;
+		}
+	}
+
 	rpt_result.ready = false;
 	rpt_result.busy = true;
 
