@@ -24,6 +24,7 @@ typedef struct {
 /** Comapre result is stored here */
 typedef struct {
 	bool ready;
+	bool success;
 	float deviation;
 	float i_rms;
 } ReportingResult;

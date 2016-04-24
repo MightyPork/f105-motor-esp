@@ -96,9 +96,15 @@ static void FLASH_FN compare_ref_cb(SBMP_Endpoint *ep, SBMP_Datagram *dg, void *
 
 	info("Measurement complete.");
 
-	PayloadParser pp = pp_start(dg->payload, dg->length);
-	rpt_result.deviation = pp_float(&pp);
-	rpt_result.i_rms = pp_float(&pp);
+	rpt_result.success = (dg->type == DG_SUCCESS);
+
+	if (dg->type == DG_SUCCESS) {
+		PayloadParser pp = pp_start(dg->payload, dg->length);
+		rpt_result.deviation = pp_float(&pp);
+		rpt_result.i_rms = pp_float(&pp);
+	} else {
+		error("FAIL resp from sbmp.");
+	}
 
 	rpt_result.ready = true; // signal to waiting loop
 }
@@ -110,10 +116,11 @@ static void FLASH_FN do_send_report(void)
 	info("Sending report...");
 	switch (rpt_conf.service) {
 		case RPT_XIVELY:
-			// TODO send request
+			warn("------- TODO: REPORT TO XIVELY -------");
 			break;
 
 		case RPT_THINGSPEAK:
+			warn("------- TODO: REPORT TO THINGSPEAK -------");
 			break;
 	}
 }
@@ -135,7 +142,9 @@ bool FLASH_FN capture_and_report(void)
 		uart_poll();
 
 		if (rpt_result.ready) {
-			do_send_report();
+			if (rpt_result.success) {
+				do_send_report();
+			}
 			return true; // done
 		}
 
@@ -166,7 +175,7 @@ static void FLASH_FN store_ref_cb(SBMP_Endpoint *ep, SBMP_Datagram *dg, void **o
 /** Capture reference vector for monitoring */
 bool FLASH_FN capture_reporting_reference(void)
 {
-	info("Capturing refernece...");
+	info("Capturing reference...");
 
 	uint16_t sesn;
 	sbmp_ep_send_message(dlnk_ep, DG_REQUEST_STORE_REF, NULL, 0, &sesn, NULL);

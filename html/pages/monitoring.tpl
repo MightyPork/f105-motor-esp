@@ -36,11 +36,11 @@
 			</td>
 		</tr>
 		<tr>
-			<th>Actual&nbsp;state:</th>
+			<th>Status:</th>
 			<td>
-				<span class="Valfield">
-					Δ = <span id="actual-dev">%curDeviation%</span>,
-					I<sub>rms</sub> = <span id="actual-rms">%curRMS%</span> mA
+				<span class="Valfield" style="vertical-align:middle;">
+					Δ = <span id="actual-dev">%curDeviation%</span><br>
+					I<sub>RMS</sub> = <span id="actual-rms">%curRMS%</span>&nbsp;mA
 				</span>
 				<a onclick="page_mon.compareNow()" class="button btn-blue">Measure</a>
 			</td>
@@ -55,7 +55,7 @@
 		<tr>
 			<th><label for="rep-on">Reporting:</label></th>
 			<td>
-				<input type="checkbox" id="rep-on" name="enabled" value="1" %repEnableCheck%><!--
+				<input type="checkbox" id="rep-on" name="enabled" value="1" %rep_en%><!--
 				-->&nbsp;<label for="rep-on">enabled</label>
 			</td>
 		</tr>
@@ -69,8 +69,8 @@
 		<tr>
 			<th>Service:</th>
 			<td>
-				<input type="radio" name="service" value="xv" id="rep-svc-xv" %repSvcCheckXv%>&nbsp;<label for="rep-svc-xv">Xively</label>&nbsp;
-				<input type="radio" name="service" value="ts" id="rep-svc-ts" %repSvcCheckTs%>&nbsp;<label for="rep-svc-ts">ThingSpeak</label>
+				<input type="radio" name="service" value="xv" id="rep-svc-xv" %svc_xv%>&nbsp;<label for="rep-svc-xv">Xively</label>&nbsp;
+				<input type="radio" name="service" value="ts" id="rep-svc-ts" %svc_ts%>&nbsp;<label for="rep-svc-ts">ThingSpeak</label>
 			</td>
 		</tr>
 		<tr>

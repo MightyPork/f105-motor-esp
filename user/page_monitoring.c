@@ -7,10 +7,7 @@
 
 httpd_cgi_state FLASH_FN cgiMonCompare(HttpdConnData *connData)
 {
-	if (connData->conn == NULL) {
-		//Connection aborted. Clean up.
-		return HTTPD_CGI_DONE;
-	}
+	if (connData->conn == NULL) return HTTPD_CGI_DONE;
 
 	httpdStartResponse(connData, 200);
 	httpdHeader(connData, "Content-Type", "application/json");
@@ -23,11 +20,12 @@ httpd_cgi_state FLASH_FN cgiMonCompare(HttpdConnData *connData)
 
 	if (suc && rpt_result.ready) {
 		// success
-		sprintf(buf, "{\"success\": true, \"deviation\": ");
-		my_ftoa(buf+strlen(buf),rpt_result.deviation, 2);
-		sprintf(buf, ", \"rms\": ");
-		my_ftoa(buf+strlen(buf),rpt_result.i_rms, 2);
-		sprintf(buf, "}");
+		char *bb = buf;
+		bb += sprintf(bb, "{\"success\": true, \"deviation\": ");
+		bb += my_ftoa(bb,rpt_result.deviation, 2);
+		bb += sprintf(bb, ", \"rms\": ");
+		bb += my_ftoa(bb,rpt_result.i_rms, 2);
+		bb += sprintf(bb, "}");
 
 		httpdSend(connData, buf, -1);
 	} else {
@@ -40,10 +38,7 @@ httpd_cgi_state FLASH_FN cgiMonCompare(HttpdConnData *connData)
 
 httpd_cgi_state FLASH_FN cgiMonSetRef(HttpdConnData *connData)
 {
-	if (connData->conn == NULL) {
-		//Connection aborted. Clean up.
-		return HTTPD_CGI_DONE;
-	}
+	if (connData->conn == NULL) return HTTPD_CGI_DONE;
 
 	httpdStartResponse(connData, 200);
 	httpdHeader(connData, "Content-Type", "application/json");
@@ -59,14 +54,7 @@ httpd_cgi_state FLASH_FN cgiMonSetRef(HttpdConnData *connData)
 
 httpd_cgi_state FLASH_FN cgiMonitoringCfg(HttpdConnData *connData)
 {
-	if (connData->conn == NULL) {
-		//Connection aborted. Clean up.
-		return HTTPD_CGI_DONE;
-	}
-
-	httpdStartResponse(connData, 200);
-	httpdHeader(connData, "Content-Type", "application/json");
-	httpdEndHeaders(connData);
+	if (connData->conn == NULL) return HTTPD_CGI_DONE;
 
 	// TODO
 	HttpdPostData *post = connData->post;
@@ -84,7 +72,7 @@ httpd_cgi_state FLASH_FN cgiMonitoringCfg(HttpdConnData *connData)
 		}
 
 		// interval=secs
-		blen = httpdFindArg(post->buff, "enabled", buf, 64);
+		blen = httpdFindArg(post->buff, "interval", buf, 64);
 		if (blen != -1) {
 			rpt_conf.interval = (uint32_t)atoi(buf);
 		}
@@ -146,19 +134,19 @@ httpd_cgi_state FLASH_FN tplMonitoring(HttpdConnData *connData, char *token, voi
 		}
 		httpdSend(connData, buf, -1);
 
-	} else if (streq(token, "repEnableCheck")) {
+	} else if (streq(token, "rep_en")) {
 		if (rpt_conf.enabled) httpdSend(connData, "checked", -1);
 
 	} else if (streq(token, "repInterval")) { // interval in seconds
 		sprintf(buf, "%d", rpt_conf.interval);
 		httpdSend(connData, buf, -1);
 
-	} else if (streq(token, "repSvcCheckXv")) { // Xively checkbox
+	} else if (streq(token, "svc_xv")) { // Xively checkbox
 		if (rpt_conf.service == RPT_XIVELY) {
 			httpdSend(connData, "checked", -1);
 		}
 
-	} else if (streq(token, "repSvcCheckTs")) { // ThingSpeak checkbox
+	} else if (streq(token, "svc_ts")) { // ThingSpeak checkbox
 		if (rpt_conf.service == RPT_THINGSPEAK) {
 			httpdSend(connData, "checked", -1);
 		}

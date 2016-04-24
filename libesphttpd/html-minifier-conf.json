@@ -7,7 +7,7 @@
   "collapseBooleanAttributes": true,
   "removeTagWhitespace": true,
   "removeAttributeQuotes": true,
-  "removeRedundantAttributes": true,
+  "removeRedundantAttributes": false,
   "useShortDoctype": true,
   "removeEmptyAttributes": true,
   "removeScriptTypeAttributes": true,
