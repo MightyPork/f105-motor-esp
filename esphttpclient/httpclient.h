@@ -67,4 +67,9 @@ bool http_request(const char *url, http_method method, const char *body, const c
  */
 void http_callback_example(char *response_body, int http_status, char *response_headers, int body_size);
 
+/**
+ * Show status code, and body on error. Error/warn log msg on error.
+ */
+void http_callback_showstatus(char *response_body, int code, char *response_headers, int body_size);
+
 #endif

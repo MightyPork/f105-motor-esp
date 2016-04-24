@@ -14,7 +14,7 @@ httpd_cgi_state FLASH_FN cgiMonCompare(HttpdConnData *connData)
 	httpdEndHeaders(connData);
 
 	// this is semi-async (waits for completion)
-	bool suc = capture_and_report();
+	bool suc = capture_and_report(false);
 
 	char buf[100];
 
@@ -27,6 +27,33 @@ httpd_cgi_state FLASH_FN cgiMonCompare(HttpdConnData *connData)
 		bb += my_ftoa(bb,rpt_result.i_rms, 2);
 		bb += sprintf(bb, "}");
 
+		httpdSend(connData, buf, -1);
+	} else {
+		httpdSend(connData, "{\"success\": false}", -1);
+	}
+
+	return HTTPD_CGI_DONE;
+}
+
+/** This is an automated poll for current state, to update the display (measured by reporting func) */
+httpd_cgi_state FLASH_FN cgiMonStatus(HttpdConnData *connData)
+{
+	if (connData->conn == NULL) return HTTPD_CGI_DONE;
+
+	httpdStartResponse(connData, 200);
+	httpdHeader(connData, "Content-Type", "application/json");
+	httpdEndHeaders(connData);
+
+	char buf[100];
+
+	if (rpt_result.ready) {
+		// success
+		char *bb = buf;
+		bb += sprintf(bb, "{\"success\": true, \"deviation\": ");
+		bb += my_ftoa(bb,rpt_result.deviation, 2);
+		bb += sprintf(bb, ", \"rms\": ");
+		bb += my_ftoa(bb,rpt_result.i_rms, 2);
+		bb += sprintf(bb, "}");
 		httpdSend(connData, buf, -1);
 	} else {
 		httpdSend(connData, "{\"success\": false}", -1);

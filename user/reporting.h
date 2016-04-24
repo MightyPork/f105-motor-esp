@@ -25,6 +25,7 @@ typedef struct {
 typedef struct {
 	bool ready;
 	bool success;
+	bool busy;
 	float deviation;
 	float i_rms;
 } ReportingResult;
@@ -42,8 +43,8 @@ void reporting_cfg_save(void);
 /** Load the reporting config from flash */
 void reporting_cfg_load(void);
 
-/** Immediately send report to xively / thingspeak */
-bool capture_and_report(void);
+/** Immediately capture & send report to xively / thingspeak (or dont send - just for view) */
+bool capture_and_report(bool do_report);
 
 /** Capture reference vector for monitoring */
 bool capture_reporting_reference(void);

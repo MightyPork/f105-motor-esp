@@ -569,3 +569,23 @@ void FLASH_FN http_callback_example(char *response_body, int http_status, char *
 		dbg("body: %s<EOF>", response_body); // FIXME: this does not handle binary data.
 	}
 }
+
+
+
+void FLASH_FN http_callback_showstatus(char *response_body, int code, char *response_headers, int body_size)
+{
+	(void)response_body;
+	(void)response_headers;
+	(void)body_size;
+
+	if (code == 200) {
+		info("Response OK (200)");
+	} else if (code >= 400) {
+		error("Response ERROR (%d)", code);
+		dbg("Body: %s<EOF>",response_body);
+	} else {
+		// ???
+		warn("Response %d", code);
+		dbg("Body: %s<EOF>",response_body);
+	}
+}

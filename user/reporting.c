@@ -17,7 +17,7 @@ static void FLASH_FN rpt_tim_cb(void *arg)
 	(void)arg;
 	// send report now...
 	if (rpt_conf.enabled) {
-		capture_and_report();
+		capture_and_report(true);
 	}
 }
 
@@ -130,12 +130,13 @@ static void FLASH_FN do_send_report(void)
 			bb += my_ftoa(bb, rpt_result.i_rms, 2);
 
 			// URL
+			// We technically could use HTTPS, but it's not tested and probably buggy as hell
 			sprintf(url_buf, "http://api.xively.com/v2/feeds/%s.csv", rpt_conf.feed);
 
 			// Key
 			sprintf(hdrs_buf, "X-ApiKey: %s\r\n", rpt_conf.key);
 
-			http_put(url_buf, buf, hdrs_buf, http_callback_example);
+			http_put(url_buf, buf, hdrs_buf, http_callback_showstatus);
 
 			break;
 
@@ -147,10 +148,17 @@ static void FLASH_FN do_send_report(void)
 
 
 /** Immediately send report to xively / thingspeak */
-bool FLASH_FN capture_and_report(void)
+bool FLASH_FN capture_and_report(bool do_report)
 {
 	info("Starting reporting measurmenet...");
+
+	if (rpt_result.busy) {
+		error("Capture busy.");
+		return false;
+	}
+
 	rpt_result.ready = false;
+	rpt_result.busy = true;
 
 	uint16_t sesn;
 	sbmp_ep_send_message(dlnk_ep, DG_REQUEST_COMPARE_REF, NULL, 0, &sesn, NULL);
@@ -162,9 +170,11 @@ bool FLASH_FN capture_and_report(void)
 		uart_poll();
 
 		if (rpt_result.ready) {
-			if (rpt_result.success) {
+			if (rpt_result.success && do_report) {
 				do_send_report();
 			}
+
+			rpt_result.busy = false;
 			return true; // done
 		}
 
@@ -175,6 +185,8 @@ bool FLASH_FN capture_and_report(void)
 	// timeout - remove listener
 	error("Measure timeout - no resp received.");
 	sbmp_ep_remove_listener(dlnk_ep, sesn);
+
+	rpt_result.busy = false;
 	return false;
 }
 
@@ -197,6 +209,12 @@ bool FLASH_FN capture_reporting_reference(void)
 {
 	info("Capturing reference...");
 
+	if (rpt_result.busy) {
+		error("Capture busy.");
+		return false;
+	}
+	rpt_result.busy = true;
+
 	uint16_t sesn;
 	sbmp_ep_send_message(dlnk_ep, DG_REQUEST_STORE_REF, NULL, 0, &sesn, NULL);
 	sbmp_ep_add_listener(dlnk_ep, sesn, store_ref_cb, NULL);
@@ -209,6 +227,7 @@ bool FLASH_FN capture_reporting_reference(void)
 		uart_poll();
 
 		if (capt_ref_done) {
+			rpt_result.busy = false;
 			return capt_ref_success; // done
 		}
 
@@ -219,5 +238,6 @@ bool FLASH_FN capture_reporting_reference(void)
 	// timeout - remove listener
 	error("Ref capture timeout - no resp received.");
 	sbmp_ep_remove_listener(dlnk_ep, sesn);
+	rpt_result.busy = false;
 	return false;
 }

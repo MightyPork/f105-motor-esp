@@ -48,6 +48,7 @@ HttpdBuiltInUrl builtInUrls[] = {
 	ROUTE_TPL_FILE("/measure/fft", tplFourierJSON, "/json/samples.tpl"),
 
 	ROUTE_CGI("/mon/compare", cgiMonCompare),
+	ROUTE_CGI("/mon/status", cgiMonStatus),
 	ROUTE_CGI("/mon/setref", cgiMonSetRef),
 	ROUTE_CGI("/mon/config", cgiMonitoringCfg), // redirects to /monitoring
 

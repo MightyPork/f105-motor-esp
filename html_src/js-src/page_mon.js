@@ -38,9 +38,7 @@ var page_mon = (function() {
 						$('#actual-dev').html(numfmt(j.deviation, 2));
 						$('#actual-rms').html(numfmt(j.rms, 2));
 					} else {
-						errorMsg('Capture failed.');
-						$('#actual-dev').html('--');
-						$('#actual-rms').html('--');
+						throw 'Capture failed.';
 					}
 				} catch(e) {
 					errorMsg(e);
@@ -52,7 +50,26 @@ var page_mon = (function() {
 	};
 
 	mon.init = function() {
-		//
+		setInterval(function() {
+			$().get(_root + '/mon/status', function(resp, status) {
+				if (status == 200) {
+					try {
+						// OK
+						var j = JSON.parse(resp);
+						if (j.success) {
+							$('#actual-dev').html(numfmt(j.deviation, 2));
+							$('#actual-rms').html(numfmt(j.rms, 2));
+						} else {
+							throw 'Capture failed.';
+						}
+					} catch(e) {
+						errorMsg(e);
+						$('#actual-dev').html('--');
+						$('#actual-rms').html('--');
+					}
+				}
+			});
+		}, 10000);
 	};
 
 	return mon;
