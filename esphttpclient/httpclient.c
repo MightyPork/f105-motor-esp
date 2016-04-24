@@ -241,8 +241,8 @@ static void FLASH_FN sent_callback(void * arg)
 static void FLASH_FN connect_callback(void * arg)
 {
 	info("Connected!");
-	struct espconn * conn = (struct espconn *)arg;
-	request_args * req = (request_args *)conn->reserve;
+	struct espconn *conn = (struct espconn *)arg;
+	request_args *req = (request_args *)conn->reserve;
 
 	espconn_regist_recvcb(conn, receive_callback);
 	espconn_regist_sentcb(conn, sent_callback);

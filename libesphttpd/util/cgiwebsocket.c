@@ -119,26 +119,27 @@ int ICACHE_FLASH_ATTR cgiWebsocketSend(Websock *ws, char *data, int len, int fla
 	return r;
 }
 
-//Broadcast data to all websockets at a specific url. Returns the amount of connections sent to.
-int ICACHE_FLASH_ATTR cgiWebsockBroadcast(char *resource, char *data, int len, int flags) {
-//This is majorly broken (and actually, always, it just tended to work because the circumstances
-//were juuuust right). Because the socket is used outside of the httpd send/receive context, it
-//will not have an associated send buffer. This means httpdSend will write to a dangling pointer!
-//Disabled for now. If you really need this, open an issue on github or otherwise poke me and I'll
-//see what I can do.
-/*
-	Websock *lw=llStart;
-	int ret=0;
-	while (lw!=NULL) {
-		if (strcmp(lw->conn->url, resource)==0) {
-			cgiWebsocketSend(lw, data, len, flags);
-			ret++;
-		}
-		lw=lw->priv->next;
-	}
-	return ret;*/
-	return 0;
-}
+
+////Broadcast data to all websockets at a specific url. Returns the amount of connections sent to.
+//int ICACHE_FLASH_ATTR cgiWebsockBroadcast(char *resource, char *data, int len, int flags) {
+////This is majorly broken (and actually, always, it just tended to work because the circumstances
+////were juuuust right). Because the socket is used outside of the httpd send/receive context, it
+////will not have an associated send buffer. This means httpdSend will write to a dangling pointer!
+////Disabled for now. If you really need this, open an issue on github or otherwise poke me and I'll
+////see what I can do.
+///*
+//	Websock *lw=llStart;
+//	int ret=0;
+//	while (lw!=NULL) {
+//		if (strcmp(lw->conn->url, resource)==0) {
+//			cgiWebsocketSend(lw, data, len, flags);
+//			ret++;
+//		}
+//		lw=lw->priv->next;
+//	}
+//	return ret;*/
+//	return 0;
+//}
 
 
 void ICACHE_FLASH_ATTR cgiWebsocketClose(Websock *ws, int reason) {
@@ -167,7 +168,7 @@ static void ICACHE_FLASH_ATTR websockFree(Websock *ws) {
 	if (ws->priv) free(ws->priv);
 }
 
-int ICACHE_FLASH_ATTR cgiWebSocketRecv(HttpdConnData *connData, char *data, int len) {
+httpd_cgi_state ICACHE_FLASH_ATTR cgiWebSocketRecv(HttpdConnData *connData, char *data, int len) {
 	int i, j, sl;
 	int r=HTTPD_CGI_MORE;
 	int wasHeaderByte;
@@ -280,7 +281,7 @@ int ICACHE_FLASH_ATTR cgiWebSocketRecv(HttpdConnData *connData, char *data, int 
 }
 
 //Websocket 'cgi' implementation
-int ICACHE_FLASH_ATTR cgiWebsocket(HttpdConnData *connData) {
+httpd_cgi_state ICACHE_FLASH_ATTR cgiWebsocket(HttpdConnData *connData) {
 	char buff[256];
 	int i;
 	sha1nfo s;

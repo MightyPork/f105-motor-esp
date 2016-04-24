@@ -62,7 +62,7 @@ struct HttpdPriv {
 
 
 //Connection pool
-static HttpdConnData *connData[HTTPD_MAX_CONNECTIONS];
+static HttpdConnData *connPool[HTTPD_MAX_CONNECTIONS];
 
 //Struct to keep extension->mime data in
 typedef struct {
@@ -118,10 +118,10 @@ const char ICACHE_FLASH_ATTR *httpdGetMimetype(const char *filepath) {
 //Looks up the connData info for a specific connection
 static HttpdConnData ICACHE_FLASH_ATTR *httpdFindConnData(ConnTypePtr conn, const char *remIp, int remPort) {
 	for (int i=0; i<HTTPD_MAX_CONNECTIONS; i++) {
-		if (connData[i] && connData[i]->remote_port == remPort &&
-						memcmp(connData[i]->remote_ip, remIp, 4) == 0) {
-			connData[i]->conn=conn;
-			return connData[i];
+		if (connPool[i] && connPool[i]->remote_port == remPort &&
+						memcmp(connPool[i]->remote_ip, remIp, 4) == 0) {
+			connPool[i]->conn=conn;
+			return connPool[i];
 		}
 	}
 	//Shouldn't happen.
@@ -146,7 +146,7 @@ static void ICACHE_FLASH_ATTR httpdRetireConn(HttpdConnData *conn) {
 	if (conn->priv!=NULL) free(conn->priv);
 	if (conn) free(conn);
 	for (int i=0; i<HTTPD_MAX_CONNECTIONS; i++) {
-		if (connData[i]==conn) connData[i]=NULL;
+		if (connPool[i]==conn) connPool[i]=NULL;
 	}
 }
 
@@ -285,7 +285,7 @@ void ICACHE_FLASH_ATTR httpdRedirect(HttpdConnData *conn, char *newUrl) {
 }
 
 //Use this as a cgi function to redirect one url to another.
-int ICACHE_FLASH_ATTR cgiRedirect(HttpdConnData *connData) {
+httpd_cgi_state ICACHE_FLASH_ATTR cgiRedirect(HttpdConnData *connData) {
 	if (connData->conn==NULL) {
 		//Connection aborted. Clean up.
 		return HTTPD_CGI_DONE;
@@ -295,7 +295,7 @@ int ICACHE_FLASH_ATTR cgiRedirect(HttpdConnData *connData) {
 }
 
 //Used to spit out a 404 error
-static int ICACHE_FLASH_ATTR cgiNotFound(HttpdConnData *connData) {
+static httpd_cgi_state ICACHE_FLASH_ATTR cgiNotFound(HttpdConnData *connData) {
 	if (connData->conn==NULL) return HTTPD_CGI_DONE;
 	httpdStartResponse(connData, 404);
 	httpdEndHeaders(connData);
@@ -308,7 +308,7 @@ static int ICACHE_FLASH_ATTR cgiNotFound(HttpdConnData *connData) {
 //ESP in order to load a HTML page as soon as a phone, tablet etc connects to the ESP. Watch out:
 //this will also redirect connections when the ESP is in STA mode, potentially to a hostname that is not
 //in the 'official' DNS and so will fail.
-int ICACHE_FLASH_ATTR cgiRedirectToHostname(HttpdConnData *connData) {
+httpd_cgi_state ICACHE_FLASH_ATTR cgiRedirectToHostname(HttpdConnData *connData) {
 	static const char hostFmt[]="http://%s/";
 	char *buff;
 	int isIP=0;
@@ -345,7 +345,7 @@ int ICACHE_FLASH_ATTR cgiRedirectToHostname(HttpdConnData *connData) {
 //Same as above, but will only redirect clients with an IP that is in the range of
 //the SoftAP interface. This should preclude clients connected to the STA interface
 //to be redirected to nowhere.
-int ICACHE_FLASH_ATTR cgiRedirectApClientToHostname(HttpdConnData *connData) {
+httpd_cgi_state ICACHE_FLASH_ATTR cgiRedirectApClientToHostname(HttpdConnData *connData) {
 #ifndef FREERTOS
 	uint32 *remadr;
 	struct ip_info apip;
@@ -588,19 +588,22 @@ static void ICACHE_FLASH_ATTR httpdParseHeader(char *h, HttpdConnData *conn) {
 	int i;
 	char firstLine=0;
 
-	if (strncmp(h, "GET ", 4)==0) {
+	if (strstarts(h, "GET ")) {
 		conn->requestType = HTTPD_METHOD_GET;
 		firstLine=1;
-	} else if (strncmp(h, "Host:", 5)==0) {
+	} else if (strstarts(h, "POST ")) {
+		conn->requestType = HTTPD_METHOD_POST;
+		firstLine=1;
+	} else if (strstarts(h, "PUT ")) {
+		conn->requestType = HTTPD_METHOD_PUT;
+		firstLine=1;
+	} else if (strstarts(h, "OPTIONS ")) {
+		conn->requestType = HTTPD_METHOD_OPTIONS;
+		firstLine=1;
+	} else if (strstarts(h, "Host:")) {
 		i=5;
 		while (h[i]==' ') i++;
 		conn->hostName=&h[i];
-	} else if (strncmp(h, "POST ", 5)==0) {
-		conn->requestType = HTTPD_METHOD_POST;
-		firstLine=1;
-	} else if (strncmp(h, "OPTIONS ", 8)==0) {
-		conn->requestType = HTTPD_METHOD_OPTIONS;
-		firstLine=1;
 	}
 
 	if (firstLine) {
@@ -630,12 +633,12 @@ static void ICACHE_FLASH_ATTR httpdParseHeader(char *h, HttpdConnData *conn) {
 		} else {
 			conn->getArgs=NULL;
 		}
-	} else if (strncmp(h, "Connection:", 11)==0) {
+	} else if (strstarts(h, "Connection:")) {
 		i=11;
 		//Skip trailing spaces
 		while (h[i]==' ') i++;
-		if (strncmp(&h[i], "close", 5)==0) conn->priv->flags&=~HFL_CHUNKED; //Don't use chunked conn
-	} else if (strncmp(h, "Content-Length:", 15)==0) {
+		if (strstarts(&h[i], "close")) conn->priv->flags&=~HFL_CHUNKED; //Don't use chunked conn
+	} else if (strstarts(h, "Content-Length:")) {
 		i=15;
 		//Skip trailing spaces
 		while (h[i]==' ') i++;
@@ -652,7 +655,7 @@ static void ICACHE_FLASH_ATTR httpdParseHeader(char *h, HttpdConnData *conn) {
 		dbg("Malloc'd buffer for %d + 1 bytes of post data.", conn->post->buffSize);
 		conn->post->buff=(char*)malloc(conn->post->buffSize + 1);
 		conn->post->buffLen=0;
-	} else if (strncmp(h, "Content-Type: ", 14)==0) {
+	} else if (strstarts(h, "Content-Type: ")) {
 		if (strstr(h, "multipart/form-data")) {
 			// It's multipart form data so let's pull out the boundary for future use
 			char *b;
@@ -663,7 +666,7 @@ static void ICACHE_FLASH_ATTR httpdParseHeader(char *h, HttpdConnData *conn) {
 				dbg("boundary = %s", conn->post->multipartBoundary);
 			}
 		}
-	} else if (strncmp(h, "Access-Control-Request-Headers: ", 32)==0) {
+	} else if (strstarts(h, "Access-Control-Request-Headers: ")) {
 		// CORS crap that needs to be repeated in the response
 
 		info("CORS preflight request.");
@@ -783,7 +786,7 @@ int ICACHE_FLASH_ATTR httpdConnectCb(ConnTypePtr conn, char *remIp, int remPort)
 
 	int i;
 	//Find empty conndata in pool
-	for (i=0; i<HTTPD_MAX_CONNECTIONS; i++) if (connData[i]==NULL) break;
+	for (i=0; i<HTTPD_MAX_CONNECTIONS; i++) if (connPool[i]==NULL) break;
 	info("Conn req from  %d.%d.%d.%d:%d, using pool slot %d", remIp[0]&0xff, remIp[1]&0xff, remIp[2]&0xff, remIp[3]&0xff, remPort, i);
 	if (i==HTTPD_MAX_CONNECTIONS) {
 		error("Aiee, conn pool overflow!");
@@ -799,24 +802,24 @@ int ICACHE_FLASH_ATTR httpdConnectCb(ConnTypePtr conn, char *remIp, int remPort)
 
 	failed_cnt = 0;
 
-	connData[i]=malloc(sizeof(HttpdConnData));
-	memset(connData[i], 0, sizeof(HttpdConnData));
-	connData[i]->priv=malloc(sizeof(HttpdPriv));
-	memset(connData[i]->priv, 0, sizeof(HttpdPriv));
-	connData[i]->conn=conn;
-	connData[i]->slot=i;
-	connData[i]->priv->headPos=0;
-	connData[i]->post=malloc(sizeof(HttpdPostData));
-	memset(connData[i]->post, 0, sizeof(HttpdPostData));
-	connData[i]->post->buff=NULL;
-	connData[i]->post->buffLen=0;
-	connData[i]->post->received=0;
-	connData[i]->post->len=-1;
-	connData[i]->hostName=NULL;
-	connData[i]->remote_port=remPort;
-	connData[i]->priv->sendBacklog=NULL;
-	connData[i]->priv->sendBacklogSize=0;
-	memcpy(connData[i]->remote_ip, remIp, 4);
+	connPool[i]=malloc(sizeof(HttpdConnData));
+	memset(connPool[i], 0, sizeof(HttpdConnData));
+	connPool[i]->priv=malloc(sizeof(HttpdPriv));
+	memset(connPool[i]->priv, 0, sizeof(HttpdPriv));
+	connPool[i]->conn=conn;
+	connPool[i]->slot=i;
+	connPool[i]->priv->headPos=0;
+	connPool[i]->post=malloc(sizeof(HttpdPostData));
+	memset(connPool[i]->post, 0, sizeof(HttpdPostData));
+	connPool[i]->post->buff=NULL;
+	connPool[i]->post->buffLen=0;
+	connPool[i]->post->received=0;
+	connPool[i]->post->len=-1;
+	connPool[i]->hostName=NULL;
+	connPool[i]->remote_port=remPort;
+	connPool[i]->priv->sendBacklog=NULL;
+	connPool[i]->priv->sendBacklogSize=0;
+	memcpy(connPool[i]->remote_ip, remIp, 4);
 
 	return 1;
 }
@@ -826,7 +829,7 @@ void ICACHE_FLASH_ATTR httpdInit(HttpdBuiltInUrl *fixedUrls, int port) {
 	int i;
 
 	for (i=0; i<HTTPD_MAX_CONNECTIONS; i++) {
-		connData[i]=NULL;
+		connPool[i]=NULL;
 	}
 	builtInUrls=fixedUrls;
 

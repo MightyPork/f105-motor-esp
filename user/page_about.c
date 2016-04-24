@@ -5,7 +5,7 @@
 #include "sbmp.h"
 
 /** "About" page */
-int FLASH_FN tplAbout(HttpdConnData *connData, char *token, void **arg)
+httpd_cgi_state FLASH_FN tplAbout(HttpdConnData *connData, char *token, void **arg)
 {
 	// arg is unused
 	(void)arg;

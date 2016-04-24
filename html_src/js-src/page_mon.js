@@ -35,14 +35,17 @@ var page_mon = (function() {
 					// OK
 					var j = JSON.parse(resp);
 					if (j.success) {
-						$('#refdist').html(numfmt(j.deviation, 2));
+						$('#actual-dev').html(numfmt(j.deviation, 2));
+						$('#actual-rms').html(numfmt(j.rms, 2));
 					} else {
 						errorMsg('Capture failed.');
-						$('#refdist').html('--');
+						$('#actual-dev').html('--');
+						$('#actual-rms').html('--');
 					}
 				} catch(e) {
 					errorMsg(e);
-					$('#refdist').html('--');
+					$('#actual-dev').html('--');
+					$('#actual-rms').html('--');
 				}
 			}
 		});

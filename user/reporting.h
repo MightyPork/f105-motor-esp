@@ -5,14 +5,14 @@
 
 typedef struct {
 	// 0
-	bool enabled : 4;
+	bool enabled;
 	// 4
 	uint32_t interval;
 	// 8
 	enum {
 		RPT_XIVELY,
 		RPT_THINGSPEAK
-	} service : 4;
+	} service;
 	// 12
 	char feed[64];
 	// 76
@@ -23,23 +23,28 @@ typedef struct {
 
 /** Comapre result is stored here */
 typedef struct {
-	bool ready : 4;
+	bool ready;
 	float deviation;
-	float rms;
+	float i_rms;
 } ReportingResult;
 
+/** Report result */
 extern ReportingResult rpt_result;
 
 /** Reporting config struct */
 extern ReportingCfg rpt_conf;
 
+
 /** Save reporting config to flash */
-void reporting_save(void);
+void reporting_cfg_save(void);
 
 /** Load the reporting config from flash */
-void reporting_load(void);
+void reporting_cfg_load(void);
 
 /** Immediately send report to xively / thingspeak */
-void reporting_send_now(void);
+bool capture_and_report(void);
+
+/** Capture reference vector for monitoring */
+bool capture_reporting_reference(void);
 
 #endif // REPORTING_H

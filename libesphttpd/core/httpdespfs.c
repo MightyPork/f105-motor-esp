@@ -73,7 +73,7 @@ EspFsFile *tryOpenIndex(const char *path)
 }
 
 
-int ICACHE_FLASH_ATTR serveStaticFile(HttpdConnData *connData, const char* filepath)
+httpd_cgi_state ICACHE_FLASH_ATTR serveStaticFile(HttpdConnData *connData, const char* filepath)
 {
 	EspFsFile *file = connData->cgiData;
 	int len;
@@ -153,13 +153,13 @@ int ICACHE_FLASH_ATTR serveStaticFile(HttpdConnData *connData, const char* filep
 //This is a catch-all cgi function. It takes the url passed to it, looks up the corresponding
 //path in the filesystem and if it exists, passes the file through. This simulates what a normal
 //webserver would do with static files.
-int ICACHE_FLASH_ATTR cgiEspFsHook(HttpdConnData *connData)
+httpd_cgi_state cgiEspFsHook(HttpdConnData *connData)
 {
 	return serveStaticFile(connData, connData->url);
 }
 
 
-int ICACHE_FLASH_ATTR cgiEspFsFile(HttpdConnData *connData)
+httpd_cgi_state ICACHE_FLASH_ATTR cgiEspFsFile(HttpdConnData *connData)
 {
 	return serveStaticFile(connData, connData->cgiArg);
 }
@@ -183,9 +183,9 @@ typedef struct {
 	char *buff_e;
 } TplData;
 
-typedef int (* TplCallback)(HttpdConnData *connData, char *token, void **arg);
+typedef httpd_cgi_state (* TplCallback)(HttpdConnData *connData, char *token, void **arg);
 
-int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
+httpd_cgi_state ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 {
 	TplData *tpd = connData->cgiData;
 	int len;
@@ -289,7 +289,7 @@ int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData)
 
 						tpd->chunk_resume = false;
 
-						int status = ((TplCallback)(connData->cgiArg))(connData, tpd->token, &tpd->tplArg);
+						httpd_cgi_state status = ((TplCallback)(connData->cgiArg))(connData, tpd->token, &tpd->tplArg);
 
 						if (status == HTTPD_CGI_MORE) {
 //							dbg("Multi-part tpl subst, saving parser state");

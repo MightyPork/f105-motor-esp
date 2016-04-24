@@ -47,6 +47,10 @@ HttpdBuiltInUrl builtInUrls[] = {
 	ROUTE_TPL_FILE("/measure/raw", tplWaveformJSON, "/json/samples.tpl"),
 	ROUTE_TPL_FILE("/measure/fft", tplFourierJSON, "/json/samples.tpl"),
 
+	ROUTE_CGI("/mon/compare", cgiMonCompare),
+	ROUTE_CGI("/mon/setref", cgiMonSetRef),
+	ROUTE_CGI("/mon/config", cgiMonitoringCfg), // redirects to /monitoring
+
 	// --- UI pages ---
 	// System Status page
 	ROUTE_TPL_FILE("/",  tplSystemStatus, "/pages/status.tpl"),

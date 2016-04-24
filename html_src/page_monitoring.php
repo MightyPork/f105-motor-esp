@@ -13,9 +13,12 @@
 			</td>
 		</tr>
 		<tr>
-			<th>Actual&nbsp;distance:</th>
+			<th>Actual&nbsp;state:</th>
 			<td>
-				<span id="refdist" class="Valfield">N/A</span>
+				<span class="Valfield">
+					Δ = <span id="actual-dev">%curDeviation%</span>,
+					I<sub>rms</sub> = <span id="actual-rms">%curRMS%</span> mA
+				</span>
 				<a onclick="page_mon.compareNow()" class="button btn-blue">Measure</a>
 			</td>
 		</tr>
@@ -24,36 +27,36 @@
 
 <div class="Box">
 	<h2>Reporting</h2>
-	<form method="POST">
+	<form action="<?=$root?>/mon/config" method="POST">
 	<table>
 		<tr>
 			<th><label for="rep-on">Reporting:</label></th>
 			<td>
-				<input type="checkbox" id="rep-on" name="rep-on" %repEnableCheck%><!--
+				<input type="checkbox" id="rep-on" name="enabled" value="1" %repEnableCheck%><!--
 				-->&nbsp;<label for="rep-on">enabled</label>
 			</td>
 		</tr>
 		<tr>
 			<th><label for="rep-interval">Interval:</label></th>
 			<td>
-				<input type="number" id="rep-interval" style="max-width: 10em" value="%repInterval%"><!--
+				<input type="number" name="interval" id="rep-interval" style="max-width: 10em" value="%repInterval%"><!--
 				-->&nbsp;seconds
 			</td>
 		</tr>
 		<tr>
 			<th>Service:</th>
 			<td>
-				<input type="radio" name="rep-service" value="xively" id="rep-svc-xv" %repSvcCheckXv%>&nbsp;<label for="rep-svc-xv">Xively</label>&nbsp;
-				<input type="radio" name="rep-service" value="thingspeak" id="rep-svc-ts" %repSvcCheckTs%>&nbsp;<label for="rep-svc-ts">ThingSpeak</label>
+				<input type="radio" name="service" value="xv" id="rep-svc-xv" %repSvcCheckXv%>&nbsp;<label for="rep-svc-xv">Xively</label>&nbsp;
+				<input type="radio" name="service" value="ts" id="rep-svc-ts" %repSvcCheckTs%>&nbsp;<label for="rep-svc-ts">ThingSpeak</label>
 			</td>
 		</tr>
 		<tr>
 			<th><label for="rep-feed">Feed/Channel:</label></th>
-			<td><input type="text" name="rep-feed" id="rep-feed" value="%repFeed%"></td>
+			<td><input type="text" name="feed" id="rep-feed" value="%repFeed%"></td>
 		</tr>
 		<tr>
 			<th><label for="rep-key">API key:</label></th>
-			<td><input type="text" name="rep-key" id="rep-key" value="%repKey%"></td>
+			<td><input type="text" name="key" id="rep-key" value="%repKey%"></td>
 		</tr>
 		<tr>
 			<th>&nbsp;</th>

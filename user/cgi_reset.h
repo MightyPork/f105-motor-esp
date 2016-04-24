@@ -4,6 +4,6 @@
 #include <esp8266.h>
 #include <httpd.h>
 
-int cgiResetDevice(HttpdConnData *connData);
+httpd_cgi_state cgiResetDevice(HttpdConnData *connData);
 
 #endif // CGI_RESET_H

@@ -7,7 +7,7 @@
 
 
 /** System Status page */
-int FLASH_FN tplSystemStatus(HttpdConnData *connData, char *token, void **arg)
+httpd_cgi_state FLASH_FN tplSystemStatus(HttpdConnData *connData, char *token, void **arg)
 {
 	// arg is unused
 	(void)arg;

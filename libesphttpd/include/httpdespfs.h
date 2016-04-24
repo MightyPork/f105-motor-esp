@@ -4,12 +4,12 @@
 #include "httpd.h"
 
 /** Catch-all, use in '*' routes */
-int cgiEspFsHook(HttpdConnData *connData);
+httpd_cgi_state cgiEspFsHook(HttpdConnData *connData);
 
 /** Template route */
-int ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData);
+httpd_cgi_state ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData);
 
 /** Static file route with the file as the first arg. */
-int ICACHE_FLASH_ATTR cgiEspFsFile(HttpdConnData *connData);
+httpd_cgi_state ICACHE_FLASH_ATTR cgiEspFsFile(HttpdConnData *connData);
 
 #endif
