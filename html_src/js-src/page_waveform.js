@@ -15,6 +15,8 @@ var page_waveform = (function () {
 
 	var readXhr; // read xhr
 
+	var lastObj = null; // samples are stored here
+
 	var opts = {
 		count: 0, // sample count
 		freq: 0 // sampling freq
@@ -152,6 +154,8 @@ var page_waveform = (function () {
 			if (!j.success) {
 				errorMsg("Sampling failed.", 1000);
 			} else {
+				$('.chartexport').removeClass('hidden');
+				lastObj = j;
 				buildChart(j);
 			}
 		}
@@ -210,6 +214,40 @@ var page_waveform = (function () {
 		}
 
 		$('#load').on('click', onLoadClick);
+
+		$('.chartexport a').on('click', function() {
+			var sep = $(this).data('sep');
+			var str = '';
+
+			// for fft
+			var fftStep = (lastObj.stats.freq/lastObj.stats.count);
+
+			switch (sep) {
+				case 'space': str = lastObj.samples.join(' '); break;
+				case 'comma': str = lastObj.samples.join(','); break;
+				case 'newline': str = lastObj.samples.join('\n'); break;
+
+				case 'fft-csv':
+					str = _.map(lastObj.samples, function (a, i) {
+						return numfmt(i * fftStep,3) + "," + a;
+					}).join('\n');
+					break;
+
+				case 'fft-json':
+					str = JSON.stringify(_.map(lastObj.samples, function (a, i) {
+						return {f: +numfmt(i * fftStep, 3), m: a}
+					}));
+					break;
+			}
+
+			if (!copyToClipboard(str)) {
+				var $cb = $('#copybox');
+				$cb.removeClass('hidden');
+				$cb.val(str);
+			} else {
+				infoMsg('Copy success!');
+			}
+		});
 
 		$('#count,#freq').on('keyup', function (e) {
 			if (e.which == 13) {

@@ -51,5 +51,11 @@ $().ready(function () {
 
 
 function errorMsg(msg, time) {
+	$('#notif').addClass('error');
+	notify.show(msg, time || 3000);
+}
+
+function infoMsg(msg, time) {
+	$('#notif').removeClass('error');
 	notify.show(msg, time || 3000);
 }

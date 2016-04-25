@@ -31,11 +31,11 @@ $c-form-highlight-a: #28bc65;
 }
 
 .invis {
-	visibility: hidden;
+	visibility: hidden !important;
 }
 
 .hidden {
-	display: none;
+	display: none !important;
 }
 
 .nb {
@@ -44,6 +44,7 @@ $c-form-highlight-a: #28bc65;
 
 @import "layout/index";
 @import "form/index";
+
 
 // import all our pages
 @import "pages/wifi";
