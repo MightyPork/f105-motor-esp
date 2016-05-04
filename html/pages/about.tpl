@@ -60,7 +60,7 @@
 	</table>
 
 	<p>
-		The webserver is built using the great <a href="https://github.com/Spritetm/esphttpd" target="blank">esp-httpd</a>
+		The webserver was built using the great <a href="https://github.com/Spritetm/esphttpd" target="blank">esp-httpd</a>
 		library by Jeroen Domburg.
 	</p>
 </div>
