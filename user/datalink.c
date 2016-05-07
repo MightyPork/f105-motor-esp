@@ -1,5 +1,6 @@
 #include "uart_driver.h"
 #include "datalink.h"
+#include "wificontrol.h"
 
 // payload rx buffer
 #define PAYLOAD_BUFFER_LEN (256+3)
@@ -15,13 +16,22 @@ static void FLASH_FN u0_putc(uint8_t c)
 }
 
 
+/** Handle incoming datagram (new session) */
 static void FLASH_FN dg_handler(SBMP_Datagram *dg)
 {
-	dbg("[SBMP] Datagram received, type %d, session %d", dg->type, dg->session);
+	switch (dg->type) {
+		case DG_SETMODE_AP:
+			wificontrol_setmode_ap();
+			break;
+
+		case DG_WPS_START:
+			wificontrol_start_wps();
+			break;
+	}
 }
 
 /** This is called by the UART rx handler */
-void datalink_receive(uint8_t byte)
+void FLASH_FN datalink_receive(uint8_t byte)
 {
 	sbmp_ep_receive(dlnk_ep, byte);
 }

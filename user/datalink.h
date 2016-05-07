@@ -7,10 +7,13 @@
 // request to capture data...
 #define DG_REQUEST_RAW 40
 #define DG_REQUEST_FFT 41
-// reporting helpers
-#define DG_REQUEST_STORE_REF 42
-#define DG_REQUEST_COMPARE_REF 43
-
+// reporting
+#define DG_REQUEST_STORE_REF 42 // request to capture & store reference FFT
+#define DG_REQUEST_COMPARE_REF 43 // request to capture FFT & compare with reference
+// wifi status & control
+#define DG_SETMODE_AP 44 // request AP mode (AP button pressed)
+#define DG_WPS_START 45 // start WPS
+#define DG_WIFI_STATUS 46 // WiFi status report
 
 
 extern SBMP_Endpoint *dlnk_ep;

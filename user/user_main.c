@@ -24,6 +24,7 @@
 #include "fw_version.h"
 
 #include "reporting.h"
+#include "wificontrol.h"
 
 extern HttpdBuiltInUrl builtInUrls[];
 
@@ -119,7 +120,24 @@ void user_init(void)
 	info("Ready");
 	printf(LOG_EOL);
 
+	wificontrol_init();
+
 	os_timer_disarm(&prSecondTimer);
 	os_timer_setfn(&prSecondTimer, prSecondTimerCb, NULL);
 	os_timer_arm(&prSecondTimer, 1000, 1);
+}
+
+
+// ---- unused funcs removed from sdk to save space ---
+
+// вызывается из phy_chip_v6.o
+void ICACHE_FLASH_ATTR chip_v6_set_sense(void)
+{
+	// ret.n
+}
+
+// вызывается из phy_chip_v6.o
+int ICACHE_FLASH_ATTR chip_v6_unset_chanfreq(void)
+{
+	return 0;
 }

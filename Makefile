@@ -59,7 +59,12 @@ MODULES		= user sbmp/library esphttpclient
 EXTRA_INCDIR	= include libesphttpd/include sbmp/library user esphttpclient
 
 # libraries used in this project, mainly provided by the SDK
-LIBS		= c gcc hal phy pp net80211 wpa main lwip crypto
+LIBS		= c mgcc mphy pp net80211 wpa main lwip wps
+
+# mwpa causes compile errors with wps
+# mmain causes undefined symbol call_user_start (not worth the trouble - uses some kind of custom app_main.c)
+
+#LIBS		= c gcc hal phy pp net80211 wpa main lwip wps
 #ssl
 
 #Add in esphttpd lib

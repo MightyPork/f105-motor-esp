@@ -68,7 +68,8 @@ SOURCES += \
 	esphttpclient/test/httpclient_test.c \
 	esphttpclient/httpclient.c \
     user/page_monitoring.c \
-    user/reporting.c
+    user/reporting.c \
+    user/wificontrol.c
 
 HEADERS += \
 	include/uart_hw.h \
@@ -158,7 +159,8 @@ HEADERS += \
 	esphttpclient/espmissingincludes.h \
 	esphttpclient/httpclient.h \
     user/page_monitoring.h \
-    user/reporting.h
+    user/reporting.h \
+    user/wificontrol.h
 
 DISTFILES += \
 	style.astylerc \
