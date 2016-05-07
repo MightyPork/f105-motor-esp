@@ -10,9 +10,9 @@
 void FLASH_FN wificontrol_setmode_ap(void)
 {
 	wifi_station_disconnect(); // disconnect
-	wifi_set_opmode(SOFTAP_MODE); // enter AP mode
+	wifi_set_opmode(STATIONAP_MODE); // enter AP mode
 
-	warn("SBMP request to switch to SoftAP mode. Restarting...\n");
+	warn("Received Rq to enable AP.\n");// Restarting...
 
 	system_restart(); // TODO check if restart is needed
 }
@@ -42,10 +42,13 @@ static void FLASH_FN my_wps_cb(int status)
 			info("WPS success!");
 			wifi_wps_disable();
 			wifi_station_connect();
+			os_timer_disarm(&wps_abort_timer);
 			break;
 
 		default:
 			error("WPS failed.");
+			wifi_wps_disable();
+			os_timer_disarm(&wps_abort_timer);
 			break;
 	}
 
@@ -54,23 +57,31 @@ static void FLASH_FN my_wps_cb(int status)
 
 void FLASH_FN wificontrol_start_wps(void)
 {
+	if (wps_in_progress) {
+		warn("Request to abort WPS.");
+		wifi_wps_disable();
+		wps_in_progress = false;
+		return;
+	}
+
 	info("Starting WPS...");
 
 	// Make sure station is enabled
-	if (wifi_get_opmode() == SOFTAP_MODE) {
-		wifi_set_opmode(STATIONAP_MODE);
-	}
-
+	wifi_set_opmode(STATION_MODE);
 	// Disconnect if connected to any station
 	wifi_station_disconnect();
 
+	os_delay_us(1000000);
+
 	// enable WPS
-	wifi_set_wps_cb(my_wps_cb);
+	wifi_wps_disable();
 	wifi_wps_enable(WPS_TYPE_PBC);
+	wifi_set_wps_cb(my_wps_cb);
+	wifi_wps_start();
 
 	os_timer_disarm(&wps_abort_timer);
 	os_timer_setfn(&wps_abort_timer, abort_wps_cb, NULL);
-	os_timer_arm(&wps_abort_timer, 15000, false); // 15 seconds
+	os_timer_arm(&wps_abort_timer, 60000, false); // 15 seconds
 
 	wps_in_progress = true;
 }

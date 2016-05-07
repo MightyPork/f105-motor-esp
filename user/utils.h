@@ -5,6 +5,6 @@
 
 int rssi2perc(int rssi);
 const char *auth2str(AUTH_MODE auth);
-const char *opmode2str(int opmode);
+const char *opmode2str(WIFI_MODE opmode);
 
 #endif // UTILS_H

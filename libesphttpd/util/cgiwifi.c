@@ -316,7 +316,7 @@ httpd_cgi_state ICACHE_FLASH_ATTR cgiWiFiConnStatus(HttpdConnData *connData) {
 //Template code for the WLAN page.
 httpd_cgi_state ICACHE_FLASH_ATTR tplWlan(HttpdConnData *connData, char *token, void **arg) {
 	char buff[256];
-	int x;
+	WIFI_MODE x;
 	static struct station_config stconf;
 	if (token==NULL) return HTTPD_CGI_DONE;
 	wifi_station_get_config(&stconf);
@@ -331,7 +331,7 @@ httpd_cgi_state ICACHE_FLASH_ATTR tplWlan(HttpdConnData *connData, char *token, 
 //		strcpy(buff, (char*)stconf.password);
 	} else if (strcmp(token, "WiFiapwarn")==0) {
 		x=wifi_get_opmode();
-		if (x==2) {
+		if (x==SOFTAP_MODE) {
 			strcpy(buff, "<b>Can't scan in this mode.</b> Click <a href=\"/wifi/setmode?mode=3\">here</a> to go to STA+AP mode.");
 		} else {
 			strcpy(buff, "Click <a href=\"/wifi/setmode?mode=2\">here</a> to go to stand-alone AP mode.");

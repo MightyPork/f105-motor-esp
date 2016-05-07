@@ -29,7 +29,7 @@ const FLASH_FN char *auth2str(AUTH_MODE auth)
 	}
 }
 
-const FLASH_FN char *opmode2str(int opmode)
+const FLASH_FN char *opmode2str(WIFI_MODE opmode)
 {
 	switch (opmode) {
 		case NULL_MODE: return "Disabled";
