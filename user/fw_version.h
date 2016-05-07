@@ -1,6 +1,6 @@
 #ifndef FW_VERSION_H
 #define FW_VERSION_H
 
-#define FIRMWARE_VERSION "0.1.3"
+#define FIRMWARE_VERSION "1.0.0"
 
 #endif // FW_VERSION_H

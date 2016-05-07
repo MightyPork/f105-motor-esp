@@ -85,11 +85,11 @@ void user_init(void)
 	uptime_timer_init();
 
 	banner("*** AC current analyser - WiFi module ***");
-	info("(c) Ondrej Hruska, 2016");
-	info("Katedra mereni FEL CVUT");
-	info("");
-	info("Version "FIRMWARE_VERSION", built "__DATE__" at "__TIME__);
-	info("HTTPD v."HTTPDVER", SBMP v."SBMP_VER", IoT SDK v."STR(ESP_SDK_VERSION));
+	banner_info("(c) Ondrej Hruska, 2016");
+	banner_info("Katedra mereni FEL CVUT");
+	banner_info("");
+	banner_info("Version "FIRMWARE_VERSION", built "__DATE__" at "__TIME__);
+	banner_info("HTTPD v."HTTPDVER", SBMP v."SBMP_VER", IoT SDK v."STR(ESP_SDK_VERSION));
 	printf(LOG_EOL);
 
 	// reset button etc
@@ -117,7 +117,7 @@ void user_init(void)
 	reporting_cfg_load();
 
 	printf(LOG_EOL);
-	info("Ready");
+	banner_info("Ready");
 	printf(LOG_EOL);
 
 	wificontrol_init();
