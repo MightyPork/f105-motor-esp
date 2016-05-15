@@ -5,7 +5,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-	<title>WiFi config - Current Analyser</title>
+	<title>WiFi config - WiFi Demo</title>
 
 	<link href="/css/app.css" rel="stylesheet">
 	<script src="/js/all.js"></script>
@@ -18,8 +18,8 @@
 <body class="page-wifi">
 <div id="outer">
 <nav id="menu">
-	<div id="brand" onclick="$('#menu').toggleClass('expanded')">Current Analyser</div>
-	<a href="/status">Home</a><a href="/wifi" class="selected">WiFi config</a><a href="/waveform">Waveform</a><a href="/fft">FFT</a><a href="/spectrogram">Spectrogram</a><a href="/monitoring">Monitoring</a><a href="/about">About</a></nav>
+	<div id="brand" onclick="$('#menu').toggleClass('expanded')">WiFi Demo</div>
+	<a href="/home">Home</a><a href="/wifi" class="selected">WiFi config</a></nav>
 <div id="content">
 	<img src="/img/loader.gif" alt="Loading…" id="loader">
 

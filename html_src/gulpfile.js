@@ -21,18 +21,15 @@ elixir(function (mix) {
 	// JS libs
 	mix.scripts([
 		'js-src/lib/chibi.js',
-		'js-src/lib/chartist.js',
-		'js-src/lib/chartist.axis-title.js',
-		'js-src/lib/chartist.zoom.js',
+		//'js-src/lib/chartist.js',
+		//'js-src/lib/chartist.axis-title.js',
+		//'js-src/lib/chartist.zoom.js',
 		'js-src/lib/lodash.custom.js',
 		'js-src/utils.js',
 		'js-src/modal.js',
 		'js-src/notif.js',
 		'js-src/app.js',
 		'js-src/page_wifi.js',
-		'js-src/page_waveform.js',
-		'js-src/page_spectrogram.js',
-		'js-src/page_status.js',
-		'js-src/page_mon.js',
+		'js-src/page_home.js',
 	], 'js/all.js');
 });

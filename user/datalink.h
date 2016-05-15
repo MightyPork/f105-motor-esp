@@ -4,13 +4,8 @@
 #include <esp8266.h>
 #include <sbmp.h>
 
-// request to capture data...
-#define DG_REQUEST_RAW 40
-#define DG_REQUEST_FFT 41
-
-// reporting
-#define DG_REQUEST_STORE_REF 42 // request to capture & store reference FFT
-#define DG_REQUEST_COMPARE_REF 43 // request to capture FFT & compare with reference
+#define DG_MOTOR_HOME 40
+#define DG_MOTOR_GOTO 41
 
 // wifi status & control
 #define DG_SETMODE_AP 44 // request AP mode (AP button pressed)

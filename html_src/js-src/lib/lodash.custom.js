@@ -1,7 +1,7 @@
 /**
  * @license
  * lodash 4.6.1 (Custom Build) <https://lodash.com/>
- * Build: `lodash include="range,isArray,isObject,escape,unescape,escapeRegExp,each,replace,map,isNumber,isUndefined" exports="global" -d`
+ * Build: `lodash include="range,isArray,isObject,escape,unescape,escapeRegExp,each,replace,map,isNumber,isUndefined,extend" exports="global" -d`
  * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -18,6 +18,9 @@
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
 
+  /** Used as the `TypeError` message for "Functions" methods. */
+  var FUNC_ERROR_TEXT = 'Expected a function';
+
   /** Used to stand-in for `undefined` hash values. */
   var HASH_UNDEFINED = '__lodash_hash_undefined__';
 
@@ -28,6 +31,7 @@
   /** Used as references for various `Number` constants. */
   var INFINITY = 1 / 0,
       MAX_SAFE_INTEGER = 9007199254740991,
+      MAX_INTEGER = 1.7976931348623157e+308,
       NAN = 0 / 0;
 
   /** `Object#toString` result references. */
@@ -224,6 +228,27 @@
   }
 
   /**
+   * A faster alternative to `Function#apply`, this function invokes `func`
+   * with the `this` binding of `thisArg` and the arguments of `args`.
+   *
+   * @private
+   * @param {Function} func The function to invoke.
+   * @param {*} thisArg The `this` binding of `func`.
+   * @param {...*} args The arguments to invoke `func` with.
+   * @returns {*} Returns the result of `func`.
+   */
+  function apply(func, thisArg, args) {
+    var length = args.length;
+    switch (length) {
+      case 0: return func.call(thisArg);
+      case 1: return func.call(thisArg, args[0]);
+      case 2: return func.call(thisArg, args[0], args[1]);
+      case 3: return func.call(thisArg, args[0], args[1], args[2]);
+    }
+    return func.apply(thisArg, args);
+  }
+
+  /**
    * A specialized version of `_.forEach` for arrays without support for
    * iteratee shorthands.
    *
@@ -399,6 +424,23 @@
   }
 
   /**
+   * Converts `iterator` to an array.
+   *
+   * @private
+   * @param {Object} iterator The iterator to convert.
+   * @returns {Array} Returns the converted array.
+   */
+  function iteratorToArray(iterator) {
+    var data,
+        result = [];
+
+    while (!(data = iterator.next()).done) {
+      result.push(data.value);
+    }
+    return result;
+  }
+
+  /**
    * Converts `map` to an array.
    *
    * @private
@@ -469,8 +511,10 @@
 
   /** Built-in value references. */
   var Buffer = moduleExports ? root.Buffer : undefined,
+      Reflect = root.Reflect,
       Symbol = root.Symbol,
       Uint8Array = root.Uint8Array,
+      enumerate = Reflect ? Reflect.enumerate : undefined,
       getPrototypeOf = Object.getPrototypeOf,
       getOwnPropertySymbols = Object.getOwnPropertySymbols,
       objectCreate = Object.create,
@@ -487,6 +531,9 @@
       Set = getNative(root, 'Set'),
       WeakMap = getNative(root, 'WeakMap'),
       nativeCreate = getNative(Object, 'create');
+
+  /** Detect if properties shadowing those on `Object.prototype` are non-enumerable. */
+  var nonEnumShadows = !propertyIsEnumerable.call({ 'valueOf': 1 }, 'valueOf');
 
   /** Used to lookup unminified function names. */
   var realNames = {};
@@ -1373,6 +1420,31 @@
   }
 
   /**
+   * The base implementation of `_.keysIn` which doesn't skip the constructor
+   * property of prototypes or treat sparse arrays as dense.
+   *
+   * @private
+   * @param {Object} object The object to query.
+   * @returns {Array} Returns the array of property names.
+   */
+  function baseKeysIn(object) {
+    object = object == null ? object : Object(object);
+
+    var result = [];
+    for (var key in object) {
+      result.push(key);
+    }
+    return result;
+  }
+
+  // Fallback for IE < 9 with es6-shim.
+  if (enumerate && !propertyIsEnumerable.call({ 'valueOf': 1 }, 'valueOf')) {
+    baseKeysIn = function(object) {
+      return iteratorToArray(enumerate(object));
+    };
+  }
+
+  /**
    * The base implementation of `_.map` without support for iteratee shorthands.
    *
    * @private
@@ -1672,6 +1744,39 @@
    */
   function copySymbols(source, object) {
     return copyObject(source, getSymbols(source), object);
+  }
+
+  /**
+   * Creates a function like `_.assign`.
+   *
+   * @private
+   * @param {Function} assigner The function to assign values.
+   * @returns {Function} Returns the new assigner function.
+   */
+  function createAssigner(assigner) {
+    return rest(function(object, sources) {
+      var index = -1,
+          length = sources.length,
+          customizer = length > 1 ? sources[length - 1] : undefined,
+          guard = length > 2 ? sources[2] : undefined;
+
+      customizer = typeof customizer == 'function'
+        ? (length--, customizer)
+        : undefined;
+
+      if (guard && isIterateeCall(sources[0], sources[1], guard)) {
+        customizer = length < 3 ? undefined : customizer;
+        length = 1;
+      }
+      object = Object(object);
+      while (++index < length) {
+        var source = sources[index];
+        if (source) {
+          assigner(object, source, index, customizer);
+        }
+      }
+      return object;
+    });
   }
 
   /**
@@ -2398,6 +2503,59 @@
   /*------------------------------------------------------------------------*/
 
   /**
+   * Creates a function that invokes `func` with the `this` binding of the
+   * created function and arguments from `start` and beyond provided as an array.
+   *
+   * **Note:** This method is based on the [rest parameter](https://mdn.io/rest_parameters).
+   *
+   * @static
+   * @memberOf _
+   * @category Function
+   * @param {Function} func The function to apply a rest parameter to.
+   * @param {number} [start=func.length-1] The start position of the rest parameter.
+   * @returns {Function} Returns the new function.
+   * @example
+   *
+   * var say = _.rest(function(what, names) {
+   *   return what + ' ' + _.initial(names).join(', ') +
+   *     (_.size(names) > 1 ? ', & ' : '') + _.last(names);
+   * });
+   *
+   * say('hello', 'fred', 'barney', 'pebbles');
+   * // => 'hello fred, barney, & pebbles'
+   */
+  function rest(func, start) {
+    if (typeof func != 'function') {
+      throw new TypeError(FUNC_ERROR_TEXT);
+    }
+    start = nativeMax(start === undefined ? (func.length - 1) : toInteger(start), 0);
+    return function() {
+      var args = arguments,
+          index = -1,
+          length = nativeMax(args.length - start, 0),
+          array = Array(length);
+
+      while (++index < length) {
+        array[index] = args[start + index];
+      }
+      switch (start) {
+        case 0: return func.call(this, array);
+        case 1: return func.call(this, args[0], array);
+        case 2: return func.call(this, args[0], args[1], array);
+      }
+      var otherArgs = Array(start + 1);
+      index = -1;
+      while (++index < start) {
+        otherArgs[index] = args[index];
+      }
+      otherArgs[start] = array;
+      return apply(func, this, otherArgs);
+    };
+  }
+
+  /*------------------------------------------------------------------------*/
+
+  /**
    * Performs a [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
    * comparison between two values to determine if they are equivalent.
    *
@@ -2802,6 +2960,43 @@
   }
 
   /**
+   * Converts `value` to an integer.
+   *
+   * **Note:** This function is loosely based on [`ToInteger`](http://www.ecma-international.org/ecma-262/6.0/#sec-tointeger).
+   *
+   * @static
+   * @memberOf _
+   * @category Lang
+   * @param {*} value The value to convert.
+   * @returns {number} Returns the converted integer.
+   * @example
+   *
+   * _.toInteger(3);
+   * // => 3
+   *
+   * _.toInteger(Number.MIN_VALUE);
+   * // => 0
+   *
+   * _.toInteger(Infinity);
+   * // => 1.7976931348623157e+308
+   *
+   * _.toInteger('3');
+   * // => 3
+   */
+  function toInteger(value) {
+    if (!value) {
+      return value === 0 ? value : 0;
+    }
+    value = toNumber(value);
+    if (value === INFINITY || value === -INFINITY) {
+      var sign = (value < 0 ? -1 : 1);
+      return sign * MAX_INTEGER;
+    }
+    var remainder = value % 1;
+    return value === value ? (remainder ? value - remainder : value) : 0;
+  }
+
+  /**
    * Converts `value` to a number.
    *
    * @static
@@ -2874,6 +3069,45 @@
   }
 
   /*------------------------------------------------------------------------*/
+
+  /**
+   * This method is like `_.assign` except that it iterates over own and
+   * inherited source properties.
+   *
+   * **Note:** This method mutates `object`.
+   *
+   * @static
+   * @memberOf _
+   * @alias extend
+   * @category Object
+   * @param {Object} object The destination object.
+   * @param {...Object} [sources] The source objects.
+   * @returns {Object} Returns `object`.
+   * @example
+   *
+   * function Foo() {
+   *   this.b = 2;
+   * }
+   *
+   * function Bar() {
+   *   this.d = 4;
+   * }
+   *
+   * Foo.prototype.c = 3;
+   * Bar.prototype.e = 5;
+   *
+   * _.assignIn({ 'a': 1 }, new Foo, new Bar);
+   * // => { 'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5 }
+   */
+  var assignIn = createAssigner(function(object, source) {
+    if (nonEnumShadows || isPrototype(source) || isArrayLike(source)) {
+      copyObject(source, keysIn(source), object);
+      return;
+    }
+    for (var key in source) {
+      assignValue(object, key, source[key]);
+    }
+  });
 
   /**
    * Gets the value at `path` of `object`. If the resolved value is
@@ -2974,6 +3208,48 @@
       if (baseHas(object, key) &&
           !(skipIndexes && (key == 'length' || isIndex(key, length))) &&
           !(isProto && key == 'constructor')) {
+        result.push(key);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Creates an array of the own and inherited enumerable property names of `object`.
+   *
+   * **Note:** Non-object values are coerced to objects.
+   *
+   * @static
+   * @memberOf _
+   * @category Object
+   * @param {Object} object The object to query.
+   * @returns {Array} Returns the array of property names.
+   * @example
+   *
+   * function Foo() {
+   *   this.a = 1;
+   *   this.b = 2;
+   * }
+   *
+   * Foo.prototype.c = 3;
+   *
+   * _.keysIn(new Foo);
+   * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
+   */
+  function keysIn(object) {
+    var index = -1,
+        isProto = isPrototype(object),
+        props = baseKeysIn(object),
+        propsLength = props.length,
+        indexes = indexKeys(object),
+        skipIndexes = !!indexes,
+        result = indexes || [],
+        length = result.length;
+
+    while (++index < propsLength) {
+      var key = props[index];
+      if (!(skipIndexes && (key == 'length' || isIndex(key, length))) &&
+          !(key == 'constructor' && (isProto || !hasOwnProperty.call(object, key)))) {
         result.push(key);
       }
     }
@@ -3279,13 +3555,19 @@
   Stack.prototype.set = stackSet;
 
   // Add functions that return wrapped values when chaining.
+  lodash.assignIn = assignIn;
   lodash.constant = constant;
   lodash.iteratee = iteratee;
   lodash.keys = keys;
+  lodash.keysIn = keysIn;
   lodash.map = map;
   lodash.property = property;
   lodash.range = range;
+  lodash.rest = rest;
   lodash.toPairs = toPairs;
+
+  // Add aliases.
+  lodash.extend = assignIn;
 
   /*------------------------------------------------------------------------*/
 
@@ -3314,6 +3596,7 @@
   lodash.isUndefined = isUndefined;
   lodash.last = last;
   lodash.replace = replace;
+  lodash.toInteger = toInteger;
   lodash.toNumber = toNumber;
   lodash.toString = toString;
   lodash.unescape = unescape;

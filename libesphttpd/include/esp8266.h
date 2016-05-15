@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+//#include "espmissingprotos.h"
 
 #ifdef FREERTOS
 #include <stdint.h>
@@ -35,7 +36,6 @@
 
 
 #include "platform.h"
-#include "espmissingprotos.h"
 #include "esp_sdk_ver.h"
 
 #include "logging.h"

@@ -3,7 +3,7 @@
 #include "wificontrol.h"
 #include <sbmp.h>
 #include "datalink.h"
-#include "reporting.h"
+#include "pers_cfg.h"
 
 // --- AP ---
 
@@ -95,6 +95,11 @@ static void FLASH_FN wifistatus_cb(void *arg)
 {
 	(void)arg;
 
+	if (sbmp_ep_handshake_status(dlnk_ep) != SBMP_HSK_SUCCESS) {
+		warn("SBMP hsk not success, can't send WiFi status!");
+		return;
+	}
+
 	WIFI_MODE opmode = wifi_get_opmode();
 
 	STATION_STATUS status = STATION_IDLE;
@@ -102,11 +107,10 @@ static void FLASH_FN wifistatus_cb(void *arg)
 		status = wifi_station_get_connect_status();
 	}
 
-	if (sbmp_ep_start_message(dlnk_ep, DG_WIFI_STATUS, 4, NULL)) {
+	if (sbmp_ep_start_message(dlnk_ep, DG_WIFI_STATUS, 3, NULL)) {
 		sbmp_ep_send_u8(dlnk_ep, opmode); // 1-Client, 2-SoftAP, 3-STA+AP
 		sbmp_ep_send_u8(dlnk_ep, status == STATION_GOT_IP); // Station connected
 		sbmp_ep_send_u8(dlnk_ep, wps_in_progress); // 1 = WPS is in progress
-		sbmp_ep_send_u8(dlnk_ep, rpt_conf.enabled); // Reporting is enabled
 	}
 }
 

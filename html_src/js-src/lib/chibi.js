@@ -615,7 +615,7 @@
 
 			if (_.isNumber(options)) options = {timeout: options};
 
-			var opts = Chartist.extend({}, {
+			var opts = _.extend({}, {
 				nocache: true,
 				timeout: 5000,
 				loader: true,

@@ -6,18 +6,15 @@
 #include "httpdespfs.h"
 #include "cgiwifi.h"
 //#include "cgiflash.h"
-//#include "auth.h"
+#include "auth.h"
 //#include "cgiwebsocket.h"
 
 // user files
-#include "page_status.h"
-#include "page_waveform.h"
-#include "page_about.h"
-#include "page_monitoring.h"
+#include "page_home.h"
 #include "cgi_reset.h"
 #include "cgi_ping.h"
 
-#define WIFI_PROTECT 0
+#define WIFI_PROTECT 1
 
 #if WIFI_PROTECT
 static int FLASH_FN myPassFn(HttpdConnData *connData, int no, char *user, int userLen, char *pass, int passLen);
@@ -41,26 +38,12 @@ HttpdBuiltInUrl builtInUrls[] = {
 	// --- System control ---
 	ROUTE_CGI("/system/reset", cgiResetDevice),
 	ROUTE_CGI("/system/ping", cgiPing),
-	ROUTE_TPL_FILE("/system/status", tplSystemStatus, "/json/status.tpl"),
-
-	// --- Measurement ---
-	ROUTE_TPL_FILE("/measure/raw", tplWaveformJSON, "/json/samples.tpl"),
-	ROUTE_TPL_FILE("/measure/fft", tplFourierJSON, "/json/samples.tpl"),
-
-	ROUTE_CGI("/mon/compare", cgiMonCompare),
-	ROUTE_CGI("/mon/status", cgiMonStatus),
-	ROUTE_CGI("/mon/setref", cgiMonSetRef),
-	ROUTE_CGI("/mon/config", cgiMonitoringCfg), // redirects to /monitoring
 
 	// --- UI pages ---
 	// System Status page
-	ROUTE_TPL_FILE("/",  tplSystemStatus, "/pages/status.tpl"),
-	ROUTE_TPL_FILE("/status",  tplSystemStatus, "/pages/status.tpl"),
-	ROUTE_TPL_FILE("/about",  tplAbout, "/pages/about.tpl"),
-	ROUTE_TPL_FILE("/monitoring",  tplMonitoring, "/pages/monitoring.tpl"),
-	ROUTE_FILE("/waveform", "/pages/wfm.html"), // static file, html -> can use gzip
-	ROUTE_FILE("/fft", "/pages/fft.html"), // static file, html -> can use gzip
-	ROUTE_FILE("/spectrogram", "/pages/sgm.html"), // static file, html -> can use gzip
+	ROUTE_REDIRECT("/", "/home"),
+	ROUTE_REDIRECT("/home/", "/home"),
+	ROUTE_TPL_FILE("/home",  tplHome, "/pages/home.tpl"),
 
 	// --- WiFi config ---
 #if WIFI_PROTECT
@@ -104,8 +87,8 @@ static int FLASH_FN myPassFn(HttpdConnData *connData, int no, char *user, int us
 	(void)passLen;
 
 	if (no == 0) {
-		os_strcpy(user, "admin");
-		os_strcpy(pass, "s3cr3t");
+		os_strcpy(user, "wifiadmin");
+		os_strcpy(pass, "amazing grace");
 		return 1;
 //Add more users this way. Check against incrementing no for each user added.
 //  } else if (no==1) {

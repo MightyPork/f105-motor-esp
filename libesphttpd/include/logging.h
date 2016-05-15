@@ -4,7 +4,7 @@
 #include <esp8266.h>
 #include "uptime.h"
 
-#define VERBOSE 0
+#define VERBOSE 1
 
 
 // logging functions

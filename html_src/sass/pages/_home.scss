@@ -1,11 +1,17 @@
-.page-home #staRSSIperc:after {
-	padding-left: dist(-4);
-	content: '%';
-	font-size: fsize(-1);
-}
+.page-about {
+	.Box {
+		padding-left:dist(0);
+		padding-right:dist(0);
 
-.page-home #staRSSI:after {
-	padding-left: dist(-4);
-	content: 'dBm';
-	font-size: fsize(-1);
+		a {font-weight: bold;}
+	}
+
+	#logo {
+		float:right;
+		height: 130px;
+	}
+
+	#logo2 {
+		max-width: 150px;
+	}
 }

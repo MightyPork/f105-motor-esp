@@ -55,7 +55,7 @@
 /**
  * @brief Enable detailed logging (only for debugging, disable for better performance).
  */
-#define SBMP_DEBUG 0
+#define SBMP_DEBUG 1
 
 // here are the actual logging functions
 

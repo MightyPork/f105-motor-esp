@@ -23,7 +23,7 @@
 #include "routes.h"
 #include "fw_version.h"
 
-#include "reporting.h"
+#include "pers_cfg.h"
 #include "wificontrol.h"
 
 extern HttpdBuiltInUrl builtInUrls[];
@@ -84,7 +84,7 @@ void user_init(void)
 	serialInit();
 	uptime_timer_init();
 
-	banner("*** AC current analyser - WiFi module ***");
+	banner("*** WiFi Demo - Stepper motor control ***");
 	banner_info("(c) Ondrej Hruska, 2016");
 	banner_info("Katedra mereni FEL CVUT");
 	banner_info("");
@@ -94,6 +94,12 @@ void user_init(void)
 
 	// reset button etc
 	ioInit();
+
+	struct softap_config wificfg;
+	wifi_softap_get_config(&wificfg);
+	sprintf((char*)wificfg.ssid, "esp_motor_demo");
+	wificfg.ssid_len = strlen((char*)wificfg.ssid);
+	wifi_softap_set_config(&wificfg);
 
 	// set up SBMP
 	datalinkInit();
@@ -113,8 +119,7 @@ void user_init(void)
 
 	httpdInit(builtInUrls, 80);
 
-	// start reporting timer
-	reporting_cfg_load();
+	persistent_cfg_load();
 
 	printf(LOG_EOL);
 	banner_info("Ready");
