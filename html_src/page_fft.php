@@ -61,8 +61,8 @@
 	<a data-sep="space">1·2·3</a>
 	<a data-sep="comma">1,2,3</a>
 	<a data-sep="newline">1↵2↵3</a>
-	<a data-sep="fft-csv">CSV</a>
-	<a data-sep="fft-json">JSON</a><br>
+	<a data-sep="csv">CSV</a>
+	<br>
 	<textarea id="copybox" class="hidden" readonly onfocus="this.select();" onmouseup="return false"></textarea>
 </div>
 

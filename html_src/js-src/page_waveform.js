@@ -219,24 +219,19 @@ var page_waveform = (function () {
 			var sep = $(this).data('sep');
 			var str = '';
 
-			// for fft
-			var fftStep = (lastObj.stats.freq/lastObj.stats.count);
+			var isFft = (dataFormat == 'fft');
+			var csvStep = isFft ? (lastObj.stats.freq/lastObj.stats.count) : (1000/lastObj.stats.freq);
+			var csvPlaces = isFft ? 3 : 2;
 
 			switch (sep) {
 				case 'space': str = lastObj.samples.join(' '); break;
 				case 'comma': str = lastObj.samples.join(','); break;
 				case 'newline': str = lastObj.samples.join('\n'); break;
 
-				case 'fft-csv':
+				case 'csv':
 					str = _.map(lastObj.samples, function (a, i) {
-						return numfmt(i * fftStep,3) + "," + a;
+						return numfmt(i * csvStep, csvPlaces) + "," + a;
 					}).join('\n');
-					break;
-
-				case 'fft-json':
-					str = JSON.stringify(_.map(lastObj.samples, function (a, i) {
-						return {f: +numfmt(i * fftStep, 3), m: a}
-					}));
 					break;
 			}
 
