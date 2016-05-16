@@ -14,7 +14,7 @@
 #include "cgi_reset.h"
 #include "cgi_ping.h"
 
-#define WIFI_PROTECT 1
+#define WIFI_PROTECT 0
 
 #if WIFI_PROTECT
 static int FLASH_FN myPassFn(HttpdConnData *connData, int no, char *user, int userLen, char *pass, int passLen);
@@ -38,6 +38,10 @@ HttpdBuiltInUrl builtInUrls[] = {
 	// --- System control ---
 	ROUTE_CGI("/system/reset", cgiResetDevice),
 	ROUTE_CGI("/system/ping", cgiPing),
+
+	// --- Motor ctrl ---
+	ROUTE_CGI("/m/start", cgiMotorStart),
+	ROUTE_CGI("/m/stop", cgiMotorStop),
 
 	// --- UI pages ---
 	// System Status page
@@ -87,8 +91,8 @@ static int FLASH_FN myPassFn(HttpdConnData *connData, int no, char *user, int us
 	(void)passLen;
 
 	if (no == 0) {
-		os_strcpy(user, "wifiadmin");
-		os_strcpy(pass, "amazing grace");
+		os_strcpy(user, "admin");
+		os_strcpy(pass, "prasopes");
 		return 1;
 //Add more users this way. Check against incrementing no for each user added.
 //  } else if (no==1) {

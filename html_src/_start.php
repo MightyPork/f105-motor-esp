@@ -1,7 +1,7 @@
 <?php
 
 	$prod = defined('STDIN');
-	$root = $prod ? '' : 'http://192.168.1.13';
+	$root = $prod ? '' : 'http://192.168.1.15';
 
 	$menu = [
 		'home'        => [ $prod ? '/home' : '/page_home.php', 'Home'            ],

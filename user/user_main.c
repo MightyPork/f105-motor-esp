@@ -125,7 +125,8 @@ void user_init(void)
 	banner_info("Ready");
 	printf(LOG_EOL);
 
-	wificontrol_init();
+	// don't send updates
+	//wificontrol_init();
 
 	os_timer_disarm(&prSecondTimer);
 	os_timer_setfn(&prSecondTimer, prSecondTimerCb, NULL);

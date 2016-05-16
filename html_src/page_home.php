@@ -1,17 +1,11 @@
 <?php $page = 'home';
 include "_start.php"; ?>
 
-<h1>Home</h1>
+<h1>Motor Control</h1>
 
-<div class="Box">
-	<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus cum eius molestias nesciunt nihil sequi? Laboriosam molestiae nesciunt
-		quis! Aut eius esse in laudantium obcaecati possimus quis repudiandae tenetur velit.</p>
-</div>
-
-<div class="Box">
-	<h2>Firmware</h2>
-	<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus cum eius molestias nesciunt nihil sequi? Laboriosam molestiae nesciunt
-		quis! Aut eius esse in laudantium obcaecati possimus quis repudiandae tenetur velit.</p>
+<div class="Box center">
+	<a class="button btn-blue" id="btn-rev">REV</a><span style="display:inline-block;width:2em"></span>
+	<a class="button btn-blue" id="btn-fwd">FWD</a>
 </div>
 
 <script>

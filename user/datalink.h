@@ -4,8 +4,8 @@
 #include <esp8266.h>
 #include <sbmp.h>
 
-#define DG_MOTOR_HOME 40
-#define DG_MOTOR_GOTO 41
+#define DG_MOTOR_START 30
+#define DG_MOTOR_STOP 31
 
 // wifi status & control
 #define DG_SETMODE_AP 44 // request AP mode (AP button pressed)
