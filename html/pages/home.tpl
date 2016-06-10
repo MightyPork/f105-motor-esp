@@ -19,15 +19,20 @@
 <div id="outer">
 <nav id="menu">
 	<div id="brand" onclick="$('#menu').toggleClass('expanded')">WiFi Demo</div>
-	<a href="/home" class="selected">Home</a><a href="/wifi">WiFi config</a></nav>
+	<a href="/home" class="selected">Home</a></nav>
 <div id="content">
 	<img src="/img/loader.gif" alt="Loading…" id="loader">
 
-<h1>Motor Control</h1>
+<h1>Ovládání motoru</h1>
 
 <div class="Box center">
-	<a class="button btn-blue" id="btn-rev">REV</a><span style="display:inline-block;width:2em"></span>
-	<a class="button btn-blue" id="btn-fwd">FWD</a>
+	<a class="button btn-blue" id="btn-rev">&lt;&lt;</a>&nbsp;&nbsp;&nbsp;
+	<a class="button btn-red" id="btn-stop">Stop</a>&nbsp;&nbsp;&nbsp;
+	<a class="button btn-blue" id="btn-fwd">&gt;&gt;</a>
+</div>
+
+<div class="Box center">
+	<input type="range" id="control-range" value="0" min="-100" max="100" step="0.1">
 </div>
 
 <script>

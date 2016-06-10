@@ -97,7 +97,7 @@ void user_init(void)
 
 	struct softap_config wificfg;
 	wifi_softap_get_config(&wificfg);
-	sprintf((char*)wificfg.ssid, "esp_motor_demo");
+	sprintf((char*)wificfg.ssid, "k338_motor_demo");
 	wificfg.ssid_len = strlen((char*)wificfg.ssid);
 	wifi_softap_set_config(&wificfg);
 

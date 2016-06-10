@@ -1,11 +1,11 @@
 <?php
 
 	$prod = defined('STDIN');
-	$root = $prod ? '' : 'http://192.168.1.15';
+	$root = $prod ? '' : 'http://192.168.1.18';
 
 	$menu = [
 		'home'        => [ $prod ? '/home' : '/page_home.php', 'Home'            ],
-		'wifi'        => [ $prod ? '/wifi' : '/page_wifi.php',   'WiFi config'   ],
+//		'wifi'        => [ $prod ? '/wifi' : '/page_wifi.php',   'WiFi config'   ],
 	];
 
 	$appname = 'WiFi Demo';

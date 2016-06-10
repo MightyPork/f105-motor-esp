@@ -1,17 +1,25 @@
-.page-about {
-	.Box {
-		padding-left:dist(0);
-		padding-right:dist(0);
+.page-home {
+	#control-range {
+		width: 100%;
 
-		a {font-weight: bold;}
-	}
+		appearance: none;
+		height: 50px;
+		border-radius: 5px;
+		background-color: #37B0FF;
 
-	#logo {
-		float:right;
-		height: 130px;
-	}
+		background: url(/img/slider.png) center center no-repeat;
+		background-size: 100% 100%;
 
-	#logo2 {
-		max-width: 150px;
+		&::-webkit-slider-thumb {
+			appearance: none;
+
+			background: #3c90ee;
+			border: 1px solid #ccc;
+
+			height: 44px;
+			width: 44px;
+			border-radius: 2px;
+
+		}
 	}
 }

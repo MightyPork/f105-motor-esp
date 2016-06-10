@@ -5,7 +5,9 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-	<title>WiFi config - WiFi Demo</title>
+	<title>
+Notice: Undefined index: wifi in /home/ondra/devel/f105motor_esp/html_src/_start.php on line 24
+ - WiFi Demo</title>
 
 	<link href="/css/app.css" rel="stylesheet">
 	<script src="/js/all.js"></script>
@@ -19,7 +21,7 @@
 <div id="outer">
 <nav id="menu">
 	<div id="brand" onclick="$('#menu').toggleClass('expanded')">WiFi Demo</div>
-	<a href="/home">Home</a><a href="/wifi" class="selected">WiFi config</a></nav>
+	<a href="/home">Home</a></nav>
 <div id="content">
 	<img src="/img/loader.gif" alt="Loading…" id="loader">
 
